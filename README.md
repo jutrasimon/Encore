@@ -1,5 +1,7 @@
 # Encore!
 
+## 🎮 [Jouer à Encore](https://jutrasimon.github.io/Encore/)
+
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
 vert, coque crème et accents orange. Version 0.2.0.
