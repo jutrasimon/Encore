@@ -1,0 +1,6 @@
+project_id = "encore"
+
+[functions.encore]
+enabled = true
+verify_jwt = false
+entrypoint = "../server/index.ts"
