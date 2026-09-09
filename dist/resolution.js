@@ -1,0 +1,52 @@
+import {resolutionEvents} from './presentation.js';
+
+// A shared cast order, frozen boards, and one clock keep each performance separate.
+export function resolutionPlan(players,previous,reduced=false){
+ const cast=structuredClone(players),events=resolutionEvents(cast),groups=[];
+ let at=0,score={q:previous.q,e:previous.e};
+ for(const [index,p] of cast.entries()){
+  const notes=events.filter(e=>e.playerId===p.id),total={q:0,e:0,f:0};
+  const intro=reduced?700:Math.min(2600,1500+p.name.length*35),beat=reduced?140:620;
+  const group={player:p,index,events:notes,start:at,base:{...score},intro,beat};
+  group.charge=at+intro;group.hold=group.charge+notes.length*beat;
+  group.transfer=group.hold+(reduced?160:460);group.impact=group.transfer+(reduced?250:850);
+  group.end=group.impact+(reduced?300:650);
+  for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;
+  group.total=total;groups.push(group);score={q:score.q+total.q,e:score.e+total.e};at=group.end;
+ }
+ return {groups,duration:at,total:score,reduced};
+}
+const mix=(a,b,t)=>Math.round(a+(b-a)*Math.max(0,Math.min(1,t)));
+export function resolutionFrame(plan,elapsed){
+ const g=plan.groups.find(g=>elapsed<g.end);
+ if(!g)return {done:true,score:{...plan.total}};
+ const local={q:0,e:0,f:0},score={...g.base};let event=null,phase='intro',progress=0,completed=0;
+ if(elapsed>=g.charge){
+  phase='charge';const n=Math.min(g.events.length,Math.floor((elapsed-g.charge)/g.beat));
+  completed=n;
+  for(let i=0;i<n;i++)for(const k of ['q','e','f'])local[k]+=g.events[i][k]||0;
+  event=g.events[n]||null;progress=event?Math.min(1,(elapsed-g.charge-n*g.beat)/(g.beat*.75)):1;
+  if(event)for(const k of ['q','e','f'])local[k]+=mix(0,event[k]||0,progress);
+ }
+ if(elapsed>=g.hold){phase='hold';Object.assign(local,g.total);}
+ if(elapsed>=g.transfer){
+  phase='transfer';progress=(elapsed-g.transfer)/(g.impact-g.transfer);
+  // The packet travels first; both counters then exchange the very same integers.
+  const deposited=Math.max(0,(progress-.35)/.65);
+  for(const k of ['q','e']){const amount=mix(0,g.total[k],deposited);local[k]=g.total[k]-amount;score[k]=g.base[k]+amount;}
+ }
+ if(elapsed>=g.impact){phase='impact';local.q=local.e=0;score.q=g.base.q+g.total.q;score.e=g.base.e+g.total.e;}
+ return {done:false,group:g,phase,event,progress,completed,local,score};
+}
+
+// Three rows/columns span a 300-unit SVG, including the physical gaps between tiles.
+export function electricPath(from,to,variant=0){
+ const x=from%3*100+50,y=Math.floor(from/3)*100+50,dx=(to%3-from%3)*100,dy=(Math.floor(to/3)-Math.floor(from/3))*100;
+ const length=Math.hypot(dx,dy);if(!length)return `M ${x} ${y}`;
+ const steps=Math.max(6,Math.ceil(length/13)),parts=[`M ${x} ${y}`];
+ for(let i=1;i<steps;i++){
+  const t=i/steps,offset=(i%2?1:-1)*(variant?7:5)*(0.65+((i+from+to)%3)*.18);
+  parts.push(`L ${(x+dx*t-dy/length*offset).toFixed(2)} ${(y+dy*t+dx/length*offset).toFixed(2)}`);
+ }
+ return parts.join(' ')+` L ${x+dx} ${y+dy}`;
+}

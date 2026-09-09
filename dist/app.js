@@ -1,7 +1,9 @@
 import {TILES,SHOWS,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js';
 import {sticker} from './art.js';
 import {inventoryMarkup,inventoryEffect} from './inventory-ui.js';
-import {resolutionEvents,overdriveLevel} from './presentation.js';
+import {overdriveLevel} from './presentation.js';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.6.0';
+import {ResolutionAudio} from './resolution-audio.js?v=0.6.0';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
 import {api, BandConnection, credential, inviteCode} from './network.js';
@@ -10,24 +12,26 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
 const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 let game=null,myId=null,mode=null,view='game',selected=null,rewardAction='add',connection=null,online=[],connected=false,busy=false,networkReady=false,animating=false,frames=[],generation=0;
-let name=read('encore.name',''),sound=read('encore.sound',false),session=read('encore.session'),audioCtx;
+let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session'),audioCtx;
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
 const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
-function beep(i=0){if(!sound)return;try{audioCtx??=new AudioContext();audioCtx.resume();const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
+function beep(i=0){if(!sound)return;try{audioCtx??=resolutionAudio.ctx||new AudioContext();audioCtx.resume()?.catch(()=>{});const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.5.1 · LE BAND';
+const VERSION='0.6.0 · SUR SCÈNE';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let inventoryScroll=0,activeEvent=null,animationPlayer=null,scoredIds=new Set(),freshDeal=false;
+let cinematic=null,resolutionRaf=0;
+const resolutionAudio=new ResolutionAudio(()=>sound&&!document.hidden);
 let motion=read('encore.motion',true);
 let healthTimer=null,checkingServer=false,networkState='checking';
 const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family==='voice'?'energy':t?.kind==='duck'?'fans':'utility';
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
-function header(){return `<header class="masthead"><a href="${esc(location.pathname)}" class="wordmark">ENCORE<span>!</span></a><span class="version">${VERSION}</span>${!game?'<button class="sound" data-action="settings" aria-label="Réglages">'+icon('settings')+'</button>':''}</header>`;}
+function header(){return `<header class="masthead"><a href="${esc(location.pathname)}" class="wordmark">ENCORE<span>!</span></a><span class="version">${VERSION}</span>${game?`<button class="sound live-sound" data-action="sound" aria-pressed="${sound}" aria-label="${sound?'Couper':'Activer'} le son">${icon('sound')} ${sound?'SON':'MUET'}</button>`:'<button class="sound" data-action="settings" aria-label="Réglages">'+icon('settings')+'</button>'}</header>`;}
 function screen(){const show=SHOWS[game?.show||0];return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
-function nav(){return `<nav class="navigation" aria-label="Navigation">${[['game','amp','Show'],['inventory','bag','Inventaire'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'}">${content}${game?nav():''}</section><dialog id="details"></dialog>`;}
+function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}">${content}${game?nav():''}</section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></section>`;}
 function musicianStatus(p){
  if(mode!=='multi')return '';
@@ -47,9 +51,19 @@ function lobbyView(){
 function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><button class="secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><button class="secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="secondary" data-action="${game?'quit':'back'}">${game?'QUITTER LA PARTIE':'RETOUR'}</button><p class="version">${VERSION}</p></section>`;}
 function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>t[key]?'OVERDRIVE +'+(score[key]-t[key]):score[key]===t[key]?'OBJECTIF ATTEINT':'OBJECTIF DU SHOW'}</small></div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
 function tileButton(t,index,extra=''){const empty=!t||t.kind==='empty',d=empty?{name:'Case vide',icon:'empty'}:TILES[t.kind];const lit=!empty&&!t.inactive&&t.m>1;return `<button class="tile ${empty?'empty':''} ${t?.inactive?'inactive':''} ${lit?'lit':''} ${extra} type-${type(t)} ${freshDeal?'deal-in':''} ${animating?'unscored':''} ${(animationPlayer||me())?.focusedIds?.includes(t?.id)?'focused':''}" data-action="tile" data-index="${index}" aria-label="${esc(d.name)}${lit?`, multiplicateur ${t.m}`:''}" style="--i:${index}">${t?.level?`<span class="level">+${t.level}</span>`:''}${empty?icon(d.icon):sticker(t.kind)}${(animationPlayer||me())?.focusedIds?.includes(t?.id)?'<span class="focus-badge" aria-label="Focus actif">'+icon('focus')+'</span>':''}<span class="tile-name">${esc(d.name)}</span>${t?.charges?`<span class="charge">${t.charges} CH.</span>`:''}${lit?`<span class="mult">×${t.m}</span>`:''}${t?.inactive?'<span class="dead">HORS SERVICE</span>':''}${t?.after?'<span class="after">'+esc(t.after)+'</span>':''}${t?.q||t?.e||t?.f?`<span class="tile-points">${points(t)}</span>`:''}${t?.m?`<span class="score-tooltip" role="tooltip"><strong>${esc(d.name)}</strong><span>${points(t)||'Aucun point direct'}</span><small>×${t.m}${t.repeats?' · rejoué '+t.repeats+' fois':''}</small>${esc(d.text)}</span>`:''}</button>`;}
-function grid(){const p=animationPlayer||me(),b=p?.board.length?p.board:Array(9).fill(null);const links=[];b.forEach((t,i)=>t?.links?.forEach(j=>{if(j!==i){const x=i%3*100+50,y=Math.floor(i/3)*100+50;links.push(`<line data-from="${i}" data-to="${j}" x1="${x}" y1="${y}" x2="${j%3*100+50}" y2="${Math.floor(j/3)*100+50}"/>`);}}));return `<div class="grid-wrap"><div class="grid ${animating&&motion?'playing':''}">${b.map((t,i)=>tileButton(t,i)).join('')}</div><svg class="connections" viewBox="0 0 300 300" aria-hidden="true">${links.join('')}</svg></div>`;}
+function grid(){
+ const p=animationPlayer||me(),b=p?.board.length?p.board:Array(9).fill(null),links=[],seen=new Set();
+ b.forEach((t,i)=>t?.links?.forEach(j=>{const key=[i,j].sort((a,b)=>a-b).join(':');if(j===i||seen.has(key))return;seen.add(key);
+  links.push(`<g data-from="${i}" data-to="${j}"><path class="arc-halo" d="${electricPath(i,j)}"/><path class="arc-core" d="${electricPath(i,j)}"/><path class="arc-fork" d="${electricPath(i,j,1)}"/></g>`);
+ }));
+ return `<div class="grid-wrap"><div class="grid ${animating&&motion?'playing':''}">${b.map((t,i)=>tileButton(t,i)).join('')}</div><svg class="connections" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">${links.join('')}</svg></div>`;
+}
+function resolutionView(){
+ const g=cinematic.group;
+ return `<div class="resolution-shade" aria-hidden="true"></div><div class="resolution-top"><div><small>SUR SCÈNE · ${g.index+1}/${cinematic.plan.groups.length}</small><strong>${esc(g.player.name)}</strong></div><span class="stage-mark">${String(g.index+1).padStart(2,'0')}</span></div>${meters()}${grid()}<div class="resolution-tally">${[['q','star','QUALITÉ'],['e','bolt','ÉNERGIE']].map(([k,i,label])=>`<div class="charge-counter charge-${k}" data-charge="${k}"><span>${icon(i)} ${label}</span><b>0</b><i></i></div>`).join('')}</div><div class="resolution-caption" role="status"><strong>FAIS DU BRUIT !</strong><span class="resolution-fans"></span></div><div class="resolution-pop" aria-hidden="true"><small>FAIS DU BRUIT POUR</small><strong>${esc(g.player.name)}</strong><span>À TOI DE JOUER.</span></div><div class="resource-flights" aria-hidden="true"></div>`;
+}
 function players(){return `<div class="bandmates">${game.players.map(p=>`<div class="bandmate ${p.id===(animationPlayer?.id||myId)?'current-musician':''}"><div class="portrait">${icon('user')}</div><div><strong>${esc(p.name)}${mode==='multi'&&p.id===myId?' · TOI':''}</strong><span>${icon('choir')} ${animating?'…':p.fans} <small>fans</small></span>${mode==='multi'?`<b class="musician-status ${online.includes(p.id)&&connected?'online':''}">${musicianStatus(p)}</b>`:''}</div></div>`).join('')}</div>`;}
-function gameView(){if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(SHOWS[game.show].name)}"><small>SHOW ${game.show+1}/${SHOWS.length} ${icon('info')}</small><strong>${esc(SHOWS[game.show].name)}</strong></button><div class="round">CHANSON <b>${game.round}</b><span>/ ${SHOWS[game.show].rounds}</span></div></div>${meters()}${grid()}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>${players()}<div class="action-slot">${animating?'<button class="primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="primary" data-action="rewards">CONTINUER</button>':'<button class="primary" data-action="result">CONTINUER</button>'}</div>`;}
+function gameView(){if(animating&&cinematic)return resolutionView();if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(SHOWS[game.show].name)}"><small>SHOW ${game.show+1}/${SHOWS.length} ${icon('info')}</small><strong>${esc(SHOWS[game.show].name)}</strong></button><div class="round">CHANSON <b>${game.round}</b><span>/ ${SHOWS[game.show].rounds}</span></div></div>${meters()}${grid()}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>${players()}<div class="action-slot">${animating?'<button class="primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="primary" data-action="rewards">CONTINUER</button>':'<button class="primary" data-action="result">CONTINUER</button>'}</div>`;}
 function showIntro(){if(animating)return;const dlg=$('#details');dlg.dataset.kind='show';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button>${screen()}<div class="intro-objectives">${icon('star')} ${targets(game).q} ${icon('bolt')} ${targets(game).e}</div><p>Atteins les deux objectifs en ${SHOWS[game.show].rounds} chansons. Le show continue même en overdrive.</p>${game.phase==='lobby'?phaseAction():'<button class="primary" data-action="close">JOUER</button>'}`;dlg.showModal();}
 function showResult(){if(animating)return;const dlg=$('#details');dlg.dataset.kind='result';dlg.innerHTML=`<button class="dialog-close" data-action="dismiss-result" aria-label="Fermer">${icon('close')}</button>${phaseAction()}`;dlg.showModal();}
 function phaseAction(){const p=me();if(game.phase==='lobby')return `<div class="lobby"><h2>${game.players.length===2?'Le band est là.':'La balance est prête.'}</h2><p>${mode==='multi'?'Partage le lien avant de lancer la tournée.':'Trois salles. Un inventaire. À toi de jouer.'}</p>${mode==='multi'?'<button class="secondary" data-action="invite">COPIER LE LIEN D’INVITATION</button>':''}${game.players[0].id===myId?`<button class="primary" data-action="start" ${busy||mode==='multi'&&!connected?'disabled':''}>LANCER LA TOURNÉE ${icon('arrow')}</button>`:'<p>Le créateur lance la tournée.</p>'}</div>`;
@@ -103,23 +117,73 @@ function paintResolution(){
   el.classList.toggle('synergy-active',!!activeEvent&&i!==activeEvent.index&&activeEvent.related.includes(i));
   el.classList.toggle('unscored',!scoredIds.has((animationPlayer?.id||myId)+':'+i));
  });
- document.querySelectorAll('.connections line').forEach(el=>el.classList.toggle('linked-active',!!activeEvent&&[Number(el.dataset.from),Number(el.dataset.to)].every(i=>activeEvent.related.includes(i))));
+ document.querySelectorAll('.connections g').forEach(el=>el.classList.toggle('linked-active',!!activeEvent&&[Number(el.dataset.from),Number(el.dataset.to)].every(i=>activeEvent.related.includes(i))));
  if(activeEvent&&$('.readout'))$('.readout').innerHTML=`<span>${esc(activeEvent.name)} · ${esc(TILES[activeEvent.kind].name)}</span> ${points(activeEvent)||'<span>SYNERGIE</span>'}`;
 }
+function stopResolution(){
+ cancelAnimationFrame(resolutionRaf);frames.forEach(clearTimeout);frames=[];resolutionAudio.stop();
+ animating=false;activeEvent=null;animationPlayer=null;displayScore=null;cinematic=null;
+ document.body.classList.remove('resolving');
+}
+function transferPackets(g){
+ if(cinematic.plan.reduced)return;
+ const layer=$('.resource-flights');if(!layer)return;
+ for(const [key,ic] of [['q','star'],['e','bolt']]){
+  if(!g.total[key])continue;
+  const source=$(`[data-charge="${key}"]`).getBoundingClientRect(),target=$(`[data-stat="${key}"]`).getBoundingClientRect();
+  const x=source.x+source.width/2,y=source.y+source.height/2,dx=target.x+target.width/2-x,dy=target.y+target.height/2-y;
+  const packet=document.createElement('div');packet.className=`resource-packet packet-${key}`;
+  packet.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px`;
+  packet.innerHTML=`${icon(ic)}<b>+${g.total[key]}</b>`;layer.append(packet);
+ }
+}
+function paintCinematic(frame){
+ const c=cinematic,g=frame.group,changed=c.mounted!==g.index;
+ if(changed){
+  c.group=g;c.mounted=g.index;animationPlayer=g.player;activeEvent=null;scoredIds=new Set();
+  app.innerHTML=shell(gameView());
+  const consoleEl=$('.console');consoleEl.style.setProperty('--stage-color',['#baff42','#ff5aae','#60e9ff','#ffba42'][g.index%4]);
+ }
+ const phaseKey=g.index+':'+frame.phase,eventKey=frame.event?g.index+':'+frame.event.index:null;
+ const phaseChanged=c.phaseKey!==phaseKey;c.phaseKey=phaseKey;
+ $('.console').dataset.resolution=frame.phase;
+ if(phaseChanged){
+  if(frame.phase==='intro'){resolutionAudio.announce(g.player.name);$('.resolution-caption strong').textContent='FAIS DU BRUIT !';}
+  if(frame.phase==='hold')$('.resolution-caption strong').textContent='ENVOIE LA SAUCE !';
+  if(frame.phase==='transfer'){resolutionAudio.transfer();transferPackets(g);$('.resolution-caption strong').textContent='POUR LE BAND !';}
+  if(frame.phase==='impact'){resolutionAudio.boom();$('.resolution-caption strong').textContent='BOOM !';}
+ }
+ if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
+ activeEvent=frame.event;
+ for(const event of g.events.slice(0,frame.completed))scoredIds.add(g.player.id+':'+event.index);
+ if(frame.event&&frame.progress>=1)scoredIds.add(g.player.id+':'+frame.event.index);
+ const oldLevel=overdriveLevel(displayScore,targets(game));displayScore=frame.score;paintResolution();
+ if(overdriveLevel(displayScore,targets(game))>oldLevel)overdriveHit(overdriveLevel(displayScore,targets(game)));
+ for(const key of ['q','e']){
+  const el=$(`[data-charge="${key}"]`),num=el.querySelector('b');
+  if(num.textContent!==String(frame.local[key])){num.textContent=frame.local[key];el.classList.add('counter-tick');}
+  el.querySelector('i').style.width=(g.total[key]?frame.local[key]/g.total[key]*100:0)+'%';
+ }
+ const fans=$('.resolution-fans');fans.textContent=frame.local.f?'+'+frame.local.f+' FANS':'';
+ const value=frame.local.q+frame.local.e+frame.local.f;
+ if(value!==c.lastValue&&frame.phase==='charge'&&performance.now()-c.lastTick>65){resolutionAudio.tick(value);c.lastTick=performance.now();}
+ c.lastValue=value;
+}
 function animate(previous){
- frames.forEach(clearTimeout);frames=[];animating=true;activeEvent=null;displayScore={q:previous.q,e:previous.e};scoredIds=new Set();view='game';animationPlayer=me();freshDeal=true;
- // Mount once for the new draw. Subsequent scoring only changes classes and counters.
- app.innerHTML=shell(gameView());freshDeal=false;
- const queue=resolutionEvents(game.players,myId),delay=motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches?580:85;
- frames.push(setTimeout(()=>document.querySelectorAll('.deal-in').forEach(el=>el.classList.remove('deal-in')),600));
- queue.forEach((event,n)=>frames.push(setTimeout(()=>{
+ stopResolution();
+ const reduced=!motion||matchMedia('(prefers-reduced-motion: reduce)').matches,plan=resolutionPlan(game.players,previous,reduced);
+ if(!plan.groups.length){render();return;}
+ animating=true;displayScore={q:previous.q,e:previous.e};view='game';
+ cinematic={plan,group:plan.groups[0],mounted:-1,phaseKey:null,eventKey:null,lastValue:0,lastTick:0};
+ document.body.classList.add('resolving');
+ const started=performance.now();
+ function tick(now){
   if(!animating)return;
-  if(animationPlayer.id!==event.playerId){animationPlayer=game.players.find(p=>p.id===event.playerId);$('.grid-wrap')?.insertAdjacentHTML('afterend',grid());$('.grid-wrap')?.remove();const band=$('.bandmates');if(band)band.outerHTML=players();}
-  const oldLevel=overdriveLevel(displayScore,targets(game));activeEvent=event;
-  displayScore.q+=event.q;displayScore.e+=event.e;scoredIds.add(event.playerId+':'+event.index);paintResolution();beep(event.index);
-  const level=overdriveLevel(displayScore,targets(game));if(level>oldLevel)overdriveHit(level);
- },650+n*delay)));
- frames.push(setTimeout(()=>{animating=false;activeEvent=null;animationPlayer=null;displayScore=null;render();},1000+queue.length*delay));
+  const frame=resolutionFrame(plan,now-started);
+  if(frame.done){stopResolution();render();return;}
+  paintCinematic(frame);resolutionRaf=requestAnimationFrame(tick);
+ }
+ tick(started);
 }
 function accept(g){const previous=game;game=normalizeGame(g);busy=false;if(mode==='solo')save('encore.solo',{game,myId});if(previous&&(g.show!==previous.show||previous.phase==='lobby'&&g.phase==='show')){intro=true;resultDismissed=false;}if(previous&&g.round>previous.round&&g.show===previous.show){resultDismissed=false;animate(previous);}else render();}
 function receive(data){
@@ -140,7 +204,7 @@ async function send(type,extra={}){
  finally{if(current===connection){busy=false;render();current.sync();}}
 }
 function getName(){name=$('#name')?.value.trim()||name||'Sans nom';save('encore.name',name);return name;}
-function clearNetwork(){generation++;connection?.close();connection=null;connected=false;busy=false;}
+function clearNetwork(){stopResolution();generation++;connection?.close();connection=null;connected=false;busy=false;}
 function solo(){inventoryScroll=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[player(myId,name)];view='game';save('encore.solo',{game,myId});render();}
 async function connect(code,newSession=false){
  getName();clearNetwork();game=null;myId=null;online=[];inventoryScroll=0;intro=true;resultDismissed=false;mode='multi';view='game';
@@ -156,6 +220,8 @@ async function connect(code,newSession=false){
 }
 app.addEventListener('input',e=>{if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value;});
 app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
+ if(a==='sound'){sound=!sound;save('encore.sound',sound);if(sound){resolutionAudio.unlock();beep();if(animating)resolutionAudio.announce(animationPlayer.name);}else resolutionAudio.stop();const control=$('.live-sound');if(control){control.setAttribute('aria-pressed',sound);control.setAttribute('aria-label',sound?'Couper le son':'Activer le son');control.innerHTML=icon('sound')+' '+(sound?'SON':'MUET');}if(!animating)render();return;}
+ resolutionAudio.unlock();
  if(animating)return;
  if(a==='focus-help'){const dlg=$('#details');dlg.dataset.kind='focus';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>FOCUS : PIGE ×2</h2><p>Double le <strong>poids de pige</strong> d’une copie. Avec <strong>9 tuiles disponibles ou moins</strong>, elles sont toutes pigées.</p><p>Le focus se déplace librement avant de te déclarer prêt. Le bonus temporaire expire à la fin du show.</p><button class="secondary" data-action="close">COMPRIS</button>`;dlg.showModal();}
  if(a==='focus'){await send('focus',{tileId:b.dataset.id});}
@@ -163,7 +229,6 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='inspect-offer')inspect({kind:b.dataset.kind});
  if(a==='choose-song'){await send('draft',{kind:b.dataset.kind});}
  if(a==='nav'){view=b.dataset.view;render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
- if(a==='sound'){sound=!sound;save('encore.sound',sound);beep();render();}
  if(a==='rules')rules();if(a==='close')$('#details').close();
  if(a==='solo')solo();if(a==='resume'){intro=false;resultDismissed=false;const s=read('encore.solo');if([1,2].includes(s?.game?.version)){clearNetwork();mode='solo';myId=s.myId;game=normalizeGame(s.game);view='game';render();}else toast('Sauvegarde incompatible. Lance une nouvelle tournée.');}
  if(a==='start'||a==='ready'){if($('#details').open)$('#details').close();send(a);}
@@ -200,4 +265,6 @@ async function checkServer(){
 checkServer();
 window.addEventListener('online',()=>{if(connection)connection.sync();else if(!networkReady)checkServer();});
 window.addEventListener('offline',()=>{if(connection){connected=false;render();}});
-window.addEventListener('visibilitychange',()=>{if(!document.hidden)connection?.sync();});
+window.addEventListener('visibilitychange',()=>{if(document.hidden){resolutionAudio.stop();}else{if(animating){stopResolution();render();}connection?.sync();}});
+window.addEventListener('pagehide',()=>stopResolution());
+window.addEventListener('pageshow',e=>{if(e.persisted)render();});
