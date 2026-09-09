@@ -1,5 +1,5 @@
-import {TILES,ROLES} from './engine.js?v=0.8.0';
-import {esc,tileCard} from './tile-ui.js?v=0.8.0';
+import {TILES,ROLES} from './engine.js?v=0.8.1';
+import {esc,tileCard} from './tile-ui.js?v=0.8.1';
 export const number=n=>new Intl.NumberFormat('fr-CA',{maximumFractionDigits:1}).format(n||0);
 const sum=(a,k)=>a.reduce((n,r)=>n+(r[k]||0),0);
 const metric=(n,label,cls='')=>`<div class="stat-sticker ${cls}"><b>${number(n)}</b><span>${label}</span></div>`;

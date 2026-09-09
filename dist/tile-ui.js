@@ -1,5 +1,5 @@
-import {TILES} from './engine.js?v=0.8.0';
-import {sticker,FAMILY_ART} from './art.js?v=0.8.0';
+import {TILES} from './engine.js?v=0.8.1';
+import {sticker,FAMILY_ART} from './art.js?v=0.8.1';
 import {icon} from './icons.js';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

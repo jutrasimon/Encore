@@ -4,7 +4,7 @@
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.8.0.
+vert, coque crème et accents orange. Version 0.8.1.
 
 ## Jouer à deux
 
@@ -124,7 +124,7 @@ gestionnaire serveur. Ils ne remplacent pas les essais sur téléphones réels.
 L'illustration de scène est fixe. Pas encore de personnages personnalisables,
 de synergies entre grilles, de métaprogression entre tournées. Les sauvegardes v1 sont adaptées en conservant leur inventaire; L'équilibrage reste expérimental.
 
-## Bilan live (0.8.0)
+## Bilan live (0.8.1)
 
 Portraits carrés cliquables, fans du band additionnés, onglet Band et profils individuels. Le plateau ajuste sa taille à la hauteur disponible; inventaire et rapports gardent leur défilement. Le son se règle dans Réglages et la version est gravée en bas de la coque. Chaque tuile partage les mêmes détails au survol, au focus clavier et au clic.
 

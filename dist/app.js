@@ -1,14 +1,14 @@
-import {statsMarkup} from './stats-ui.js?v=0.8.0';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.8.0';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.8.0';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.8.0';
-import {inventoryMarkup} from './inventory-ui.js?v=0.8.0';
+import {statsMarkup} from './stats-ui.js?v=0.8.1';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.8.1';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.8.1';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.8.1';
+import {inventoryMarkup} from './inventory-ui.js?v=0.8.1';
 import {overdriveLevel} from './presentation.js';
 import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.6.0';
 import {ResolutionAudio} from './resolution-audio.js?v=0.6.0';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.8.0';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.8.1';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
@@ -21,7 +21,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){if(!sound)return;try{audioCtx??=resolutionAudio.ctx||new AudioContext();audioCtx.resume()?.catch(()=>{});const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.8.0 · ENCORE ∞';
+const VERSION='0.8.1 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -35,7 +35,7 @@ const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir',
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.8.0</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.8.1</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -283,7 +283,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='choose-song'){await send('draft',{kind:b.dataset.kind});}
  if(a==='skip-song'){await send('draft',{action:'skip'});}
  if(a==='skip-reward'){await send('reward',{action:'skip'});}
- if(a==='nav'){view=b.dataset.view;render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
+ if(a==='nav'){view=b.dataset.view;if(view==='stats')statsPlayer='band';render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
  if(a==='rules')rules();if(a==='close')$('#details').close();
  if(a==='solo')solo();if(a==='resume'){intro=false;resultDismissed=false;const s=read('encore.solo');if([1,2].includes(s?.game?.version)){clearNetwork();mode='solo';myId=s.myId;game=normalizeGame(s.game);view='game';render();}else toast('Sauvegarde incompatible. Lance une nouvelle tournée.');}
  if(a==='start'||a==='ready'){if($('#details').open)$('#details').close();send(a);}
