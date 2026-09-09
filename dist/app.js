@@ -93,6 +93,11 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='invite'){const u=new URL(location.href);u.search='';u.searchParams.set('band',session.code);try{await navigator.clipboard.writeText(u.href);toast('Lien copié. Envoie-le à ton band!');}catch{toast('Copie ce code : '+session.code);}}
 });
 render();
-fetch(endpoint+'/health',{signal:AbortSignal.timeout(5000)}).then(r=>r.json()).then(d=>{networkReady=d.ok&&d.protocol===2;if(!game)render();}).catch(()=>{});
+async function checkServer(){
+ try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();const ready=!!(r.ok&&d.ok&&d.protocol===2);if(ready!==networkReady){networkReady=ready;if(!game)render();}}
+ catch{}
+ if(!networkReady)setTimeout(checkServer,15000);
+}
+checkServer();
 window.addEventListener('online',()=>connection?.sync());
 window.addEventListener('visibilitychange',()=>{if(!document.hidden)connection?.sync();});
