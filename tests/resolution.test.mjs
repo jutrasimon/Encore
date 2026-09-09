@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {resolutionPlan,resolutionFrame,electricPath} from '../dist/resolution.js';
-import {ResolutionAudio} from '../dist/resolution-audio.js';
+import {ResolutionAudio,spokenStageName} from '../dist/resolution-audio.js';
 import {resolve,tile} from '../dist/engine.js';
 function musician(id,name){const b=Array(9).fill(null);b[3]=tile('voice',id+'v');b[4]=tile('guitar',id+'g');b[1]=tile('encore',id+'r');return {id,name,...resolve(b.filter(Boolean),b)};}
 const players=[musician('a','Premier'),musician('b','Deuxième')];
@@ -36,6 +36,13 @@ test('electric arcs zigzag and reach exact tile centers for adjacent and global 
 test('mute, unavailable audio and unavailable speech never block the performance',()=>{
  const calls=[],host={speechSynthesis:{speak:u=>calls.push(u),cancel(){},getVoices:()=>[]},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
  let enabled=false;const audio=new ResolutionAudio(()=>enabled,host);audio.unlock();audio.announce('Simon');audio.tick(5);audio.boom();assert.equal(calls.length,0);
- enabled=true;audio.announce('Simon');assert.equal(calls[0].text,'Simon');assert.ok(calls[0].pitch<1);audio.stop();
+ enabled=true;audio.announce('Simon');assert.equal(calls[0].text,'À toi, Simon !');assert.ok(calls[0].pitch<1);audio.stop();
  const unavailable=new ResolutionAudio(()=>true,{});unavailable.unlock();unavailable.announce('A');unavailable.transfer();unavailable.stop();
+});
+
+test('stage names are spoken as words with French sentence context, preserving the visible spelling',()=>{
+ assert.equal(spokenStageName('  SIMON  '),'Simon');assert.equal(spokenStageName('ÉLODIE-JEAN'),'Élodie-Jean');assert.equal(spokenStageName('yUmMy'),'Yummy');
+ const name='SIMON',calls=[];const voice={name:'Claude',lang:'fr-CA',localService:true};
+ const host={speechSynthesis:{speak:u=>calls.push(u),cancel(){},getVoices:()=>[voice]},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
+ new ResolutionAudio(()=>true,host).announce(name);assert.equal(name,'SIMON');assert.equal(calls[0].text,'À toi, Simon !');assert.equal(calls[0].lang,'fr-CA');assert.equal(calls[0].voice,voice);
 });

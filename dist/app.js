@@ -1,14 +1,14 @@
-import {statsMarkup} from './stats-ui.js?v=0.8.1';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.8.1';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.8.1';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.8.1';
-import {inventoryMarkup} from './inventory-ui.js?v=0.8.1';
+import {statsMarkup} from './stats-ui.js?v=0.8.2';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.8.2';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.8.2';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.8.2';
+import {inventoryMarkup} from './inventory-ui.js?v=0.8.2';
 import {overdriveLevel} from './presentation.js';
 import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.6.0';
-import {ResolutionAudio} from './resolution-audio.js?v=0.6.0';
+import {ResolutionAudio} from './resolution-audio.js?v=0.8.2';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.8.1';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.8.2';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
@@ -21,7 +21,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){if(!sound)return;try{audioCtx??=resolutionAudio.ctx||new AudioContext();audioCtx.resume()?.catch(()=>{});const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.8.1 · ENCORE ∞';
+const VERSION='0.8.2 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -35,7 +35,7 @@ const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir',
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.8.1</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.8.2</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -107,8 +107,8 @@ function rewardsView(){
  return `<section class="choice-screen reward-screen"><h2 class="studio-title">STUDIO</h2><button class="recap-link" data-action="stats">LE SHOW EN CHIFFRES ↗</button>${players()}<div class="choice-toolbar"><button class="back" data-action="back">← PLATEAU</button>${!p.rewarded?`<button class="skip-reward" data-action="skip-reward" ${locked?'disabled':''}>PASSER →</button>`:''}</div><span class="tape">${game.retry?'ON REMONTE SUR SCÈNE':'NIVEAU '+(game.show+1)+' RÉUSSI'}</span><h1>${game.retry?'REPRENDS DU SOUFFLE.':'FAIS GROSSIR TON SON.'}</h1><p class="screen-help">${game.retry?'Objectif manqué. Renforce ton inventaire, puis retente le même niveau. Tu gardes tes tuiles et tes fans.':'Choisis une amélioration pour la suite. Le prochain niveau sera plus difficile.'}</p>${p.rewarded?'<p class="waiting-choice">CHOIX FAIT · TON PARTENAIRE CHOISIT…</p>':`<div class="reward-tabs">${[['add','AJOUTER'],['upgrade','AMÉLIORER'],['remove','RETIRER']].map(([k,label])=>`<button class="${rewardAction===k?'active':''}" data-action="reward-tab" data-kind="${k}" aria-pressed="${rewardAction===k}">${label}</button>`).join('')}</div><p class="screen-help">${adding?'Une seule tuile à ajouter.':rewardAction==='upgrade'?'Un niveau permanent en plus. Aucun plafond d’amélioration.':'Retire une tuile pour faire ressortir les autres plus souvent.'} <strong>Touche une tuile pour voir son effet.</strong></p><div class="tile-gallery reward-gallery">${choices.map(t=>tileCard(t,{action:'select-reward',attributes:`data-id="${esc(adding?t.kind:t.id)}" aria-pressed="${t===selectedTile}"`,classes:t===selectedTile?'chosen':''})).join('')}</div>${selectedTile?`<div class="choice-detail">${tileDetails(selectedTile,{upgrade:rewardAction==='upgrade'})}<button class="primary" data-action="choose-${rewardAction}" ${adding?`data-kind="${selectedTile.kind}"`:`data-id="${esc(selectedTile.id)}"`} ${locked?'disabled':''}>${adding?'PRENDRE CETTE TUILE':rewardAction==='upgrade'?'AMÉLIORER +1':'RETIRER CETTE TUILE'}</button></div>`:''}`}</section>`;
 }
 function fitBoard(){
- const body=$('.screen-body[data-screen="game"]'),board=body?.querySelector(':scope > .grid-wrap');if(!board||animating)return;
- const css=getComputedStyle(body),gap=parseFloat(css.rowGap)||0,children=[...body.children].filter(el=>el!==board&&getComputedStyle(el).display!=='none');
+ const body=$('.screen-body[data-screen="game"]'),board=body?.querySelector(':scope > .grid-wrap');if(!board)return;
+ const css=getComputedStyle(body),gap=parseFloat(css.rowGap)||0,children=[...body.children].filter(el=>el!==board&&getComputedStyle(el).display!=='none'&&!['absolute','fixed'].includes(getComputedStyle(el).position));
  const used=children.reduce((n,el)=>{const c=getComputedStyle(el);return n+el.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0);},0)+children.length*gap;
  const size=Math.max(0,Math.min(body.clientWidth-6,body.clientHeight-used-6));body.style.setProperty('--board-size',size+'px');
 }
@@ -189,7 +189,7 @@ function paintCinematic(frame){
   const consoleEl=$('.console');consoleEl.style.setProperty('--stage-color',['#baff42','#ff5aae','#60e9ff','#ffba42'][g.index%4]);
  }
  const phaseKey=g.index+':'+frame.phase,eventKey=frame.event?g.index+':'+frame.event.index:null;
- const phaseChanged=c.phaseKey!==phaseKey;c.phaseKey=phaseKey;
+ const phaseChanged=c.phaseKey!==phaseKey,eventChanged=c.eventKey!==eventKey;c.phaseKey=phaseKey;
  $('.console').dataset.resolution=frame.phase;
  if(phaseChanged){
   if(frame.phase==='intro'){resolutionAudio.announce(g.player.name);$('.resolution-caption strong').textContent='FAIS DU BRUIT !';}
@@ -212,6 +212,7 @@ function paintCinematic(frame){
  const value=frame.local.q+frame.local.e+frame.local.f;
  if(value!==c.lastValue&&frame.phase==='charge'&&performance.now()-c.lastTick>65){resolutionAudio.tick(value);c.lastTick=performance.now();}
  c.lastValue=value;
+ if(changed||phaseChanged||eventChanged||oldLevel!==overdriveLevel(displayScore,targets(game)))fitBoard();
 }
 function animate(previous){
  stopResolution();

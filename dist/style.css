@@ -244,3 +244,10 @@ body.resolving .live-sound{position:relative;z-index:50;background:#172014;borde
 @media(max-height:600px){.screen-body[data-screen="game"]:has(>.grid-wrap){gap:3px}.screen-body[data-screen="game"] .meter{padding:4px}.screen-body[data-screen="game"] .overdrive-label{display:none}.screen-body[data-screen="game"] .show-top{min-height:30px}.screen-body[data-screen="game"] .show-name strong{font-size:20px}.screen-body[data-screen="game"] .round b{font-size:23px}.screen-body[data-screen="game"] .readout{font-size:12px;min-height:16px}}
 
 .navigation{grid-template-columns:repeat(4,minmax(0,1fr))}
+
+/* Keep the full tile announcement inside the stage, including phone screens. */
+.resolution-mode .resolution-caption{flex-direction:column;gap:3px;min-height:76px;padding:5px 6px;justify-content:center;overflow:visible}
+.resolution-mode .resolution-caption strong{display:block;width:100%;min-width:0;white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;line-height:1.18;font-size:clamp(20px,5.5vw,25px)}
+.resolution-mode .resolution-caption .resolution-fans{min-height:19px;line-height:1.15}
+.resolution-mode[data-resolution="impact"] .resolution-caption strong{font-size:30px;line-height:1.18}
+@media(max-height:600px){.resolution-mode .resolution-caption{min-height:68px;padding-block:3px}.resolution-mode .resolution-caption strong{font-size:19px}}

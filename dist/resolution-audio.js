@@ -1,3 +1,7 @@
+// Speech gets ordinary word casing; the displayed stage name remains untouched.
+export function spokenStageName(name){
+ return String(name??'').normalize('NFC').trim().replace(/\s+/g,' ').replace(/[\p{L}\p{M}]+/gu,word=>word.charAt(0).toLocaleUpperCase('fr-CA')+word.slice(1).toLocaleLowerCase('fr-CA'))||'Sans nom';
+}
 // Procedural arcade sounds. No sound or speech is emitted when the player mutes.
 export class ResolutionAudio{
  constructor(enabled=()=>false,host=globalThis){this.enabled=enabled;this.host=host;this.nodes=new Set();this.speech=null;}
@@ -16,7 +20,7 @@ export class ResolutionAudio{
   if(!this.enabled())return;
   this.tone(105,36,.65,.16,'sawtooth');this.tone(52,28,.9,.23);this.tone(210,105,.18,.055,'square',.07);
   try{const s=this.host.speechSynthesis,U=this.host.SpeechSynthesisUtterance;if(!s||!U)return;s.cancel();
-   const u=new U(name);const voices=s.getVoices(),french=voices.filter(v=>/^fr/i.test(v.lang));
+   const u=new U('À toi, '+spokenStageName(name)+' !');const voices=s.getVoices(),french=voices.filter(v=>/^fr/i.test(v.lang));
    u.voice=french.find(v=>/thomas|daniel|nicolas|paul|henri|claude/i.test(v.name))||french.find(v=>v.localService)||french[0]||voices.find(v=>v.default)||null;
    u.lang=u.voice?.lang||'fr-CA';u.pitch=.35;u.rate=.8;u.volume=1;this.speech=u;s.speak(u);
   }catch{}
