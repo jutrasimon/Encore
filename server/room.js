@@ -3,6 +3,7 @@ import {newGame, player, command} from '../dist/engine.js';
 export class GameError extends Error {
   constructor(message, status=400) { super(message); this.status=status; }
 }
+const activities=new Set(['board','resolving','choice','inventory','studio-add','studio-upgrade','studio-remove']);
 export const hash = async token => [...new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(token)))].map(n=>n.toString(16).padStart(2,'0')).join('');
 const randomSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 export function makeRoom(code, credential, name, now=Date.now()) {
@@ -14,6 +15,7 @@ export function snapshot(room, credential, knownRevision, now=Date.now()) {
   const member=room.members[credential];
   if(!member) throw new GameError('Connexion requise.',401);
   return {id:member.id, revision:room.game.revision,
+    activities:Object.fromEntries(Object.values(room.members).map(m=>[m.id,m.activity||'board'])),
     online:Object.values(room.members).filter(m=>now-m.seen<65000).map(m=>m.id),
     ...(knownRevision===room.game.revision?{}:{game:room.game})};
 }
@@ -30,7 +32,7 @@ export async function transact(store, code, credential, msg, now=Date.now()) {
       if(room.game.phase!=='lobby'||room.game.players.length>=2) throw new GameError('Band complet ou tournée déjà commencée.',409);
       const id=crypto.randomUUID(); member={id,seen:now,requests:[]};
       room.members[credential]=member; room.game.players.push(player(id,msg.name));room.game.revision++;
-    } else if(msg.type==='sync'&&now-member.seen<20000) {
+    } else if(msg.type==='sync'&&now-member.seen<20000&&(!activities.has(msg.activity)||msg.activity===member.activity)) {
       return snapshot(room,credential,msg.knownRevision,now);
     } else if(!['hello','sync'].includes(msg.type)) {
       if(member.requests.includes(msg.requestId)) return snapshot(room,credential,undefined,now);
@@ -39,6 +41,7 @@ export async function transact(store, code, credential, msg, now=Date.now()) {
       room.game=command(room.game,member.id,msg,seed);
       member.lastAction=now;member.requests=[...member.requests.slice(-15),msg.requestId];
     }
+    if(activities.has(msg.activity))member.activity=msg.activity;
     member.seen=now;
     room.expires_at=new Date(now+86400000).toISOString();
     if(await store.replace(room,room.version)) return snapshot(room,credential,msg.type==='sync'?msg.knownRevision:undefined,now);

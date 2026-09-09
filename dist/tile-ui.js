@@ -1,0 +1,39 @@
+import {TILES} from './engine.js?v=0.7.0';
+import {sticker,FAMILY_ART} from './art.js?v=0.7.0';
+import {icon} from './icons.js';
+export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
+export const tileColor=t=>t?.kind==='duck'?'fans':tileFamily(t).color;
+export function familyReference(family){const f=FAMILY_ART[family];return `<span class="tile-reference type-${f.color}">${sticker(f.kind)}<strong>${f.label}</strong></span>`;}
+function richText(text){
+ return esc(text).replace(/\b(Guitares?|Voix)\b/g,m=>familyReference(m.startsWith('Guitare')?'guitar':'voice'))
+  .replace(/(×2|\+\d+|\b\d+ (?:qualité|énergie|charges?|fans?)\b)/g,'<strong>$1</strong>');
+}
+export function tileSummary(t){
+ const d=TILES[t.kind],l=t.level||0;
+ if(t.inactive)return 'INACTIVE';
+ if(d.charge)return `${t.charges||0} CHARGES`;
+ if(d.q)return `${d.q+l} ${icon('star')}`;
+ if(d.e)return `${d.e+l} ${icon('bolt')}`;
+ return ({pick:'VOISINS +1',boot:'PAR VOISIN',duck:'FANS +',smoke:'VIDES +2',cup:'CHARGES +2',choir:'PAR VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'INACTIFS +3'})[t.kind]||'EFFET';
+}
+export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false}={}){
+ const empty=!t||t.kind==='empty',d=empty?null:TILES[t.kind],f=empty?null:tileFamily(t);
+ const production=resolved&&!empty?[['q','star'],['e','bolt'],['f','choir']].filter(([k])=>t[k]).map(([k,i])=>`<span>${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join(''):'';
+ return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
+ ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">×${t.m}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
+ </button>`;
+}
+export function tileDetails(t,{upgrade=false}={}){
+ const d=TILES[t.kind],f=tileFamily(t),level=t.level||0,stat=d.family==='guitar'?'qualité':t.kind==='duck'?'fan':'énergie';
+ const related=d.family==='guitar'?'voice':d.family==='voice'?'guitar':null;
+ return `<section class="tile-explanation type-${tileColor(t)}"><div class="explanation-heading"><strong>${esc(d.name)}</strong><span>${f.label}${level?' · NIVEAU +'+level:''}</span></div>
+ ${d.family==='voice'?'<p class="family-explainer">Cette tuile est une <strong>VOIX</strong>. Les micros comptent comme des voix.</p>':d.family==='guitar'?'<p class="family-explainer">Cette tuile est une <strong>GUITARE</strong>.</p>':''}
+ <p class="tile-rule">${richText(related?d.text.replace(/(?:Voix : )?×2 par (Voix|Guitare) adjacente\./,''):d.text)}</p>
+ ${related?`<p class="tile-rule family-rule">${familyReference(d.family)} <strong>×2</strong> par ${familyReference(related)} <strong>voisine</strong>.</p>`:''}
+ ${level?`<p class="tile-rule upgrade-current"><strong>+${level} ${stat}</strong> de niveau, avant les multiplicateurs.</p>`:''}
+ ${d.charge?`<p class="tile-rule"><strong>${t.charges||0} charge${t.charges===1?'':'s'}</strong> actuellement. Les charges restent jusqu’à la fin du show.</p>`:''}
+ ${upgrade?`<p class="upgrade-preview">NIVEAU +${level} → <strong>+${level+1}</strong><br><strong>+1 ${stat}</strong> par apparition, avant les multiplicateurs.</p>`:''}
+ ${t.exhausted?'<p class="state-explainer">Épuisée : revient au prochain show. Aucun focus possible.</p>':t.inactive?'<p class="state-explainer">Inactive : peut encore être pigée, mais ne produit rien.</p>':''}
+ <small class="adjacency-help">Voisine = en haut, en bas, à gauche ou à droite. Jamais en diagonale.</small></section>`;
+}

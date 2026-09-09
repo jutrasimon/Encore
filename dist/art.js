@@ -14,3 +14,7 @@ export function sticker(kind){
  const id=`sticker-crop-${++stickerId}`;
  return `<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><defs><clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${stickerMasks[kind]}"/></clipPath></defs><g clip-path="url(#${id})"><image href="./art/punk-stickers-v1.png" width="887" height="1774"/></g></svg>`;
 }
+
+// One atlas and one family mapping, shared by cards, rules and effect references.
+export const FAMILY_ART={guitar:{kind:'guitar',label:'GUITARE',color:'quality'},voice:{kind:'voice',label:'VOIX',color:'energy'},utility:{kind:'pedal',label:'EFFET',color:'utility'}};
+export const hasTileArt=kind=>Object.hasOwn(boxes,kind)&&Object.hasOwn(stickerMasks,kind);

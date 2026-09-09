@@ -90,3 +90,20 @@ test('network tour waits for the second player before it can start',async()=>{
  assert.equal(store.rooms.get(created.code).game.phase,'lobby');
  assert.equal(store.rooms.get(created.code).game.round,0);
 });
+
+test('studio activity sync reaches the partner without advancing the game revision',async()=>{
+ const {a,b,code,game}=await setup();
+ const first=await a('room',{code,type:'sync',knownRevision:game.revision,activity:'studio-upgrade'});
+ assert.equal(first.status,200);assert.equal(first.revision,game.revision);assert.equal(first.activities[first.id],'studio-upgrade');
+ const partner=await b('room',{code,type:'sync',knownRevision:game.revision});assert.equal(partner.activities[first.id],'studio-upgrade');assert.equal(partner.game,undefined);
+ const changed=await a('room',{code,type:'sync',knownRevision:game.revision,activity:'studio-remove'});assert.equal(changed.activities[first.id],'studio-remove');
+ const bad=await a('room',{code,type:'sync',activity:'<script>bad</script>'});assert.equal(bad.activities[first.id],'studio-remove');
+});
+
+test('HTTP skip is idempotent and unlocks the next song after both players pass',async()=>{
+ const {store,a,b,code,game}=await setup();let r=await a('room',action(code,game,'start'));resetRate(store,code);
+ r=await a('room',action(code,r.game,'ready'));resetRate(store,code);r=await b('room',action(code,r.game,'ready'));resetRate(store,code);
+ const msgA=action(code,r.game,'draft',{action:'skip'}),msgB=action(code,r.game,'draft',{action:'skip'});
+ const x=await a('room',msgA);assert.equal(x.game.phase,'draft');const replay=await a('room',msgA);assert.equal(replay.game.revision,x.game.revision);
+ const y=await b('room',msgB);assert.equal(y.game.phase,'show');assert(y.game.players.every(p=>p.inventory.length===5));
+});

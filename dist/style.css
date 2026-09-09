@@ -162,3 +162,51 @@ body.resolving .live-sound{position:relative;z-index:50;background:#172014;borde
 
 .resolution-mode.drive-impact{animation:none!important}
 @media(max-width:380px){.masthead{gap:8px}.masthead>.version{font-size:9px}.live-sound{font-size:12px;padding:5px;gap:3px}.live-sound svg{width:16px}}
+
+/* A single square tile component and one scroll surface on every screen. */
+.console.in-game{overflow:hidden}
+.screen-body{flex:1;min-height:0;display:flex;flex-direction:column;gap:9px;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#687750 transparent;padding:3px}
+.screen-body::-webkit-scrollbar{width:5px}.screen-body::-webkit-scrollbar-thumb{background:#687750;border-radius:8px}.screen-body::-webkit-scrollbar-track{background:transparent}
+.screen-body>.grid-wrap{width:100%;height:auto;aspect-ratio:1;flex:0 0 auto;max-height:none;padding:6px}
+.screen-body .grid{height:auto;grid-template-rows:repeat(3,auto);gap:6px}
+.tile-gallery,.inventory-screen .collection.tile-gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start;align-content:start;overflow:visible;grid-auto-rows:auto;flex:none;min-height:0;padding:2px;margin:0;scrollbar-gutter:auto}
+.square-tile.tile{position:relative;container-type:inline-size;display:block;aspect-ratio:1/1!important;width:100%;height:auto;min-height:0;max-height:none;padding:0;overflow:hidden;isolation:isolate;border:2px solid #72805c;border-radius:7px;background:linear-gradient(145deg,#34412b,#131c0e);color:var(--tile-color);text-align:center}
+.square-tile.tile>.sticker{position:absolute;top:15%;left:21%;width:58%;height:40%;max-height:none;animation:none;filter:drop-shadow(0 2px 1px #0009);object-fit:contain}
+.square-tile .tile-family{position:absolute;top:4px;left:5px;font-size:clamp(9px,9cqw,13px);font-weight:900;line-height:1;letter-spacing:.3px;color:var(--tile-color)}
+.square-tile .tile-name{position:absolute;display:flex;align-items:center;justify-content:center;bottom:20%;left:3px;right:3px;height:25%;margin:0;padding:0 2px;max-width:none;white-space:normal;overflow:hidden;text-overflow:clip;background:none;color:#fff4d9;font-size:clamp(10px,11.5cqw,16px);line-height:1;font-weight:800;text-shadow:1px 1px #000}
+.square-tile .tile-points,.resolution-mode .square-tile .tile-points{position:absolute;bottom:3px;left:3px;right:3px;display:flex;justify-content:center;align-items:center;gap:3px;min-height:17%;font:900 clamp(11px,13cqw,20px) var(--font);line-height:1;white-space:nowrap;color:var(--tile-color)}
+.square-tile .tile-points>span{display:inline-flex;align-items:center;gap:2px}.square-tile .tile-points svg,.resolution-mode .square-tile .tile-points svg{width:1em;height:1em}
+.square-tile .level{left:3px;bottom:auto;top:18%;font:900 clamp(10px,11cqw,15px) var(--font);color:#fff0ba;background:#18200e;padding:1px 3px}
+.square-tile .mult{top:3px;right:3px;left:auto;font:900 clamp(10px,11cqw,16px) var(--font);padding:1px 3px;line-height:1.1}
+.square-tile .focus-badge{left:3px;top:38%;bottom:auto;right:auto;width:17px;height:17px}.square-tile .focus-badge svg{width:15px;height:15px}
+.square-tile .tile-state{position:absolute;bottom:1px;left:1px;right:1px;padding:3px 0;background:#45483b;color:#e3d9bf;font-size:clamp(10px,11cqw,15px);font-weight:900;line-height:1}
+.square-tile.exhausted{border-color:#747768;background:#2d3227}.square-tile.exhausted>.sticker,.square-tile.inactive>.sticker{filter:grayscale(1);opacity:.5}
+.square-tile.chosen{border-color:#baff42;box-shadow:0 0 0 2px #baff42,inset 0 0 18px #baff4225}.square-tile.focused{border-color:#baff42}
+.square-tile .empty-mark{position:absolute;inset:0;display:grid;place-items:center;font-size:27px;color:#6b7659}
+.square-tile.empty{background:#1b2316;border-color:#5f6952}
+.tile-slot{display:flex;flex-direction:column;gap:5px;min-width:0}.tile-slot .focus-toggle{font-size:16px;min-height:34px;letter-spacing:0}.tile-slot .focus-unavailable{font-size:13px;min-height:34px;padding:3px}
+.screen-body>.inventory-screen,.screen-body>.choice-screen{flex:none;min-height:0;overflow:visible;display:flex;flex-direction:column;gap:12px;padding:1px;margin:0}
+.screen-help{font-size:18px;line-height:1.25;margin:0;color:#354029}.screen-help strong{font-weight:900;color:#182510}
+.choice-toolbar{display:flex;justify-content:space-between;align-items:center;gap:8px}.choice-toolbar .back{font-size:17px;padding:5px 0;text-decoration:none}
+.skip-reward{flex-shrink:0;padding:8px 11px;min-height:40px;border:2px solid #51673c;border-radius:4px;background:#26371b;color:#e4f5c3;font-size:18px;font-weight:900}
+.choice-screen>h1{font-size:clamp(27px,7vw,36px);line-height:1;margin:0}.choice-screen>.tape{align-self:flex-start;margin:3px 0;font-size:14px}
+.choice-detail{display:flex;flex-direction:column;gap:9px;padding:0;margin:2px 0 5px;scroll-margin:8px}
+.tile-explanation{background:#1c2915;color:#f0edd8;border:2px solid #657b4c;border-left:5px solid var(--tile-color);border-radius:5px;padding:13px;text-align:left}
+.explanation-heading>strong{display:block;font-size:26px;line-height:1;font-weight:900;color:#fff3ce}.explanation-heading>span{display:block;color:var(--tile-color);font-size:15px;font-weight:900;margin:5px 0 10px;letter-spacing:.5px}
+.tile-explanation p{font-size:20px;line-height:1.35;margin:0 0 10px}.tile-explanation p:last-of-type{margin-bottom:5px}.tile-explanation strong{font-weight:900}
+.tile-explanation .family-explainer{font-size:17px;line-height:1.25;color:#d1dabd}
+.tile-reference{display:inline-flex;align-items:center;gap:3px;vertical-align:middle;white-space:nowrap;color:var(--tile-color);font-size:17px;line-height:1}
+.tile-reference>.sticker{width:25px;height:28px;max-height:none;flex-shrink:0;overflow:hidden}
+.tile-rule strong{color:#fff6d8}.tile-reference strong{color:var(--tile-color)}
+.tile-explanation .family-rule{display:flex;align-items:center;flex-wrap:wrap;gap:5px;background:#0f190b;border-radius:3px;padding:7px;font-size:18px}
+.tile-explanation .upgrade-preview{border-top:1px solid #5e744b;padding-top:10px;color:#baff42;font-size:21px}.upgrade-preview>strong{color:#baff42}
+.tile-explanation .state-explainer{font-size:17px;color:#eac897}.adjacency-help{display:block;font-size:15px;line-height:1.2;color:#b8c5a3;margin-top:9px}
+.choice-detail>.primary{margin:0 0 4px;min-height:47px;font-size:20px}.reward-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0}.reward-tabs button{font-size:17px;padding:9px 3px;min-height:42px;font-weight:900}
+.tile-dialog{max-width:460px;width:calc(100% - 20px);padding:35px 14px 14px;max-height:calc(100dvh - 24px);scrollbar-width:thin;scrollbar-color:#6a8050 transparent}.inspect-preview{width:150px;max-width:42%;margin:0 auto 12px}.inspect-preview .square-tile{pointer-events:none}.tile-dialog .tile-explanation{margin-bottom:10px}.tile-dialog .detail-score{flex-wrap:wrap;font-size:19px}.tile-dialog .secondary{margin-bottom:0}
+.bandmates{border:0;padding:0;gap:6px;grid-template-columns:repeat(auto-fit,minmax(120px,1fr))}.bandmate{display:flex;align-items:center;gap:7px;min-width:0;padding:6px}.bandmate .portrait{width:44px;height:52px;flex:0 0 44px;animation:none;padding:0;border:1px solid #a1ba75;border-radius:4px;overflow:hidden}.class-photo{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 30%}.bandmate strong{display:block;font-size:18px;line-height:1.1}.bandmate .class-name{display:block;font-size:12px;line-height:1.1;color:#d1dda8;margin:3px 0}.bandmates .musician-status{font-size:12px;line-height:1.15;white-space:normal}.bandmate>div>span{font-size:13px}.bandmate>div>span svg{width:14px;height:14px}.seat-avatar{overflow:hidden;border-radius:4px}
+.studio-title{font-size:30px;font-weight:900;margin:0;line-height:1}.choice-screen>.bandmates{margin-bottom:2px}
+.screen-body .show-top{flex-shrink:0}.screen-body .show-name strong{font-size:25px}.screen-body .meters{flex-shrink:0}.screen-body .action-slot{margin-top:0}.screen-body .action-slot .primary{font-size:18px;line-height:1.05;min-height:44px;padding:8px;margin:3px 0 5px}
+.resolution-mode .screen-body>.grid-wrap{width:min(100%,calc(100dvh - 350px));height:auto;aspect-ratio:1;max-height:none;flex:none;align-self:center}
+.resolution-mode .screen-body{overflow-y:auto}.resolution-mode .square-tile .tile-name{font-size:clamp(10px,11.5cqw,16px)}
+@media(max-width:380px){#app{padding:5px 6px;gap:5px}.console{padding:10px 6px 7px;gap:5px}.screen-body{gap:7px;padding:2px}.tile-gallery,.inventory-screen .collection.tile-gallery{gap:5px}.screen-body .grid{gap:5px}.screen-body .show-name strong{font-size:23px}.screen-body .round{padding:5px;font-size:12px}.screen-body .round b{font-size:27px}.screen-body .meters{gap:7px}.screen-body .meter{padding:7px;gap:5px}.screen-body .meter>svg{width:22px;height:22px}.screen-body .meter-label b{font-size:23px}.bandmate .portrait{width:34px;height:43px;flex-basis:34px}.bandmate strong{font-size:16px}.bandmate .class-name{font-size:11px}.bandmates .musician-status{font-size:11px}.tile-explanation{padding:10px}.tile-explanation p{font-size:18px}.explanation-heading>strong{font-size:24px}.tile-reference{font-size:16px}.tile-reference>.sticker{width:22px;height:25px}}
+@media(max-height:560px){.screen-body .bandmates{display:grid}.square-tile .tile-name{display:flex}.screen-body>.grid-wrap{max-height:none}.resolution-mode .screen-body>.grid-wrap{width:min(100%,260px)}.resolution-mode .screen-body{overflow-y:auto}}

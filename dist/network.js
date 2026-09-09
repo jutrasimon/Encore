@@ -43,7 +43,7 @@ export class BandConnection {
   if(typeof document!=='undefined'&&document.hidden){this.schedule();return;}
   this.inflight=true;
   try{
-   const data=await api(this.endpoint,'room',this.session.token,{code:this.session.code,type:'sync',knownRevision:this.callbacks.revision()});
+   const data=await api(this.endpoint,'room',this.session.token,{code:this.session.code,type:'sync',knownRevision:this.callbacks.revision(),activity:this.callbacks.activity?.()});
    if(this.closed)return;
    this.id=data.id;if(data.game&&(!this.game||data.game.revision>=this.game.revision))this.game=data.game;
    this.failures=0;this.callbacks.state(data);

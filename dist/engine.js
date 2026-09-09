@@ -19,15 +19,25 @@ export const TILES = {
  amp:{name:'Ampli à boutte',icon:'amp',e:8,build:'Ça tient avec du tape',text:'8 énergie, puis se désactive pour le show. Reste dans l’inventaire et peut être repigé.'},
  feedback:{name:'Larsen délicieux',icon:'bolt',build:'Ça tient avec du tape',text:'+3 énergie par tuile désactivée adjacente.'}
 };
-export const SHOWS=[{name:'Le sous-sol',crowd:'Les colocs & deux inconnus',q:24,e:25,rounds:5},{name:'Le petit pub',crowd:'Les habitués veulent du bruit',q:34,e:36,rounds:5},{name:'Le toit pirate',crowd:'Tout le quartier est au courant',q:44,e:46,rounds:5}];
+export const SHOWS=[{name:'Le sous-sol',crowd:'Les colocs & deux inconnus',q:34,e:32,rounds:5},{name:'Le petit pub',crowd:'Les habitués veulent du bruit',q:70,e:64,rounds:5},{name:'Le toit pirate',crowd:'Tout le quartier est au courant',q:122,e:110,rounds:5}];
+export function showInfo(index=0){
+ const stage=Math.max(0,Math.floor(index)),venue=SHOWS[stage%SHOWS.length],tour=Math.floor(stage/SHOWS.length)+1;
+ return {...venue,name:venue.name+(tour>1?' · Tour '+tour:''),level:stage+1,tour,
+  q:34+28*stage+8*stage*stage,e:32+25*stage+7*stage*stage};
+}
 export const ROLES={
  'guitarist-singer':{name:'Guitariste-chanteur',startingCount:5,starter:['guitar','guitar','voice','voice','pick'],focus:1,pool:Object.keys(TILES)}
 };
 export const STARTER=ROLES['guitarist-singer'].starter;
 export const focusCapacity=p=>(p.focusBase??1)+(p.focusTemporary??0);
 export function normalizeGame(input){
- const g=structuredClone(input);g.version=2;
- for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
+ const g=structuredClone(input);g.version=2;g.attempt??=0;
+ // Preserve the current show's goal for saves created before the rebalance.
+ if(!g.stageTarget&&g.round>0&&!g.balanceVersion){const legacy=[[24,25],[34,36],[44,46]][g.show];if(legacy)g.stageTarget={q:legacy[0]*g.players.length,e:legacy[1]*g.players.length};}
+ g.balanceVersion=3;
+ if(['won','lost'].includes(g.phase)){g.retry=g.phase==='lost';g.phase='reward';}
+
+ for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=Object.keys(TILES).slice(0,3);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
  return g;
 }
 function pruneFocus(p){p.focusedIds=p.focusedIds.filter(id=>p.inventory.some(t=>t.id===id&&!t.exhausted)).slice(0,focusCapacity(p));}
@@ -43,7 +53,7 @@ export function player(id,name,role='guitarist-singer'){
  const config=ROLES[role];if(!config)throw Error('Rôle inconnu.');
  return{id,name,role,inventory:config.starter.slice(0,config.startingCount).map((k,i)=>tile(k,`${id}-${i}`)),fans:0,q:0,e:0,focusBase:config.focus,focusTemporary:0,focusedIds:[],ready:false,board:[],offers:[],rewarded:false,songOffers:[],drafted:false};
 }
-export function newGame(){return{version:2,revision:0,phase:'lobby',players:[],show:0,round:0,q:0,e:0,history:[]};}
+export function newGame(){return{version:2,balanceVersion:3,attempt:0,revision:0,phase:'lobby',players:[],show:0,round:0,q:0,e:0,history:[]};}
 // Weighted sampling without replacement. Focus doubles the draw weight of one copy;
 // a tile never appears twice, and all eligible tiles appear when there are <= 9.
 export function draw(inventory,rng,focusedIds=[]){
@@ -112,21 +122,21 @@ export function resolve(inventory,drawn,round=1,rounds=5){
  }
  return{board,totals};
 }
-export function targets(g){const n=g.players.length;return{q:SHOWS[g.show].q*n,e:SHOWS[g.show].e*n};}
+export function targets(g){const n=g.players.length,s=showInfo(g.show);return g.stageTarget?{...g.stageTarget}:{q:s.q*n,e:s.e*n};}
 function resetShow(g){
- g.round=0;g.q=0;g.e=0;
+ g.round=0;g.q=0;g.e=0;g.retry=false;const stage=showInfo(g.show);g.stageTarget={q:stage.q*g.players.length,e:stage.e*g.players.length};
  for(const p of g.players){p.q=0;p.e=0;p.last=null;p.ready=false;p.board=[];p.rewarded=false;p.songOffers=[];p.drafted=false;p.focusTemporary=0;pruneFocus(p);for(const t of p.inventory){t.charges=0;t.inactive=false;t.exhausted=false;}}
 }
 function playRound(g,rng){
  g.round++;
  for(const p of g.players){
-  const r=resolve(p.inventory,draw(p.inventory,rng,p.focusedIds),g.round,SHOWS[g.show].rounds);
+  const r=resolve(p.inventory,draw(p.inventory,rng,p.focusedIds),g.round,showInfo(g.show).rounds);
   pruneFocus(p);p.board=r.board;p.last=r.totals;p.q+=r.totals.q;p.e+=r.totals.e;p.fans+=r.totals.f;g.q+=r.totals.q;g.e+=r.totals.e;p.ready=false;
  }
- if(g.round===SHOWS[g.show].rounds){
+ if(g.round===showInfo(g.show).rounds){
   const target=targets(g),won=g.q>=target.q&&g.e>=target.e;
   for(const p of g.players){const gain=Math.floor((p.q+p.e)/10);p.fans+=gain;p.showFans=gain;p.offers=shuffle(Object.keys(TILES),rng).slice(0,3);p.focusTemporary=0;pruneFocus(p);p.songOffers=[];}
-  g.history.push({show:g.show,q:g.q,e:g.e,won});g.phase=won?(g.show===SHOWS.length-1?'won':'reward'):'lost';
+  g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=!won;g.phase='reward';
  }else{
   g.phase='draft';for(const p of g.players){p.songOffers=songOffers(p,rng);p.drafted=false;}
  }
@@ -153,20 +163,20 @@ export function command(input,id,msg,seed=1){
   else{if(p.focusedIds.length>=focusCapacity(p))throw Error('Retire un focus pour le déplacer sur cette tuile.');p.focusedIds.push(t.id);}
  }else if(msg.type==='draft'){
   if(g.phase!=='draft'||p.drafted)throw Error('Choix déjà fait ou indisponible.');
-  if(!p.songOffers.includes(msg.kind)||!ROLES[p.role].pool.includes(msg.kind))throw Error('Tuile non proposée.');
-  p.inventory.push(tile(msg.kind,`${id}-song-${g.show}-${g.round}`));p.drafted=true;p.songOffers=[];
+  if(msg.action!=='skip'){if(!p.songOffers.includes(msg.kind)||!ROLES[p.role].pool.includes(msg.kind))throw Error('Tuile non proposée.');
+  p.inventory.push(tile(msg.kind,`${id}-song-${g.show}-${g.attempt}-${g.round}`));}p.drafted=true;p.songOffers=[];
   if(g.players.every(p=>p.drafted))g.phase='show';
  }else if(msg.type==='reward'){
   if(g.phase!=='reward'||p.rewarded)throw Error('Récompense indisponible.');
   if(msg.action==='add'){
    if(!p.offers.includes(msg.kind))throw Error('Tuile non proposée.');
-   p.inventory.push(tile(msg.kind,`${id}-reward-${g.show}`));
+   p.inventory.push(tile(msg.kind,`${id}-reward-${g.show}-${g.attempt}`));
   }else if(msg.action==='upgrade'){
-   const t=p.inventory.find(t=>t.id===msg.tileId);if(!t||t.level>=3)throw Error('Amélioration impossible.');t.level++;
+   const t=p.inventory.find(t=>t.id===msg.tileId);if(!t||!Number.isSafeInteger(t.level+1))throw Error('Amélioration impossible.');t.level++;
   }else if(msg.action==='remove'){
    if(!p.inventory.some(t=>t.id===msg.tileId))throw Error('Tuile introuvable.');p.inventory=p.inventory.filter(t=>t.id!==msg.tileId);pruneFocus(p);
-  }else throw Error('Choix inconnu.');
-  p.rewarded=true;if(g.players.every(p=>p.rewarded)){g.show++;g.phase='show';resetShow(g);}
+  }else if(msg.action!=='skip')throw Error('Choix inconnu.');
+  p.rewarded=true;if(g.players.every(p=>p.rewarded)){if(!g.retry)g.show++;g.attempt++;g.phase='show';resetShow(g);}
  }else throw Error('Action inconnue.');
  g.revision++;return g;
 }
