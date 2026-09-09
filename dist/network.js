@@ -5,25 +5,42 @@ export async function api(endpoint,path,token,body) {
  if(!response.ok){const error=new Error(data.error||'Le serveur est indisponible.');error.status=response.status;throw error;}
  return data;
 }
-// Turn-based synchronization. While waiting for the band: 2 s. Otherwise: 10 s.
+export function inviteCode(value){
+ let text=String(value??'').trim();
+ try{const url=new URL(text);text=url.searchParams.get('band')||'';}catch{}
+ text=text.replace(/[\s-]/g,'').toUpperCase();
+ return /^[A-F0-9]{12}$/.test(text)?text:null;
+}
+// Keep wait states responsive, including the choice between songs.
+export function syncDelay(game,id,failures=0){
+ if(failures)return Math.min(15000,2000*2**failures);
+ const me=game?.players.find(p=>p.id===id);
+ const waiting=game?.phase==='lobby'||game?.phase==='show'&&me?.ready||game?.phase==='draft'&&me?.drafted||game?.phase==='reward'&&me?.rewarded;
+ return waiting?1500:4000;
+}
 // No polling on the home screen, after the tour, or in a hidden browser tab.
 export class BandConnection {
  constructor(endpoint,session,callbacks){Object.assign(this,{endpoint,session,callbacks,closed:false,inflight:false,failures:0,pending:false});}
  async open(){
-  try{const data=await api(this.endpoint,'room',this.session.token,{code:this.session.code,type:'hello',name:this.session.name});
-   if(this.closed)return;this.id=data.id;this.game=data.game;this.callbacks.state(data);this.schedule();
-  }catch(e){if(!this.closed)this.callbacks.error(e);}
+  for(let attempt=0;attempt<3&&!this.closed;attempt++){
+   try{const data=await api(this.endpoint,'room',this.session.token,{code:this.session.code,type:'hello',name:this.session.name});
+    if(this.closed)return;this.id=data.id;this.game=data.game;this.failures=0;this.callbacks.state(data);this.schedule();return;
+   }catch(e){
+    if(this.closed)return;
+    if(attempt===2||e.status&&e.status<500){this.callbacks.error(e);return;}
+    this.callbacks.status(false);
+    await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
+   }
+  }
  }
  schedule(){
   clearTimeout(this.timer);if(this.closed||['won','lost'].includes(this.game?.phase))return;
-  const me=this.game?.players.find(p=>p.id===this.id);
-  const waiting=this.game?.phase==='lobby'||me?.ready||me?.rewarded;
-  this.timer=setTimeout(()=>this.sync(),this.failures?Math.min(30000,2000*2**this.failures):waiting?2000:10000);
+  this.timer=setTimeout(()=>this.sync(),syncDelay(this.game,this.id,this.failures));
  }
  async sync(){
   if(this.closed)return;
   if(this.inflight){this.pending=true;return;}
-  if(document.hidden){this.schedule();return;}
+  if(typeof document!=='undefined'&&document.hidden){this.schedule();return;}
   this.inflight=true;
   try{
    const data=await api(this.endpoint,'room',this.session.token,{code:this.session.code,type:'sync',knownRevision:this.callbacks.revision()});

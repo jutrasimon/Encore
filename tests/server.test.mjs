@@ -82,3 +82,11 @@ test('HTTP focus and concurrent song choices persist and reject duplicate reward
  resetRate(store,code);assert.equal((await a('room',{...ma,requestId:crypto.randomUUID()})).status,400);
  const restored=await a('room',{code,type:'hello',name:'A'});assert.equal(restored.game.players[0].focusedIds.length,1);
 });
+test('network tour waits for the second player before it can start',async()=>{
+ const store=new MemoryStore(),fetcher=handler(store),a=client(fetcher,tokens[0]);
+ const created=await a('create',{name:'Host'});
+ const rejected=await a('room',action(created.code,created.game,'start'));
+ assert.equal(rejected.status,409);
+ assert.equal(store.rooms.get(created.code).game.phase,'lobby');
+ assert.equal(store.rooms.get(created.code).game.round,0);
+});

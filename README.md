@@ -4,7 +4,18 @@
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.4.0.
+vert, coque crème et accents orange. Version 0.5.0.
+
+## Jouer à deux
+
+1. Créer un band, puis copier l’invitation depuis le lobby.
+2. Le deuxième joueur ouvre le lien sur son appareil, entre son nom et rejoint.
+   Le champ accepte aussi un code avec espaces ou un lien complet.
+3. Le créateur lance quand les deux joueurs sont présents. Chacun valide la chanson
+   et choisit sa propre tuile; les scores du show sont communs.
+
+Le lobby attend deux participants. Une coupure temporaire conserve la session;
+« Reprendre mon band » retrouve le même musicien sur son appareil.
 
 ## Hébergement retenu
 
@@ -67,8 +78,8 @@ serveur. En multijoueur, le serveur choisit la graine aléatoire et valide les a
 Un identifiant unique empêche de réappliquer une action après une réponse perdue.
 `server/index.ts` assure la persistance via l'API PostgreSQL de Supabase.
 
-La synchronisation utilise des requêtes HTTP : deux secondes quand on attend le
-band, dix secondes autrement. Elle s'arrête dans un onglet masqué et à la fin de
+La synchronisation utilise des requêtes HTTP : 1,5 seconde quand on attend le
+band (dont les choix de tuiles), quatre secondes autrement. Elle s'arrête dans un onglet masqué et à la fin de
 la tournée. Les états inchangés ne sont pas retransmis. Ce prototype n'utilise pas
 encore Supabase Realtime. L'indication de présence tolère environ une minute.
 

@@ -35,6 +35,7 @@ export async function transact(store, code, credential, msg, now=Date.now()) {
     } else if(!['hello','sync'].includes(msg.type)) {
       if(member.requests.includes(msg.requestId)) return snapshot(room,credential,undefined,now);
       if(now-(member.lastAction||0)<200) throw new GameError('Un instant avant la prochaine action.',429);
+      if(msg.type==='start'&&room.game.players.length!==2)throw new GameError('Attends le deuxième musicien avant de lancer la tournée.',409);
       room.game=command(room.game,member.id,msg,seed);
       member.lastAction=now;member.requests=[...member.requests.slice(-15),msg.requestId];
     }
