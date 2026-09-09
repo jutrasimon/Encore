@@ -4,7 +4,7 @@
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.5.1.
+vert, coque crème et accents orange. Version 0.7.2.
 
 ## Jouer à deux
 
@@ -64,8 +64,8 @@ Le solo est sauvegardé localement, indépendamment du serveur.
 - Overdrive visuel au dépassement d’un objectif; double overdrive quand les deux sont dépassés. Les cinq chansons restent jouées; aucun multiplicateur automatique ajouté.
 - Fans directs des tuiles, plus `floor((qualité personnelle + énergie personnelle)/10)`
   à la fin du show. Formule provisoire, aucun achat avec les fans actuellement.
-- Trois shows et 18 sortes de tuiles. Entre les shows : ajouter une des trois
-  propositions, améliorer une tuile (+3 maximum) ou retirer définitivement une tuile.
+- Niveaux sans fin, trois salles récurrentes et 18 sortes de tuiles. Entre les shows : ajouter une des trois
+  propositions, améliorer une tuile (sans plafond) ou retirer définitivement une tuile.
 - Les améliorations de guitare ajoutent de la qualité, le canard des fans,
   les autres de l'énergie. L'amélioration ne change pas la portée des pouvoirs.
 

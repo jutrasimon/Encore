@@ -220,3 +220,11 @@ body.resolving .live-sound{position:relative;z-index:50;background:#172014;borde
 .console>.action-slot{flex-shrink:0;padding:0 3px}.console>.action-slot>.primary{min-height:43px;margin:2px 0;padding:8px;font-size:18px;line-height:1.05;justify-content:center}
 .console>.action-slot>.primary svg{margin:0}
 @media(max-width:380px){.navigation button{font-size:12px;padding:6px 2px;gap:3px}.navigation button svg{width:17px;height:17px}.navigation button span{white-space:nowrap}.bandmate .portrait{display:block!important}}
+
+/* Short tile names leave room for readable text on all shared square cards. */
+.square-tile .tile-family{font-size:clamp(12px,11cqw,14px)}
+.square-tile.tile>.sticker{top:18%;left:24%;width:52%;height:34%}
+.square-tile .tile-name,.resolution-mode .square-tile .tile-name{bottom:22%;height:30%;font-size:clamp(14px,14cqw,19px);line-height:1.02;font-weight:900}
+.square-tile .tile-points,.resolution-mode .square-tile .tile-points{font-size:clamp(12px,12cqw,18px);white-space:normal;line-height:1.05;min-height:18%}
+.bandmate .class-name,.bandmates .musician-status{font-size:13px}
+.bandmate>div{min-width:0}.bandmate strong{overflow-wrap:anywhere}

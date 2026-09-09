@@ -1,6 +1,7 @@
-import {TILES} from './engine.js?v=0.7.1';
-import {sticker,FAMILY_ART} from './art.js?v=0.7.1';
+import {TILES} from './engine.js?v=0.7.2';
+import {sticker,FAMILY_ART} from './art.js?v=0.7.2';
 import {icon} from './icons.js';
+const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
 export const tileColor=t=>t?.kind==='duck'?'fans':tileFamily(t).color;
@@ -13,23 +14,27 @@ export function tileSummary(t){
  const d=TILES[t.kind],l=t.level||0;
  if(t.inactive)return 'INACTIVE';
  if(d.charge)return t.charges?`${t.charges} CHARGES`:'+1 CHARGE';
+ if(t.kind==='solo')return `${2+l} / ${6+l} ${icon('star')}`;
+ if(t.kind==='last')return `${1+l} / ${6+l} ${icon('bolt')}`;
+ if(t.kind==='lighter')return `${1+l}+ ${icon('bolt')}`;
  if(d.q)return `${d.q+l} ${icon('star')}`;
  if(d.e)return `${d.e+l} ${icon('bolt')}`;
- return ({pick:'VOISINS +1',boot:'PAR VOISIN',duck:'FANS +',smoke:'VIDES +2',cup:'CHARGES +2',choir:'PAR VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'INACTIFS +3'})[t.kind]||'EFFET';
+ return ({pick:'GUITARES +1',boot:'+1 / VOISIN',duck:'+1 / SORTE',smoke:'VIDES +2',cup:'CHARGES +2',choir:'+1 / VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'+3 / INACTIF'})[t.kind]||'EFFET';
 }
 export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false}={}){
  const empty=!t||t.kind==='empty',d=empty?null:TILES[t.kind],f=empty?null:tileFamily(t);
  const production=resolved&&!empty?[['q','star'],['e','bolt'],['f','choir']].filter(([k])=>t[k]).map(([k,i])=>`<span>${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join(''):'';
  return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
- ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">×${t.m}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
+ ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(shortNames[t.kind]||d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">×${t.m}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
  </button>`;
 }
 export function tileDetails(t,{upgrade=false}={}){
  const d=TILES[t.kind],f=tileFamily(t),level=t.level||0,stat=d.family==='guitar'?'qualité':t.kind==='duck'?'fan':'énergie';
+ const rule=t.kind==='lighter'?'1 énergie de base. '+d.text:d.text;
  const related=d.family==='guitar'?'voice':d.family==='voice'?'guitar':null;
  return `<section class="tile-explanation type-${tileColor(t)}"><div class="explanation-heading"><strong>${esc(d.name)}</strong><span>${f.label}${level?' · NIVEAU +'+level:''}</span></div>
  ${d.family==='voice'?'<p class="family-explainer">Cette tuile est une <strong>VOIX</strong>. Les micros comptent comme des voix.</p>':d.family==='guitar'?'<p class="family-explainer">Cette tuile est une <strong>GUITARE</strong>.</p>':''}
- <p class="tile-rule">${richText(related?d.text.replace(/(?:Voix : )?×2 par (Voix|Guitare) adjacente\./,''):d.text)}</p>
+ <p class="tile-rule">${richText(related?rule.replace(', ×2','. ×2').replace(/(?:Voix : )?×2 par (Voix|Guitare) adjacente[.,]?/,'').replace(/,\s*\./g,'.'):rule)}</p>
  ${related?`<p class="tile-rule family-rule">${familyReference(d.family)} <strong>×2</strong> par ${familyReference(related)} <strong>voisine</strong>.</p>`:''}
  ${level?`<p class="tile-rule upgrade-current"><strong>+${level} ${stat}</strong> de niveau, avant les multiplicateurs.</p>`:''}
  ${d.charge?`<p class="tile-rule"><strong>${t.charges||0} charge${t.charges===1?'':'s'}</strong> actuellement. Les charges restent jusqu’à la fin du show.</p>`:''}
