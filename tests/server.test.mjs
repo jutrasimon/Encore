@@ -70,3 +70,15 @@ test('expired rooms cannot be read and creation does not expose credential hashe
  assert.equal(first.code,retry.code);assert.equal(store2.rooms.size,1);
  assert(!JSON.stringify(first).includes(await hash(tokens[0])));
 });
+test('HTTP focus and concurrent song choices persist and reject duplicate rewards',async()=>{
+ const {a,b,store,code,game}=await setup();let r=await a('room',action(code,game,'start'));resetRate(store,code);
+ r=await a('room',action(code,r.game,'focus',{tileId:r.id+'-0'}));assert.equal(r.status,200);assert.equal(r.game.players[0].focusedIds.length,1);resetRate(store,code);
+ await Promise.all([a('room',action(code,r.game,'ready')),b('room',action(code,r.game,'ready'))]);resetRate(store,code);
+ const g=store.rooms.get(code).game;assert.equal(g.phase,'draft');
+ const ma=action(code,g,'draft',{kind:g.players[0].songOffers[0]}),mb=action(code,g,'draft',{kind:g.players[1].songOffers[0]});
+ const results=await Promise.all([a('room',ma),b('room',mb)]);assert(results.every(r=>r.status===200));
+ assert.equal(store.rooms.get(code).game.phase,'show');assert(store.rooms.get(code).game.players.every(p=>p.inventory.length===6));
+ assert.equal((await a('room',ma)).status,200);assert.equal(store.rooms.get(code).game.players[0].inventory.length,6);
+ resetRate(store,code);assert.equal((await a('room',{...ma,requestId:crypto.randomUUID()})).status,400);
+ const restored=await a('room',{code,type:'hello',name:'A'});assert.equal(restored.game.players[0].focusedIds.length,1);
+});

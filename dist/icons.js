@@ -1,5 +1,7 @@
 // Compact, code-native functional symbols; all names remain visible alongside them.
 const paths={
+ focus:'M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',
+ info:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 11v6m0-10v.1',
  settings:'M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',
  guitar:'M13 3l8 8m-5-8 5 5M15 6 8 13m4-3-2-1-3 1-1 3-3 1-1 4 4 4 4-1 1-3 3-1 1-3-1-2M7 16h.01',
  mic:'M15 3a4 4 0 0 1 6 6l-5 5-6-6zM11 9l4 4-9 9-4-4zM13 5l6 6',

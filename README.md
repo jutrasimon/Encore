@@ -4,7 +4,7 @@
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.2.0.
+vert, coque crème et accents orange. Version 0.4.0.
 
 ## Hébergement retenu
 
@@ -26,8 +26,8 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
-clique pour être prêt; la manche se résout quand tous sont prêts. Entre les shows,
-chacun choisit sa récompense. L'inventaire se consulte sur un écran distinct.
+clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
+chacun choisit sa récompense. Entre chaque chanson, chacun ajoute une tuile parmi trois propositions tirées dans le pool de son rôle, doublons permis. L'inventaire se consulte sur un écran distinct.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
@@ -36,8 +36,11 @@ Le solo est sauvegardé localement, indépendamment du serveur.
 
 ## Règles du prototype
 
-- Grille 3 × 3. Neuf instances pigées sans remise à l'intérieur d'une manche;
-  toutes les tuiles admissibles redeviennent disponibles à la manche suivante.
+- Guitariste-chanteur : 5 tuiles (2 guitares, 2 voix, 1 médiator) et 1 focus. Le rôle configure le nombre de départ et son pool.
+- Focus : sélection de copies précises, poids de pige ×2, sans duplication. Modifiable librement entre les chansons avant de se déclarer prêt. Avec 9 tuiles disponibles ou moins, elles sont toutes pigées.
+- Focus temporaire : capacité distincte, expirant dès la fin du show. Le modèle et l’affichage sont prêts; aucune des 18 tuiles actuelles ne donne encore ce bonus.
+- Grille 3 × 3. Neuf instances pigées sans remise à l'intérieur d'une chanson;
+  toutes les tuiles admissibles redeviennent disponibles à la chanson suivante.
 - Inventaire insuffisant : cases vides ajoutées puis mélangées avec les tuiles.
 - Adjacence orthogonale. Une guitare entre deux voix reçoit ×4; les voix ×2 chacune.
 - Résolution automatique : phases réservées déplacement/transformation,
@@ -45,8 +48,9 @@ Le solo est sauvegardé localement, indépendamment du serveur.
   désactivation. Redéclencher répète uniquement la production des points.
 - Charges, épuisement et désactivation persistent pendant le show, puis se
   réinitialisent au suivant. Une tuile désactivée reste dans les piges.
-- Qualité ET énergie requises en cinq manches maximum, objectifs multipliés par
+- Qualité ET énergie requises en cinq chansons complètes, objectifs multipliés par
   le nombre de joueurs. Les grilles sont individuelles; leurs points s'ajoutent.
+- Overdrive visuel au dépassement d’un objectif; double overdrive quand les deux sont dépassés. Les cinq chansons restent jouées; aucun multiplicateur automatique ajouté.
 - Fans directs des tuiles, plus `floor((qualité personnelle + énergie personnelle)/10)`
   à la fin du show. Formule provisoire, aucun achat avec les fans actuellement.
 - Trois shows et 18 sortes de tuiles. Entre les shows : ajouter une des trois
@@ -102,10 +106,9 @@ L'activation initiale de Pages peut nécessiter une action de l'administrateur.
 
 ## Validation et limites
 
-18 tests couvrent les règles, les commandes simultanées, les doublons, les accès
+30 tests couvrent les règles, les commandes simultanées, les doublons, les accès
 non autorisés, les salons complets/expirés et la reprise après redémarrage du
 gestionnaire serveur. Ils ne remplacent pas les essais sur téléphones réels.
 
 L'illustration de scène est fixe. Pas encore de personnages personnalisables,
-de synergies entre grilles, de métaprogression entre tournées ni de migration des
-sauvegardes d'une version de règles à l'autre. L'équilibrage reste expérimental.
+de synergies entre grilles, de métaprogression entre tournées. Les sauvegardes v1 sont adaptées en conservant leur inventaire; L'équilibrage reste expérimental.
