@@ -4,7 +4,7 @@
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.5.0.
+vert, coque crème et accents orange. Version 0.5.1.
 
 ## Jouer à deux
 
@@ -38,7 +38,7 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
 clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
-chacun choisit sa récompense. Entre chaque chanson, chacun ajoute une tuile parmi trois propositions tirées dans le pool de son rôle, doublons permis. L'inventaire se consulte sur un écran distinct.
+chacun choisit sa récompense. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Le choix ramène au plateau avant de lancer la prochaine chanson. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
@@ -117,7 +117,7 @@ L'activation initiale de Pages peut nécessiter une action de l'administrateur.
 
 ## Validation et limites
 
-30 tests couvrent les règles, les commandes simultanées, les doublons, les accès
+Les tests couvrent les règles, les commandes simultanées, les doublons, les accès
 non autorisés, les salons complets/expirés et la reprise après redémarrage du
 gestionnaire serveur. Ils ne remplacent pas les essais sur téléphones réels.
 

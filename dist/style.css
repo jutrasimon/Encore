@@ -68,3 +68,35 @@ body{height:100dvh;min-height:0;overflow:hidden;background:#131610}#app{height:1
 .bandmates .musician-status{display:block;font-size:13px;font-weight:900;letter-spacing:.4px;color:#f49e52;line-height:1.1;margin-top:3px}.bandmates .musician-status.online{color:#baff42}.bandmate.current-musician{border-color:#a7d261}.bandmate>div:nth-child(2){min-width:0}.bandmate strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-height:720px){.band-lobby{gap:9px}.band-seat{min-height:64px;padding:9px}.band-invite{padding:8px}.lobby-heading h1{font-size:33px}.lobby-heading .tape{margin-bottom:8px}.band-lobby .start-band{font-size:19px;min-height:46px}}
 .bandmate{padding:6px;background:#28341e;border:1px solid #6d8051;border-radius:5px;color:#f4ead3}.bandmate strong{color:#fff2cd}.bandmate small{color:#c0cba8}.bandmates .musician-status{font-size:14px}
+
+/* Three columns, exhausted copies last, and an explicit between-song choice. */
+.inventory-screen .collection{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding-right:2px}
+.collection .inventory-item{padding:6px;gap:6px}
+.collection .card-heading{flex-direction:column;justify-content:flex-start;gap:4px;min-height:0;text-align:center}
+.collection .card-heading .item-icon{width:100%;height:51px;flex:0 0 51px}
+.collection .card-heading>strong{font-size:21px;line-height:1;letter-spacing:-.4px;overflow-wrap:normal;hyphens:auto;min-height:42px;display:flex;align-items:center;justify-content:center}
+.collection .effect-hit{display:grid;grid-template-columns:auto auto;justify-content:center;gap:1px 4px;min-height:58px;padding:4px 2px}
+.collection .effect-hit>b{font-size:32px}.collection .effect-hit>svg{height:23px;width:23px}
+.collection .effect-hit>strong{grid-column:1/-1;text-align:center;font-size:17px;line-height:1;font-weight:900}
+.collection .effect-synergy{min-height:44px;gap:3px;font-size:17px;align-content:center}
+.collection .effect-synergy>strong{font-size:17px}.collection .effect-synergy>b{font-size:24px}
+.collection .effect-limit{font-size:14px}.collection .focus-toggle{min-height:40px;font-size:17px;letter-spacing:0}
+.collection .inventory-item.exhausted{opacity:1;background:#282d23;border-color:#676c59;box-shadow:none}
+.collection .inventory-item.exhausted .inspect-card{filter:grayscale(1);opacity:.56}
+.focus-unavailable{display:flex;align-items:center;justify-content:center;min-height:40px;margin:auto 0 0;padding:5px;background:#34382f;border:1px solid #7a806b;border-radius:3px;color:#d9dccb;font-size:16px;font-weight:900;text-align:center}
+.song-reward-screen{display:flex;flex-direction:column;gap:10px;flex:1;min-height:0;overflow:auto;padding:3px 2px;overscroll-behavior:contain}
+.song-reward-screen>.back{align-self:flex-start;font-size:17px;padding:4px 0}
+.song-reward-screen>.tape{align-self:flex-start;margin:2px 0 1px;font-size:14px}
+.song-reward-screen>h1{font-size:35px;line-height:.95;margin:4px 0 5px;font-weight:900}
+.song-reward-screen>h1 span{font-size:25px;color:#485632}
+.song-reward-cards{display:grid;gap:10px}
+.song-reward-card{position:relative;display:grid;grid-template-columns:70px minmax(0,1fr);gap:8px 10px;padding:11px;border:2px solid var(--tile-color);border-radius:7px;background:linear-gradient(140deg,#34412a,#17220e);color:#fff2d0;box-shadow:0 3px 0 #20261b}
+.reward-art{display:flex;align-items:center;justify-content:center;min-width:0;align-self:center}
+.reward-art .sticker{width:70px;height:96px;filter:drop-shadow(1px 3px 0 #0008)}
+.reward-description{min-width:0;padding-right:10px}.reward-description>strong{display:block;font-size:25px;line-height:1;font-weight:900;text-transform:uppercase;margin:0 0 8px;color:var(--tile-color)}
+.reward-description .effect-hit{min-height:41px}.reward-description .effect-hit>b{font-size:33px}.reward-description .effect-hit>strong{font-size:18px;font-weight:900}
+.reward-description .effect-synergy{font-size:18px}.reward-description .effect-synergy>strong{font-size:18px;font-weight:800}
+.song-reward-card>.primary{grid-column:1/-1;margin:0;min-height:42px;padding:6px;font-size:20px;color:#15200c;background:var(--tile-color);box-shadow:none}
+.reward-info{position:absolute;top:3px;right:3px;width:29px;height:29px;border:1px solid #99ad75;border-radius:50%;color:#e6f1d0;background:#27341c;font-weight:900;font-size:18px}
+.song-reward-screen>.secondary{flex-shrink:0;margin:4px 0;min-height:42px;font-size:18px}
+@media(max-width:380px){.collection .card-heading>strong{font-size:19px;min-height:38px}.collection .effect-hit>strong{font-size:16px}.collection .effect-synergy>strong{font-size:16px}.collection .effect-ref{min-width:23px;width:23px}.collection .focus-toggle,.focus-unavailable{font-size:16px}.song-reward-card{grid-template-columns:55px minmax(0,1fr);padding:9px;gap:7px}.reward-art .sticker{width:55px;height:83px}.reward-description>strong{font-size:23px}}

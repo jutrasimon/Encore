@@ -44,8 +44,8 @@ test('focused copies appear more often without duplicates; all small-inventory t
  assert.equal(draw(inv.slice(0,5),random(3),['v0']).filter(Boolean).length,5);
  inv[0].exhausted=true;assert(!draw(inv,random(1),['v0']).some(t=>t?.id==='v0'));
 });
-test('offers come from role pool with replacement, and adding an owned kind is allowed',()=>{
- const p=player('a','A');assert.deepEqual(songOffers(p,()=>0),['guitar','guitar','guitar']);
+test('offers are three distinct role tiles, and adding an owned kind is allowed',()=>{
+ const p=player('a','A');for(let seed=0;seed<100;seed++){const offers=songOffers(p,random(seed));assert.equal(offers.length,3);assert.equal(new Set(offers).size,3);assert(offers.every(k=>ROLES[p.role].pool.includes(k)));}
  let g=newGame();g.players=[p];g.phase='draft';g.round=1;p.songOffers=['guitar','guitar','guitar'];
  g=act(g,'a','draft',{kind:'guitar'});assert.equal(g.players[0].inventory.filter(t=>t.kind==='guitar').length,3);
  assert.equal(g.players[0].inventory.length,6);assert.equal(new Set(g.players[0].inventory.map(t=>t.id)).size,6);

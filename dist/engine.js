@@ -27,13 +27,13 @@ export const STARTER=ROLES['guitarist-singer'].starter;
 export const focusCapacity=p=>(p.focusBase??1)+(p.focusTemporary??0);
 export function normalizeGame(input){
  const g=structuredClone(input);g.version=2;
- for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;}
+ for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
  return g;
 }
-function pruneFocus(p){p.focusedIds=p.focusedIds.filter(id=>p.inventory.some(t=>t.id===id)).slice(0,focusCapacity(p));}
+function pruneFocus(p){p.focusedIds=p.focusedIds.filter(id=>p.inventory.some(t=>t.id===id&&!t.exhausted)).slice(0,focusCapacity(p));}
 // Future tile effects can grant show-only focus through this helper.
 export function grantTemporaryFocus(p,amount){if(!Number.isSafeInteger(amount)||amount<0)throw Error('Bonus de focus invalide.');p.focusTemporary=(p.focusTemporary??0)+amount;}
-export function songOffers(p,rng){const pool=ROLES[p.role].pool;return Array.from({length:3},()=>pool[Math.floor(rng()*pool.length)]);}
+export function songOffers(p,rng){return shuffle([...new Set(ROLES[p.role].pool)],rng).slice(0,3);}
 
 export function random(seed){let x=seed>>>0;return()=>{x+=0x6D2B79F5;let t=x;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
 export function shuffle(a,rng){a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
@@ -121,7 +121,7 @@ function playRound(g,rng){
  g.round++;
  for(const p of g.players){
   const r=resolve(p.inventory,draw(p.inventory,rng,p.focusedIds),g.round,SHOWS[g.show].rounds);
-  p.board=r.board;p.last=r.totals;p.q+=r.totals.q;p.e+=r.totals.e;p.fans+=r.totals.f;g.q+=r.totals.q;g.e+=r.totals.e;p.ready=false;
+  pruneFocus(p);p.board=r.board;p.last=r.totals;p.q+=r.totals.q;p.e+=r.totals.e;p.fans+=r.totals.f;g.q+=r.totals.q;g.e+=r.totals.e;p.ready=false;
  }
  if(g.round===SHOWS[g.show].rounds){
   const target=targets(g),won=g.q>=target.q&&g.e>=target.e;
@@ -148,6 +148,7 @@ export function command(input,id,msg,seed=1){
  }else if(msg.type==='focus'){
   if(!['lobby','show','draft','reward'].includes(g.phase)||p.ready)throw Error('Change ton focus entre les chansons, avant de te déclarer prêt.');
   const t=p.inventory.find(t=>t.id===msg.tileId);if(!t)throw Error('Tuile introuvable.');
+  if(t.exhausted)throw Error('Cette tuile est épuisée : aucun focus possible.');
   if(p.focusedIds.includes(t.id))p.focusedIds=p.focusedIds.filter(id=>id!==t.id);
   else{if(p.focusedIds.length>=focusCapacity(p))throw Error('Retire un focus pour le déplacer sur cette tuile.');p.focusedIds.push(t.id);}
  }else if(msg.type==='draft'){
