@@ -129,17 +129,27 @@ function resetShow(g){
 }
 function playRound(g,rng){
  g.round++;
+ const song={show:g.show,attempt:g.attempt,round:g.round,players:[]};
  for(const p of g.players){
   const r=resolve(p.inventory,draw(p.inventory,rng,p.focusedIds),g.round,showInfo(g.show).rounds);
+  const live=r.board.filter(t=>t.kind!=='empty'&&!t.inactive);
+  const row={id:p.id,...r.totals,bonusFans:0,fans:p.fans+r.totals.f,tiles:live.length,links:live.reduce((n,t)=>n+t.links.length,0),repeats:live.reduce((n,t)=>n+(t.repeats||0),0),maxMultiplier:Math.max(1,...live.map(t=>t.m)),empty:r.board.filter(t=>t.kind==='empty').length,inactive:r.board.filter(t=>t.inactive).length,inventory:p.inventory.length,heat:r.board.map(t=>t.q*(1+(t.repeats||0))+t.e*(1+(t.repeats||0)))};
+  row.byTile={};
+  for(const t of live){const a=row.byTile[t.kind]??={appearances:0,q:0,e:0,f:0};a.appearances++;for(const k of ['q','e','f'])a[k]+=t[k]*(1+(t.repeats||0));}
+  song.players.push(row);
+  p.career??={songs:0,q:0,e:0,f:0,bonusFans:0,links:0,repeats:0,tiles:0,maxMultiplier:1,bestQ:0,bestE:0,byTile:{},heat:Array(9).fill(0)};
+  const c=p.career;c.songs++;for(const k of ['q','e','f','links','repeats','tiles'])c[k]+=row[k];c.maxMultiplier=Math.max(c.maxMultiplier,row.maxMultiplier);c.bestQ=Math.max(c.bestQ,row.q);c.bestE=Math.max(c.bestE,row.e);row.heat.forEach((v,i)=>c.heat[i]+=v);
+  for(const t of live){const a=c.byTile[t.kind]??={appearances:0,q:0,e:0,f:0};a.appearances++;for(const k of ['q','e','f'])a[k]+=t[k]*(1+(t.repeats||0));}
   pruneFocus(p);p.board=r.board;p.last=r.totals;p.q+=r.totals.q;p.e+=r.totals.e;p.fans+=r.totals.f;g.q+=r.totals.q;g.e+=r.totals.e;p.ready=false;
  }
  if(g.round===showInfo(g.show).rounds){
   const target=targets(g),won=g.q>=target.q&&g.e>=target.e;
-  for(const p of g.players){const gain=Math.floor((p.q+p.e)/10);p.fans+=gain;p.showFans=gain;p.offers=shuffle(Object.keys(TILES),rng).slice(0,3);p.focusTemporary=0;pruneFocus(p);p.songOffers=[];}
+  for(const p of g.players){const gain=Math.floor((p.q+p.e)/10);p.fans+=gain;p.showFans=gain;p.career.bonusFans+=gain;const row=song.players.find(r=>r.id===p.id);row.bonusFans=gain;row.fans=p.fans;p.offers=shuffle(Object.keys(TILES),rng).slice(0,3);p.focusTemporary=0;pruneFocus(p);p.songOffers=[];}
   g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=!won;g.phase='reward';
  }else{
   g.phase='draft';for(const p of g.players){p.songOffers=songOffers(p,rng);p.drafted=false;}
  }
+ g.songs??=[];g.songs.push(song);if(g.songs.length>250)g.songs.splice(0,g.songs.length-250);
 }
 // Commands are guarded by both player identity and revision. Invalid commands never mutate state.
 export function command(input,id,msg,seed=1){
