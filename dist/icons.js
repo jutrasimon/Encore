@@ -1,5 +1,6 @@
 // Compact, code-native functional symbols; all names remain visible alongside them.
 const paths={
+ charge:'M8 3V1h8v2M6 3h12v19H6zM9 8h6m-3-3v6M9 16h6',
  focus:'M4 9V4h5m6 0h5v5m0 6v5h-5m-6 0H4v-5M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',
  info:'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20M12 11v6m0-10v.1',
  settings:'M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1zM12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',

@@ -1,5 +1,6 @@
 import {TILES,SHOWS,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js';
 import {sticker} from './art.js';
+import {inventoryMarkup} from './inventory-ui.js';
 import {resolutionEvents,overdriveLevel} from './presentation.js';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
@@ -16,9 +17,9 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){if(!sound)return;try{audioCtx??=new AudioContext();audioCtx.resume();const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.4.0 · OVERDRIVE';
+const VERSION='0.4.2 · OVERDRIVE';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
-let inventoryPage=0,draftSeen='',activeEvent=null,animationPlayer=null,scoredIds=new Set(),freshDeal=false;
+let inventoryScroll=0,draftSeen='',activeEvent=null,animationPlayer=null,scoredIds=new Set(),freshDeal=false;
 let motion=read('encore.motion',true);
 const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family==='voice'?'energy':t?.kind==='duck'?'fans':'utility';
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
@@ -40,15 +41,20 @@ function phaseAction(){const p=me();if(game.phase==='lobby')return `<div class="
  if(game.phase==='show')return `<button class="primary play" data-action="ready" ${busy||animating||p.ready||mode==='multi'&&!connected?'disabled':''}>${icon('bolt')}${p.ready?'EN ATTENTE DU BAND…':game.round?'JOUER LA CHANSON SUIVANTE':'JOUER LA PREMIÈRE CHANSON'}${icon('arrow')}</button>`;
  if(game.phase==='reward')return `<div class="result"><span class="tape">SHOW RÉUSSI</span><h2>La salle en redemande.</h2><p>+${p.showFans} fans de performance, en plus des fans gagnés par tes tuiles.</p><button class="primary" data-action="rewards" ${animating||p.rewarded?'disabled':''}>${p.rewarded?'TON BAND CHOISIT ENCORE…':'PASSER EN COULISSES'} ${icon('arrow')}</button></div>`;
  return `<div class="result"><span class="tape">${game.phase==='won'?'TOURNÉE BOUCLÉE!':'SHOW TERMINÉ'}</span><h2>${game.phase==='won'?p.fans+' fans':'Le show s’arrête ici.'}</h2><p>${game.phase==='won'?'Les trois shows sont réussis.':'Il fallait atteindre les deux objectifs. '}</p><div class="tour-results">${game.history.map(h=>`<span>${h.won?'✓':'×'} ${SHOWS[h.show].name} · ${points(h)}</span>`).join('')}</div><button class="primary" data-action="again">NOUVELLE TOURNÉE ${icon('repeat')}</button></div>`;}
-function focusSummary(){const p=me();return `<div class="focus-summary">${icon('focus')}<strong>FOCUS ${p.focusedIds.length}/${focusCapacity(p)}</strong><span>${p.focusBase} permanent${p.focusBase>1?'s':''}</span>${p.focusTemporary?`<span class="temp-focus">+${p.focusTemporary} ce show</span>`:''}</div>`;}
-function focusButton(t){const p=me(),focused=p.focusedIds.includes(t.id),locked=animating||busy||p.ready||!['lobby','show','draft','reward'].includes(game.phase);return `<button class="focus-toggle ${focused?'active':''}" data-action="focus" data-id="${esc(t.id)}" aria-pressed="${focused}" ${locked?'disabled':''}>${icon('focus')} ${focused?'FOCUS ×2':'FOCUS'}</button>`;}
-function inventoryView(){const p=me(),pages=Math.max(1,Math.ceil(p.inventory.length/4));inventoryPage=Math.min(inventoryPage,pages-1);return `<section class="inventory-screen"><div class="section-title"><h1>Inventaire</h1><b>${p.inventory.length} TUILES</b></div>${focusSummary()}<p class="focus-help">Focus : poids de pige ×2 pour cette copie.${p.inventory.filter(t=>!t.exhausted).length<=9?' Avec 9 tuiles disponibles ou moins, elles sortent toutes.':''}</p><div class="inventory-list collection">${p.inventory.slice(inventoryPage*4,inventoryPage*4+4).map((t,j)=>`<article class="inventory-item type-${type(t)} ${t.exhausted?'exhausted':''} ${p.focusedIds.includes(t.id)?'focused':''}"><button class="inspect-card" data-action="inspect-inventory" data-index="${inventoryPage*4+j}"><span class="item-icon">${sticker(t.kind)}${t.level?'<b>+'+t.level+'</b>':''}</span><strong>${esc(TILES[t.kind].name)}</strong></button><p>${esc(TILES[t.kind].text)}</p>${t.exhausted||t.inactive||t.charges?`<small>${t.exhausted?'Épuisée':t.inactive?'Désactivée':t.charges+' charges'}</small>`:''}${focusButton(t)}</article>`).join('')}</div><div class="inventory-pager"><button data-action="inventory-page" data-delta="-1" aria-label="Page précédente" ${inventoryPage===0?'disabled':''}>←</button><span>${inventoryPage+1} / ${pages}</span><button data-action="inventory-page" data-delta="1" aria-label="Page suivante" ${inventoryPage===pages-1?'disabled':''}>→</button></div>${game.phase==='draft'&&!p.drafted?'<button class="primary" data-action="draft">CHOISIR LA NOUVELLE TUILE</button>':''}</section>`;}
+function focusButton(t){const p=me(),focused=p.focusedIds.includes(t.id),locked=animating||busy||p.ready||!['lobby','show','draft','reward'].includes(game.phase);return `<button class="focus-toggle ${focused?'active':''}" data-action="focus" data-id="${esc(t.id)}" aria-pressed="${focused}" ${locked?'disabled':''}>${focused?'FOCUS ACTIF':'FOCUS +'}</button>`;}
+function inventoryView(){return inventoryMarkup(me(),{
+ locked:animating||busy||me().ready||!['lobby','show','draft','reward'].includes(game.phase),
+ draft:game.phase==='draft'&&!me().drafted
+});}
 function draftDialog(){if(animating||game.phase!=='draft'||me().drafted)return;draftSeen=game.show+':'+game.round;const dlg=$('#details');dlg.classList.add('draft-dialog');dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><small>CHANSON ${game.round}/${SHOWS[game.show].rounds} TERMINÉE</small><h2>Une nouvelle tuile</h2><div class="draft-cards">${me().songOffers.map(kind=>`<button class="draft-card type-${type({kind})}" data-action="choose-song" data-kind="${kind}" ${busy?'disabled':''}>${sticker(kind)}<strong>${esc(TILES[kind].name)}</strong><p>${esc(TILES[kind].text)}</p><span>CHOISIR +</span></button>`).join('')}</div><button class="secondary" data-action="inventory">INVENTAIRE ET FOCUS</button>`;dlg.showModal();}
 function rewardsView(){const p=me();return `<section class="reward-screen"><button class="back" data-action="back">← REVOIR LE SHOW</button><span class="tape">LES COULISSES / SHOW ${game.show+1}</span><h1>Coulisses</h1><p>Choisis une seule action. Chaque membre choisit pour son inventaire.</p><div class="reward-tabs">${[['add','AJOUTER'],['upgrade','AMÉLIORER'],['remove','RETIRER']].map(([k,label])=>`<button class="${rewardAction===k?'active':''}" data-action="reward-tab" data-kind="${k}">${label}</button>`).join('')}</div>${p.rewarded?'<p>Choix enregistré. En attente du band…</p>':rewardAction==='add'?`<div class="reward-cards">${p.offers.map(k=>`<button class="reward-card" data-action="choose-add" data-kind="${k}" ${busy?'disabled':''}><span class="item-icon">${sticker(k)}</span><small>${esc(TILES[k].build)}</small><strong>${esc(TILES[k].name)}</strong><p>${esc(TILES[k].text)}</p><span class="choose">CHOISIR +</span></button>`).join('')}</div>`:`<p>${rewardAction==='upgrade'?'+1 qualité pour une Guitare, +1 fan pour le Canard, +1 énergie pour les autres. Permanent pour la tournée, maximum +3.':'Retire définitivement une tuile de ton inventaire. Les autres ressortiront plus souvent.'}</p><div class="inventory-list">${p.inventory.map(t=>`<button class="inventory-item" data-action="choose-${rewardAction}" data-id="${esc(t.id)}" ${busy||rewardAction==='upgrade'&&t.level>=3?'disabled':''}><span class="item-icon">${sticker(t.kind)}</span><span><strong>${esc(TILES[t.kind].name)}</strong><small>Niveau +${t.level}</small></span><b>${rewardAction==='upgrade'?'+1':'−'}</b></button>`).join('')}</div>`}</section>`;}
 function render(){
  if(animating&&view==='game'&&$('.grid')){paintResolution();return;}
  if(view==='rewards'&&game?.phase!=='reward')view='game';
+ const collection=$('.collection');if(collection)inventoryScroll=collection.scrollTop;
+ const focusedTile=document.activeElement?.dataset.action==='focus'?document.activeElement.dataset.id:null;
  app.innerHTML=shell(view==='settings'?settingsView():!game?home():view==='inventory'?inventoryView():view==='rewards'?rewardsView():gameView());
+ if(view==='inventory'){const list=$('.collection');if(list)list.scrollTop=inventoryScroll;if(focusedTile){const target=[...document.querySelectorAll('.collection .focus-toggle')].find(b=>b.dataset.id===focusedTile);target?.focus({preventScroll:true});}}
  if(game&&view==='game'&&!animating){
   if(intro){intro=false;showIntro();}
   else if(game.phase==='draft'&&!me().drafted&&draftSeen!==game.show+':'+game.round)draftDialog();
@@ -117,9 +123,9 @@ async function send(type,extra={}){
 }
 function getName(){name=$('#name')?.value.trim()||name||'Sans nom';save('encore.name',name);return name;}
 function clearNetwork(){generation++;connection?.close();connection=null;connected=false;busy=false;}
-function solo(){draftSeen='';inventoryPage=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[player(myId,name)];view='game';save('encore.solo',{game,myId});render();}
+function solo(){draftSeen='';inventoryScroll=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[player(myId,name)];view='game';save('encore.solo',{game,myId});render();}
 async function connect(code,newSession=false){
- getName();clearNetwork();game=null;myId=null;online=[];draftSeen='';inventoryPage=0;intro=true;resultDismissed=false;mode='multi';view='game';
+ getName();clearNetwork();game=null;myId=null;online=[];draftSeen='';inventoryScroll=0;intro=true;resultDismissed=false;mode='multi';view='game';
  if(newSession||!session||session.code!==code){session={code,token:credential(),name};save('encore.session',session);}
  const gen=generation;busy=true;render();
  connection=new BandConnection(endpoint,session,{
@@ -133,7 +139,7 @@ async function connect(code,newSession=false){
 app.addEventListener('input',e=>{if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value.toUpperCase();});
 app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
  if(animating)return;
- if(a==='inventory-page'){inventoryPage+=Number(b.dataset.delta);render();}
+ if(a==='focus-help'){const dlg=$('#details');dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>FOCUS : PIGE ×2</h2><p>Double le <strong>poids de pige</strong> d’une copie. Avec <strong>9 tuiles disponibles ou moins</strong>, elles sont toutes pigées.</p><p>Le focus se déplace librement avant de te déclarer prêt. Le bonus temporaire expire à la fin du show.</p><button class="secondary" data-action="close">COMPRIS</button>`;dlg.showModal();}
  if(a==='focus'){await send('focus',{tileId:b.dataset.id});}
  if(a==='draft')draftDialog();
  if(a==='choose-song'){await send('draft',{kind:b.dataset.kind});}
@@ -152,7 +158,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='confirm-remove'){$('#details').close();send('reward',{action:'remove',tileId:selected});}
  if(a==='tile')inspect(me()?.board[Number(b.dataset.index)]);
  if(a==='inspect-inventory')inspect(me().inventory[Number(b.dataset.index)]);
- if(a==='quit'||a==='again'){draftSeen='';inventoryPage=0;animationPlayer=null;activeEvent=null;displayScore=null;intro=true;resultDismissed=false;clearNetwork();frames.forEach(clearTimeout);animating=false;game=null;mode=null;view='game';render();}
+ if(a==='quit'||a==='again'){draftSeen='';inventoryScroll=0;animationPlayer=null;activeEvent=null;displayScore=null;intro=true;resultDismissed=false;clearNetwork();frames.forEach(clearTimeout);animating=false;game=null;mode=null;view='game';render();}
  if(a==='create'){
   getName();busy=true;render();const token=credential();
   try{const d=await api(endpoint,'create',token,{name});session={code:d.code,token,name};save('encore.session',session);await connect(d.code);}

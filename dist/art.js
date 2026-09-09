@@ -1,4 +1,5 @@
-// Source atlas is preserved unchanged. Each viewBox frames one transparent sticker.
+import {stickerMasks} from './art-masks.js';
+// Clip atlas pixels explicitly; a wide SVG viewport otherwise reveals adjacent stickers.
 const boxes={
  guitar:[31,10,254,289],voice:[348,15,212,282],pick:[627,55,228,227],
  boot:[31,299,255,261],lighter:[366,284,150,284],duck:[627,311,234,246],
@@ -7,4 +8,9 @@ const boxes={
  note:[62,1116,201,293],pedal:[328,1131,228,264],encore:[618,1133,231,236],
  kamikaze:[13,1393,295,358],amp:[324,1430,251,289],feedback:[616,1413,251,317]
 };
-export function sticker(kind){const box=boxes[kind];return box?`<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><image href="./art/punk-stickers-v1.png" width="887" height="1774"/></svg>`:'';}
+let stickerId=0;
+export function sticker(kind){
+ const box=boxes[kind];if(!box)return '';
+ const id=`sticker-crop-${++stickerId}`;
+ return `<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><defs><clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${stickerMasks[kind]}"/></clipPath></defs><g clip-path="url(#${id})"><image href="./art/punk-stickers-v1.png" width="887" height="1774"/></g></svg>`;
+}
