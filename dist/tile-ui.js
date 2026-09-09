@@ -1,18 +1,18 @@
-import {TILES} from './engine.js?v=0.7.0';
-import {sticker,FAMILY_ART} from './art.js?v=0.7.0';
+import {TILES} from './engine.js?v=0.7.1';
+import {sticker,FAMILY_ART} from './art.js?v=0.7.1';
 import {icon} from './icons.js';
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
 export const tileColor=t=>t?.kind==='duck'?'fans':tileFamily(t).color;
-export function familyReference(family){const f=FAMILY_ART[family];return `<span class="tile-reference type-${f.color}">${sticker(f.kind)}<strong>${f.label}</strong></span>`;}
+export function familyReference(family,label){const f=FAMILY_ART[family];return `<span class="tile-reference type-${f.color}">${sticker(f.kind)}<strong>${label||f.label}</strong></span>`;}
 function richText(text){
- return esc(text).replace(/\b(Guitares?|Voix)\b/g,m=>familyReference(m.startsWith('Guitare')?'guitar':'voice'))
+ return esc(text).replace(/\b(Guitares?|Voix)\b/g,m=>familyReference(m.startsWith('Guitare')?'guitar':'voice',m.toUpperCase()))
   .replace(/(×2|\+\d+|\b\d+ (?:qualité|énergie|charges?|fans?)\b)/g,'<strong>$1</strong>');
 }
 export function tileSummary(t){
  const d=TILES[t.kind],l=t.level||0;
  if(t.inactive)return 'INACTIVE';
- if(d.charge)return `${t.charges||0} CHARGES`;
+ if(d.charge)return t.charges?`${t.charges} CHARGES`:'+1 CHARGE';
  if(d.q)return `${d.q+l} ${icon('star')}`;
  if(d.e)return `${d.e+l} ${icon('bolt')}`;
  return ({pick:'VOISINS +1',boot:'PAR VOISIN',duck:'FANS +',smoke:'VIDES +2',cup:'CHARGES +2',choir:'PAR VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'INACTIFS +3'})[t.kind]||'EFFET';
