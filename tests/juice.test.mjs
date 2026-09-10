@@ -7,6 +7,22 @@ import {newGame,player,command} from '../dist/engine.js';
 import {ResolutionAudio} from '../dist/resolution-audio.js';
 function setup(ids=['a']){let g=newGame();g.players=ids.map(id=>player(id,id));return act(g,ids[0],'start');}
 function act(g,id,type,extra={}){return command(g,id,{type,revision:g.revision,show:g.show,round:g.round,...extra},77);}
+for(const ids of [['a'],['a','b']])test(`launch starts only the first song with ${ids.length} player(s), despite duplicate updates`,()=>{
+ let g=newGame();g.players=ids.map(id=>player(id,id));
+ const clients=ids.map(id=>({id,advance:new RewardAdvance()}));
+ for(const {id,advance} of clients){advance.observe(null,g,id);assert.equal(advance.take(g,id),false);}
+ const lobby=g;g=act(g,ids[0],'start');
+ for(const {id,advance} of clients){
+  advance.observe(lobby,g,id);advance.observe(g,structuredClone(g),id);
+  assert.equal(advance.take(g,id),true);assert.equal(advance.take(g,id),false);
+ }
+ for(const {id} of clients){
+  const previous=g;g=act(g,id,'ready');
+  for(const client of clients){client.advance.observe(previous,g,client.id);assert.equal(client.advance.take(g,client.id),false);}
+ }
+ assert.equal(g.round,1);assert.equal(g.phase,'draft');
+ for(const {id,advance} of clients){advance.observe(g,structuredClone(g),id);assert.equal(advance.take(g,id),false);}
+});
 test('reward completion auto-readies once in solo and stops after that song',()=>{
  let g=setup();g=act(g,'a','ready');const advance=new RewardAdvance();
  assert.equal(g.phase,'draft');const next=act(g,'a','draft',{kind:g.players[0].songOffers[0]});advance.observe(g,next,'a');
