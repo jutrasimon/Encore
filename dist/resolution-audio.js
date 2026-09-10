@@ -39,6 +39,20 @@ export class ResolutionAudio{
  tick(value){this.tone(650+Math.min(value,80)*13,280,.045,.035,'square');}
  hit(index){this.tone(110+index*14,52,.14,.06,'triangle');}
  transfer(){this.tone(130,1100,.55,.075,'sawtooth');this.tone(65,330,.5,.08);}
- boom(){this.tone(125,25,.65,.25);this.tone(75,28,.35,.085,'sawtooth');this.tone(520,160,.12,.055,'square');}
+ boom(){
+  // Sub drop, metallic attack, then a filtered rumble that follows the visual tail.
+  this.tone(150,28,1.5,.24);this.tone(65,24,1.8,.14,'sine',.045);
+  this.tone(240,42,.65,.075,'sawtooth');this.tone(1100,150,.16,.06,'triangle');
+  if(!this.enabled()||this.ctx?.state!=='running'||this.levels?.effects===0)return;
+  try{
+   const c=this.ctx,duration=1.65,buffer=c.createBuffer(1,Math.ceil(c.sampleRate*duration),c.sampleRate),data=buffer.getChannelData(0);
+   let low=0;for(let i=0;i<data.length;i++){const white=Math.random()*2-1;low=.96*low+.04*white;data[i]=white*.4+low*3;}
+   const source=c.createBufferSource(),filter=c.createBiquadFilter(),gain=c.createGain(),start=c.currentTime;
+   source.buffer=buffer;filter.type='lowpass';filter.frequency.setValueAtTime(4200,start);filter.frequency.exponentialRampToValueAtTime(110,start+duration);
+   gain.gain.setValueAtTime(0,start);gain.gain.linearRampToValueAtTime(.26*(this.levels?.effects??1),start+.012);gain.gain.exponentialRampToValueAtTime(.0001,start+duration);
+   source.connect(filter).connect(gain).connect(c.destination);this.nodes.add(source);
+   source.onended=()=>{source.disconnect();filter.disconnect();gain.disconnect();this.nodes.delete(source);};source.start(start);source.stop(start+duration);
+  }catch{}
+ }
  stop(){this.cancelSpeech();for(const node of this.nodes){try{node.stop();}catch{}}this.nodes.clear();}
 }

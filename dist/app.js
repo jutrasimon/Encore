@@ -1,16 +1,16 @@
-import {Juice,scoreCallout} from './juice.js?v=0.9.6';
-import {RewardAdvance} from './autoplay.js?v=0.9.6';
-import {statsMarkup} from './stats-ui.js?v=0.9.6';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.6';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.6';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.6';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.6';
+import {Juice,scoreCallout} from './juice.js?v=0.9.7';
+import {RewardAdvance} from './autoplay.js?v=0.9.7';
+import {statsMarkup} from './stats-ui.js?v=0.9.7';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.7';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.7';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.7';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.7';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.6';
-import {StageAudio,audioScene} from './stage-audio.js?v=0.9.6';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.7';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.7';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.6';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.7';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -24,14 +24,14 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.6 · ENCORE ∞';
+const VERSION='0.9.7 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
 let inventoryScroll=0,activeEvent=null,animationPlayer=null,scoredIds=new Set(),freshDeal=false;
 let cinematic=null,resolutionRaf=0;
 const resolutionAudio=new StageAudio(()=>sound&&!document.hidden);
-const audioLevels=read('encore.mix',{music:.38,effects:.85,voice:1});
+const audioLevels=read('encore.mix.v2')??musicSettings(read('encore.mix'));
 resolutionAudio.setLevels(audioLevels);
 function syncAudio(){resolutionAudio.setScene(audioScene(game,view,animating));}
 let motion=read('encore.motion',true);
@@ -50,7 +50,7 @@ const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir',
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.6</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.7</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -214,7 +214,7 @@ function paintCinematic(frame){
   if(frame.phase==='intro'){resolutionAudio.announce(g.player.name);$('.resolution-caption strong').textContent='FAIS DU BRUIT !';}
   if(frame.phase==='hold')$('.resolution-caption strong').textContent='ENVOIE LA SAUCE !';
   if(frame.phase==='transfer'){resolutionAudio.transfer();transferPackets(g);$('.resolution-caption strong').textContent='POUR LE BAND !';}
-  if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);$('.resolution-caption strong').textContent='BOOM !';}
+  if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);const verdict=scoreCallout(g.total);if(verdict)resolutionAudio.verdict(verdict.text);$('.resolution-caption strong').textContent='';}
  }
  if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise)resolutionAudio.critical(praise.rank);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
  activeEvent=frame.event;
@@ -286,7 +286,7 @@ async function connect(code,newSession=false){
  });
  await connection.open();
 }
-app.addEventListener('input',e=>{if(e.target.dataset.mix){resolutionAudio.setLevels({[e.target.dataset.mix]:Number(e.target.value)/100});save('encore.mix',resolutionAudio.levels);return;}if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value;});
+app.addEventListener('input',e=>{if(e.target.dataset.mix){resolutionAudio.setLevels({[e.target.dataset.mix]:Number(e.target.value)/100});save('encore.mix.v2',resolutionAudio.levels);return;}if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value;});
 installTooltips(app,()=>animating);
 app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;if(a==='noop')return;
  if(a==='sound'){sound=!sound;save('encore.sound',sound);if(sound){resolutionAudio.unlock();beep();if(animating)resolutionAudio.announce(animationPlayer.name);}else resolutionAudio.suspend();const control=$('.live-sound');if(control){control.setAttribute('aria-pressed',sound);control.setAttribute('aria-label',sound?'Couper le son':'Activer le son');control.innerHTML=icon('sound')+' '+(sound?'SON':'MUET');}if(!animating)render();return;}

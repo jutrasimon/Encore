@@ -1,18 +1,22 @@
-import {ResolutionAudio} from './resolution-audio.js?v=0.9.2';
+import {ResolutionAudio} from './resolution-audio.js?v=0.9.7';
+import {PLAYLIST} from './music-playlist.js?v=0.9.7';
+export {PLAYLIST};
 
-export const PLAYLIST=['djartmusic-stand-up-and-fight-sport-action-martial-arts-boxing-317261.mp3', 'djartmusic-fun-with-my-8-bit-game-301278.mp3', 'djartmusic-time-stands-electric-253526.mp3'];
 const MUSIC=PLAYLIST[0];
-const MUSIC_GAIN=.8;
+const MUSIC_GAIN=.08;
+export function musicSettings(saved){
+ return {music:saved?Math.min(1,Math.max(0,(saved.music??.05)*10)):.5,effects:saved?.effects??.85,voice:saved?.voice??1};
+}
 const SAMPLES=['cursor','select','reward','open','close','error','score-hit','critical','whoosh','overdrive'];
 export function audioScene(game,view,animating=false){
  return {key:MUSIC,live:true};
 }
 // One audio context, smooth music transitions, bounded effect voices, no autoplay.
 export class StageAudio extends ResolutionAudio{
- constructor(enabled,host=globalThis){
-  super(enabled,host);this.tracks=new Map();this.buffers=new Map();this.pending=new Set();
-  this.queue=[];this.scene={key:this.nextTrack(),live:true};this.unlocked=false;this.duckTimer=null;this.ducked=false;
-  this.levels={music:.38,effects:.85,voice:1};this.epoch=0;this.onSpeechDone=()=>this.unduck();
+ constructor(enabled,host=globalThis,playlist=PLAYLIST){
+  super(enabled,host);this.playlist=playlist;this.tracks=new Map();this.buffers=new Map();this.pending=new Set();
+  this.failed=new Set();this.queue=[];this.scene={key:this.nextTrack(),live:true};this.unlocked=false;this.duckTimer=null;this.ducked=false;
+  this.levels=musicSettings();this.epoch=0;this.onSpeechDone=()=>this.unduck();
  }
  unlock(){
   super.unlock();if(!this.enabled()||!this.ctx)return;
@@ -27,14 +31,22 @@ export class StageAudio extends ResolutionAudio{
   }catch{}finally{this.pending.delete(name);}
  }
  nextTrack(){
-  if(!this.queue.length){this.queue=[...PLAYLIST];for(let i=this.queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[this.queue[i],this.queue[j]]=[this.queue[j],this.queue[i]];}if(this.queue[0]===this.scene?.key)this.queue.push(this.queue.shift());}
+  this.queue=this.queue.filter(key=>!this.failed.has(key));
+  if(!this.queue.length){this.queue=this.playlist.filter(key=>!this.failed.has(key));for(let i=this.queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[this.queue[i],this.queue[j]]=[this.queue[j],this.queue[i]];}if(this.queue.length>1&&this.queue[0]===this.scene?.key)this.queue.push(this.queue.shift());}
   return this.queue.shift();
+ }
+ failedTrack(key){
+  if(this.failed.has(key))return;
+  this.failed.add(key);const track=this.tracks.get(key);track?.media.pause();
+  if(track){track.gain.gain.cancelScheduledValues(this.ctx.currentTime);track.gain.gain.value=0;}
+  if(this.scene.key===key){this.scene={key:this.nextTrack(),live:true};this.mix();}
  }
  setScene(){this.mix();}
  setLevels(levels){for(const k of ['music','effects','voice'])if(Number.isFinite(levels[k]))this.levels[k]=Math.max(0,Math.min(1,levels[k]));if(!this.levels.voice)this.cancelSpeech();this.mix();}
  track(key){
+  if(!key)return null;
   if(this.tracks.has(key))return this.tracks.get(key);
-  try{const media=new this.host.Audio(new URL('./audio/'+key,import.meta.url).href);media.loop=false;media.preload='auto';media.onended=()=>{if(this.scene.key!==key)return;this.scene={key:this.nextTrack(),live:true};this.mix();};
+  try{const media=new this.host.Audio(new URL('./audio/music/'+encodeURIComponent(key),import.meta.url).href);media.loop=false;media.preload='auto';media.onended=()=>{if(this.scene.key!==key)return;this.scene={key:this.nextTrack(),live:true};this.mix();};media.onerror=()=>this.failedTrack(key);
    const gain=this.ctx.createGain();gain.gain.value=0;const source=this.ctx.createMediaElementSource(media);source.connect(gain).connect(this.ctx.destination);
    const track={media,gain,source,pauseTimer:null,starting:false};this.tracks.set(key,track);return track;
   }catch{return null;}
@@ -49,7 +61,7 @@ export class StageAudio extends ResolutionAudio{
    const p=t.gain.gain;p.cancelScheduledValues(this.ctx.currentTime);p.setTargetAtTime(volume,this.ctx.currentTime,.18);
    if(wanted&&t.media.paused&&!t.starting){
     t.starting=true;const epoch=this.epoch;
-    Promise.resolve(t.media.play()).then(()=>{if(epoch!==this.epoch||!this.enabled())t.media.pause();}).catch(()=>{}).finally(()=>{t.starting=false;});
+    Promise.resolve(t.media.play()).then(()=>{if(epoch!==this.epoch||!this.enabled())t.media.pause();}).catch(e=>{if(e?.name==='NotSupportedError')this.failedTrack(key);}).finally(()=>{t.starting=false;});
    }
    if(!wanted)t.pauseTimer=setTimeout(()=>{t.media.pause();t.pauseTimer=null;},900);
   }
@@ -85,6 +97,10 @@ export class StageAudio extends ResolutionAudio{
  }
  hit(index){super.hit(index);this.sample('score-hit',.34,1+index*.025);}
  critical(rank){this.sample('critical',.38+rank*.035,1+rank*.04);}
+ verdict(text){
+  if(!this.enabled()||!this.levels.voice||!text)return;
+  this.duck(2000);this.speak(text,{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:.95});
+ }
 
  transfer(){super.transfer();this.sample('whoosh',.44);}
  boom(){super.boom();}
