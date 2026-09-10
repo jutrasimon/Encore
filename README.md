@@ -1,13 +1,13 @@
 # Encore!
 
-## 🎮 [Jouer à ENCORE 0.9.7](https://jutrasimon.github.io/Encore/)
+## 🎮 [Jouer à ENCORE 0.9.8](https://jutrasimon.github.io/Encore/)
 
 Version principale sur `main`. [Version de test](https://jutrasimon.github.io/Encore/audio-test/) sur `preview/audio-0.9.0`.
 Les sauvegardes du jeu principal et de la version de test restent séparées.
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.9.7.
+vert, coque crème et accents orange. Version 0.9.8.
 
 ## Jouer à deux
 
