@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {StageAudio,audioScene} from '../dist/stage-audio.js';
+import {StageAudio,audioScene,PLAYLIST} from '../dist/stage-audio.js';
 function fixture(){
  const utterances=[],media=[];let enabled=true;
  const param=()=>({value:0,cancelScheduledValues(){},setTargetAtTime(v){this.value=v;}});
@@ -9,19 +9,22 @@ function fixture(){
  const audio=new StageAudio(()=>enabled,host);audio.ctx=ctx;
  return {audio,media,utterances,mute(){enabled=false;audio.suspend();}};
 }
-test('menus and choices stay calm, every song uses the supplied soft backing track',()=>{
- for(const view of ['settings','inventory','stats','draft','rewards'])assert.equal(audioScene({phase:'show',show:0,round:1},view).live,false);
- for(const phase of ['lobby','draft','reward'])assert.equal(audioScene({phase,show:0,round:1},'game').live,false);
- assert.equal(audioScene(null,'game').key,'backstage.mp3');
- assert.equal(new Set([1,2,3].map(round=>audioScene({phase:'draft',show:0,round},'game',true).key)).size,1);
+test('all screens retain a continuous playlist of the three supplied tracks',()=>{
+ assert.equal(PLAYLIST.length,3);
+ for(const view of ['game','settings','inventory','stats','draft','rewards'])assert.equal(audioScene({phase:'show'},view).key,PLAYLIST[0]);
+ const {audio,media,mute}=fixture();audio.unlocked=true;audio.mix();
+ const first=audio.scene.key;audio.setScene(audioScene(null,'settings'));assert.equal(audio.scene.key,first);
+ const played=[first];
+ for(let i=0;i<2;i++){audio.tracks.get(audio.scene.key).media.onended();played.push(audio.scene.key);}
+ assert.equal(new Set(played).size,3);mute();
 });
 test('no autoplay, repeated renders keep music position, voice ducks and restores music',async()=>{
  const {audio,media,utterances,mute}=fixture();audio.setScene({key:'backstage.mp3',live:false});assert.equal(media.length,0);
  audio.unlocked=true;audio.mix();await Promise.resolve();await Promise.resolve();
- const before=audio.tracks.get('backstage.mp3').gain.gain.value;
+ const before=audio.tracks.get(audio.scene.key).gain.gain.value;
  for(let n=0;n<10;n++)audio.setScene({key:'backstage.mp3',live:false});assert.equal(media.length,1);assert.equal(media[0].calls,1);
- audio.song(2);assert.equal(utterances.at(-1).text,'Song two!');assert.equal(utterances.at(-1).lang,'en-US');assert.ok(audio.tracks.get('backstage.mp3').gain.gain.value<before);
- utterances.at(-1).onend();assert.equal(audio.tracks.get('backstage.mp3').gain.gain.value,before);mute();
+ audio.song(2);assert.equal(utterances.at(-1).text,'Song two!');assert.equal(utterances.at(-1).lang,'en-US');assert.ok(audio.tracks.get(audio.scene.key).gain.gain.value<before);
+ utterances.at(-1).onend();assert.equal(audio.tracks.get(audio.scene.key).gain.gain.value,before);mute();
 });
 test('mute silences every track and clears delayed fades, re-enable uses retained scene',async()=>{
  const {audio,media,mute}=fixture();audio.unlocked=true;audio.mix();audio.setScene({key:'show-fight.mp3',live:true});

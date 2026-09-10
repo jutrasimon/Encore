@@ -68,9 +68,9 @@ export class Juice{
  impact(total){
   const praise=scoreCallout(total);if(praise)this.float(praise.text,'#fff3ca',praise.rank);
   const board=this.root.querySelector('.grid-wrap');if(!board)return;const r=board.getBoundingClientRect();
-  this.burst('big-boom',r.x+r.width/2,r.y+r.height/2,r.width*1.2,'#fff3ca',580);
-  this.burst('shockwave',r.x+r.width/2,r.y+r.height/2,r.width*1.5,'#baff42',630);
-  this.speed('concentric',r,550,.3);
+  this.burst('big-boom',r.x+r.width/2,r.y+r.height/2,r.width*1.2,'#fff3ca',1400);
+  this.burst('shockwave',r.x+r.width/2,r.y+r.height/2,r.width*1.5,'#baff42',1600);
+  this.speed('concentric',r,1400,.3);
  }
  overdrive(level){
   this.float(level===2?'DOUBLE OVERDRIVE!':'OVERDRIVE!','#ffbb42',5);
@@ -85,7 +85,7 @@ export class Juice{
   this.warp*=Math.pow(.75,dt/16);document.getElementById('cursor-displacement')?.setAttribute('scale',this.warp.toFixed(1));
   if(this.warp<.15){this.warp=0;this.release();}
   this.bursts=this.bursts.filter(b=>(b.life+=dt)<b.ttl);
-  for(const b of this.bursts){const im=this.assets.get(b.name);if(!im?.complete||!im.naturalWidth)continue;const n=im.naturalWidth/32,frame=Math.min(n-1,Math.floor(b.life/b.ttl*n));c.globalAlpha=.9;c.shadowColor=b.color;c.shadowBlur=12;c.drawImage(im,frame*32,0,32,32,b.x-b.size/2,b.y-b.size/2,b.size,b.size);}
+  for(const b of this.bursts){const im=this.assets.get(b.name);if(!im?.complete||!im.naturalWidth)continue;const n=im.naturalWidth/32,frame=Math.min(n-1,Math.floor(b.life/b.ttl*n));c.globalAlpha=.9*Math.min(1,(1-b.life/b.ttl)/.35);c.shadowColor=b.color;c.shadowBlur=12;c.drawImage(im,frame*32,0,32,32,b.x-b.size/2,b.y-b.size/2,b.size,b.size);}
   c.shadowBlur=0;
   if(this.lines){const b=this.lines;b.life+=dt;const im=this.assets.get(`speed-${b.kind}-${Math.floor(b.life/45)%10+1}`);if(im?.complete&&im.naturalWidth){c.globalAlpha=b.alpha*(1-b.life/b.ttl);const r=b.rect;c.drawImage(im,r.x-r.width*.2,r.y-r.height*.2,r.width*1.4,r.height*1.4);}if(b.life>=b.ttl)this.lines=null;}
   this.particles=this.particles.filter(p=>(p.life+=dt)<p.ttl);

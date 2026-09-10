@@ -1,17 +1,16 @@
-import {ResolutionAudio} from './resolution-audio.js?v=0.9.1';
+import {ResolutionAudio} from './resolution-audio.js?v=0.9.2';
 
-const MUSIC='candy.ogg';
-const SAMPLES=['cursor','select','reward','open','close','error','crowd-cheer','score-hit','critical','whoosh','overdrive'];
+export const PLAYLIST=['djartmusic-stand-up-and-fight-sport-action-martial-arts-boxing-317261.mp3', 'djartmusic-fun-with-my-8-bit-game-301278.mp3', 'djartmusic-time-stands-electric-253526.mp3'];
+const MUSIC=PLAYLIST[0];
+const SAMPLES=['cursor','select','reward','open','close','error','score-hit','critical','whoosh','overdrive'];
 export function audioScene(game,view,animating=false){
- return game&&((animating)||view==='game'&&game.phase==='show')
-  ?{key:MUSIC,live:true}
-  :{key:'backstage.mp3',live:false};
+ return {key:MUSIC,live:true};
 }
 // One audio context, smooth music transitions, bounded effect voices, no autoplay.
 export class StageAudio extends ResolutionAudio{
  constructor(enabled,host=globalThis){
   super(enabled,host);this.tracks=new Map();this.buffers=new Map();this.pending=new Set();
-  this.scene={key:'backstage.mp3',live:false};this.unlocked=false;this.duckTimer=null;this.ducked=false;
+  this.queue=[];this.scene={key:this.nextTrack(),live:true};this.unlocked=false;this.duckTimer=null;this.ducked=false;
   this.levels={music:.38,effects:.85,voice:1};this.epoch=0;this.onSpeechDone=()=>this.unduck();
  }
  unlock(){
@@ -26,11 +25,15 @@ export class StageAudio extends ResolutionAudio{
    this.buffers.set(name,await this.ctx.decodeAudioData(await r.arrayBuffer()));
   }catch{}finally{this.pending.delete(name);}
  }
- setScene(scene){this.scene=scene;this.mix();}
+ nextTrack(){
+  if(!this.queue.length){this.queue=[...PLAYLIST];for(let i=this.queue.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[this.queue[i],this.queue[j]]=[this.queue[j],this.queue[i]];}if(this.queue[0]===this.scene?.key)this.queue.push(this.queue.shift());}
+  return this.queue.shift();
+ }
+ setScene(){this.mix();}
  setLevels(levels){for(const k of ['music','effects','voice'])if(Number.isFinite(levels[k]))this.levels[k]=Math.max(0,Math.min(1,levels[k]));if(!this.levels.voice)this.cancelSpeech();this.mix();}
  track(key){
   if(this.tracks.has(key))return this.tracks.get(key);
-  try{const media=new this.host.Audio(new URL('./audio/'+key,import.meta.url).href);media.loop=true;media.preload='none';
+  try{const media=new this.host.Audio(new URL('./audio/'+key,import.meta.url).href);media.loop=false;media.preload='auto';media.onended=()=>{if(this.scene.key!==key)return;this.scene={key:this.nextTrack(),live:true};this.mix();};
    const gain=this.ctx.createGain();gain.gain.value=0;const source=this.ctx.createMediaElementSource(media);source.connect(gain).connect(this.ctx.destination);
    const track={media,gain,source,pauseTimer:null,starting:false};this.tracks.set(key,track);return track;
   }catch{return null;}
@@ -41,7 +44,7 @@ export class StageAudio extends ResolutionAudio{
   for(const [key,t] of this.tracks){
    clearTimeout(t.pauseTimer);t.pauseTimer=null;
    const wanted=key===this.scene.key&&this.levels.music>0;
-   const volume=wanted?(this.scene.live?.23:.3)*this.levels.music*(this.ducked?.24:1):0;
+   const volume=wanted?this.levels.music*(this.ducked?.5:1):0;
    const p=t.gain.gain;p.cancelScheduledValues(this.ctx.currentTime);p.setTargetAtTime(volume,this.ctx.currentTime,.18);
    if(wanted&&t.media.paused&&!t.starting){
     t.starting=true;const epoch=this.epoch;
@@ -67,10 +70,9 @@ export class StageAudio extends ResolutionAudio{
    ['tile','inspect-inventory','inspect-offer','show-details','rules','profile'].includes(action)?'open':'cursor';
   this.sample(name,.38);
  }
- crowd(strength=.5){this.sample('crowd-cheer',strength,.96+Math.random()*.08);}
  song(number){
   if(!this.enabled())return;
-  this.crowd(.55);this.tone(65,32,.45,.15);this.sample('select',.35);
+  this.tone(65,32,.45,.15);this.sample('select',.35);
   if(!this.levels.voice)return;
   const words=['','one','two','three','four','five'];this.duck(1700);
   this.speak('Song '+(words[number]||number)+'!',{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:1.12});
@@ -84,8 +86,8 @@ export class StageAudio extends ResolutionAudio{
  critical(rank){this.sample('critical',.38+rank*.035,1+rank*.04);}
 
  transfer(){super.transfer();this.sample('whoosh',.44);}
- boom(){super.boom();this.crowd(.48);}
- overdrive(level){this.crowd(level===2?.65:.5);this.sample('overdrive',.55,.86);if(this.levels.voice){this.duck(1700);this.speak(level===2?'Double overdrive!':'Overdrive!',{volume:this.levels.voice,pitch:.3,rate:1.05});}}
+ boom(){super.boom();}
+ overdrive(level){this.sample('overdrive',.55,.86);if(this.levels.voice){this.duck(1700);this.speak(level===2?'Double overdrive!':'Overdrive!',{volume:this.levels.voice,pitch:.3,rate:1.05});}}
  stop(){super.stop();this.unduck();}
  suspend(){
   this.epoch++;super.stop();clearTimeout(this.duckTimer);this.duckTimer=null;this.ducked=false;

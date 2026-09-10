@@ -16,7 +16,7 @@ export function resolutionPlan(players,previous,reduced=false){
   for(const event of notes){const duration=(reduced?140:620)/resolutionSpeed(cursor);group.timings.push({start:cursor,duration});cursor+=duration;}
   group.charge=at+intro;group.hold=cursor;
   group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer);
-  group.end=group.impact+(reduced?300:650)/resolutionSpeed(group.impact);
+  group.end=group.impact+(reduced?500:1800);
   for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;
   group.total=total;groups.push(group);score={q:score.q+total.q,e:score.e+total.e};at=group.end;
  }
