@@ -1,0 +1,45 @@
+/* The console stays fixed. Only bounded content panels can scroll. */
+html,body{overflow:hidden;overscroll-behavior:none}
+#app{height:100dvh;max-height:100dvh;min-height:0;overflow:hidden}
+.console{min-height:0;overflow:hidden}
+.console .screen-body{min-height:0;overflow:hidden}
+.screen-body>.choice-screen,.screen-body>.inventory-screen,.screen-body>.settings-screen,.screen-body>.stats-screen,.screen-body>.home,.screen-body>.band-lobby{display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden;gap:8px;margin:0;padding:1px}
+.screen-body>.show-top,.screen-body>.meters,.screen-body>.drive-status,.choice-screen>.reward-tabs,.choice-screen>.studio-toolbar,.choice-actions,.inventory-screen>.section-title,.inventory-screen>.focus-summary,.inventory-screen>.screen-help,.settings-screen>h1,.stats-screen>h1,.stats-screen>.tape,.stats-screen>.stats-tabs,.home>h1,.band-lobby>.lobby-heading,.band-lobby>.start-band{flex-shrink:0}
+.content-box{min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#687750 transparent;border:2px solid #657b4c;border-radius:5px}
+.content-box:focus-visible{outline:2px solid #baff42;outline-offset:-3px}
+.choice-screen .choice-detail{flex:1;min-height:0;margin:0;padding:0;background:#1c2915;overflow:auto}
+.choice-detail>.tile-explanation{border:0;border-left:5px solid var(--tile-color);border-radius:0;min-height:100%;box-sizing:border-box}
+.choice-screen>.reward-gallery{flex:0 0 auto;min-height:0;margin:0;padding:3px;max-height:30dvh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.choice-actions{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding-top:2px}
+.choice-actions>.primary,.choice-actions>.skip-reward{min-width:0;min-height:48px;margin:0;font-size:18px;line-height:1.1;padding:9px 10px}
+.choice-actions>.skip-reward:only-child{grid-column:1/-1}
+.studio-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.studio-toolbar .studio-title{font-size:23px}
+.studio-toolbar .recap-link{font-size:15px;padding:6px 9px;min-height:36px}
+.reward-screen .reward-gallery{flex:0 1 auto;max-height:23dvh}
+.reward-screen .reward-tabs button{min-height:38px;padding:7px 3px;font-size:16px}
+.inventory-screen .collection.tile-gallery{flex:1;min-height:0;overflow:auto;align-content:start;overscroll-behavior:contain;border:2px solid #657b4c;border-radius:5px;padding:6px;scrollbar-width:thin}
+.stats-content,.home-content,.settings-content,.lobby-content{flex:1;display:flex;flex-direction:column;gap:12px;padding:10px;background:#c8c4ad80}
+.stats-content>*,.home-content>*,.settings-content>*,.lobby-content>*{flex-shrink:0}
+.stats-screen>h1{font-size:clamp(26px,7vw,36px);line-height:.98}
+.stats-screen>.tape{font-size:12px}
+.stats-content>h2{font-size:26px;line-height:1;margin:8px 0 0}
+.stats-content>.primary,.stats-content>.secondary{margin:0}
+.screen-body>.home{justify-content:flex-start;padding:4px}
+.home>h1{margin:4px 0 10px;font-size:clamp(45px,14vw,65px)}
+.settings-screen>h1{margin:4px 0 6px}
+.lobby-content .band-invite{margin:0}
+@media(max-height:650px){
+ .console .screen-body{gap:5px}
+ .screen-body>.choice-screen{gap:6px}
+ .screen-body .show-name strong{font-size:21px}
+ .screen-body .meter{padding:5px}
+ .screen-body .overdrive-label{display:none}
+ .screen-body .round b{font-size:25px}
+ .choice-actions>.primary,.choice-actions>.skip-reward{min-height:42px;font-size:16px;padding:8px}
+ .choice-screen .tile-explanation{padding:9px}
+ .choice-screen .tile-explanation p{font-size:18px}
+ .choice-screen .explanation-heading>strong{font-size:23px}
+ .stats-screen>h1{font-size:25px}
+ .home>h1{font-size:43px;margin:2px 0 5px}
+}
