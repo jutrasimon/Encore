@@ -1,0 +1,31 @@
+/* Grunge punch layered over the existing ENCORE console. */
+.fx-defs{position:absolute;width:0;height:0;overflow:hidden;pointer-events:none}
+.juice-layer{position:fixed;inset:0;z-index:80;pointer-events:none;overflow:hidden;contain:strict}
+.juice-layer canvas{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hype-callout{position:absolute;max-width:min(88vw,640px);width:max-content;text-align:center;font:1000 italic clamp(32px,7vw,66px)/.98 var(--font);letter-spacing:-1px;color:var(--hype);text-shadow:3px 4px #0a0a09,-2px -2px #0a0a09,5px 6px #ff329755;transform:translate(-50%,-50%) rotate(-7deg);animation:hype-slam 1s cubic-bezier(.12,.8,.18,1) both;overflow-wrap:anywhere;filter:drop-shadow(0 0 12px #0009)}
+.hype-callout.rank-5{font-size:clamp(30px,6.8vw,64px);padding:12px 18px;background:#161912ed;border-block:3px solid #ffbb42;box-shadow:8px 8px 0 #ed4c3666}
+@keyframes hype-slam{0%{opacity:0;transform:translate(-50%,-35%) scale(2.1) rotate(-15deg)}12%{opacity:1;transform:translate(-50%,-50%) scale(.9) rotate(-5deg)}24%{transform:translate(-50%,-50%) scale(1.05) rotate(-8deg)}70%{opacity:1;transform:translate(-50%,-65%) scale(1) rotate(-7deg)}100%{opacity:0;transform:translate(-50%,-150%) scale(1.15) rotate(-3deg)}}
+.resolution-mode .grid .tile.scoring{z-index:7;animation:tile-detonate var(--hit-time,400ms) cubic-bezier(.15,.7,.25,1) both;transform-origin:50% 62%;overflow:visible}
+.resolution-mode .grid .tile.scoring:after{content:'';position:absolute;inset:0;z-index:5;pointer-events:none;border-radius:inherit;background:linear-gradient(110deg,transparent 25%,#fff9 45%,#fff 50%,transparent 65%);background-size:250% 100%;animation:tile-shine var(--hit-time,400ms) ease-out both;mix-blend-mode:screen}
+.resolution-mode .grid .tile.scoring>.sticker{animation:sticker-thrash var(--hit-time,400ms) ease-out both;filter:drop-shadow(3px 0 #ff3895) drop-shadow(-3px 0 #9cff2f)}
+@keyframes tile-detonate{0%{transform:scale(.93) rotate(-3deg)}17%{transform:translate(3px,-5px) scale(1.17) rotate(7deg)}29%{transform:translate(-4px,2px) scale(1.14) rotate(-6deg)}42%{transform:translate(3px,-2px) scale(1.12) rotate(4deg)}61%{transform:translate(-2px,0) scale(1.06) rotate(-2deg)}100%{transform:scale(1.02) rotate(0)}}
+@keyframes sticker-thrash{0%{transform:scale(.9)}25%{transform:scale(1.25) rotate(-10deg)}50%{transform:scale(1.13) rotate(6deg)}100%{transform:scale(1.04)}}
+@keyframes tile-shine{0%{background-position:170% 0;opacity:0}22%{opacity:.8}80%,100%{background-position:-70% 0;opacity:0}}
+.pointer-warp>.sticker,.home h1.pointer-warp{filter:url(#grunge-warp)!important;transform:rotate(var(--lean,0deg)) scale(1.07)}
+.primary.pointer-warp{filter:url(#grunge-warp);transform:skewX(var(--lean,0deg))}
+.resolution-mode .resolution-pop{pointer-events:none}
+.resolution-mode .resolution-pop strong{font-size:clamp(42px,12vw,88px);color:#e6ffc0;text-shadow:4px 3px #000,-4px 0 #ff4b94,4px 0 #58dcec;animation:name-rip .65s ease-out both}
+@keyframes name-rip{0%{opacity:0;transform:scale(1.6) skew(-18deg)}20%{opacity:1;transform:scale(.95) skew(8deg)}35%{transform:translateX(-5px) skew(-4deg)}55%{transform:translateX(3px)}100%{transform:none}}
+.resource-packet{animation-duration:var(--flight-time,560ms)!important}
+.resolution-mode[data-resolution="impact"] .grid-wrap{animation:amp-kick .36s ease-out}
+@keyframes amp-kick{0%,100%{transform:none}15%{transform:translate(4px,-3px) rotate(.6deg)}35%{transform:translate(-4px,3px) rotate(-.5deg)}60%{transform:translate(2px,0)}}
+.resolution-shade{background:radial-gradient(ellipse at 50% 48%,#193008d9,#05090af5 75%)}
+.resolution-shade:after{content:'';position:absolute;inset:0;opacity:.13;background:repeating-linear-gradient(0deg,transparent 0 3px,#baff42 4px,transparent 5px),repeating-linear-gradient(105deg,transparent 0 47px,#ff418922 48px 49px);pointer-events:none}
+@media(prefers-reduced-motion:reduce){.pointer-warp,.pointer-warp>.sticker{filter:none!important;transform:none!important}.hype-callout{animation:none;transform:translate(-50%,-50%)}.juice-layer canvas{display:none}}
+.reduced-motion .pointer-warp,.reduced-motion .pointer-warp>.sticker{filter:none!important;transform:none!important}
+.reduced-motion .hype-callout{animation:none;transform:translate(-50%,-50%)}
+.reduced-motion .juice-layer canvas{display:none}
+
+.live-sound{position:relative;z-index:28;display:flex;align-items:center;gap:5px;background:#172014;color:#baff42;border:2px solid #688548;border-radius:4px;min-height:40px;padding:5px 8px;font-weight:900;font-size:14px;flex-shrink:0}
+
+.pointer-warp>.sticker{animation:none!important}

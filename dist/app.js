@@ -1,41 +1,55 @@
-import {statsMarkup} from './stats-ui.js?v=0.8.2';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.8.2';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.8.2';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.8.2';
-import {inventoryMarkup} from './inventory-ui.js?v=0.8.2';
+import {Juice,scoreCallout} from './juice.js?v=0.9.1';
+import {RewardAdvance} from './autoplay.js?v=0.9.1';
+import {statsMarkup} from './stats-ui.js?v=0.9.1';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.1';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.1';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.1';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.1';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.6.0';
-import {ResolutionAudio} from './resolution-audio.js?v=0.8.2';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.1';
+import {StageAudio,audioScene} from './stage-audio.js?v=0.9.1';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.8.2';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.1';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(k))??d;}catch{return d;}};
-const save=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem('audio-preview.'+k))??d;}catch{return d;}};
+const save=(k,v)=>{try{localStorage.setItem('audio-preview.'+k,JSON.stringify(v));}catch{}};
 let game=null,myId=null,mode=null,view='game',selected=null,rewardAction='add',connection=null,online=[],activities={},connected=false,busy=false,networkReady=false,animating=false,frames=[],generation=0;
-let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session'),audioCtx;
+let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session');
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
 const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
-function beep(i=0){if(!sound)return;try{audioCtx??=resolutionAudio.ctx||new AudioContext();audioCtx.resume()?.catch(()=>{});const o=audioCtx.createOscillator(),v=audioCtx.createGain();o.type='square';o.frequency.value=[196,247,294,392,494,587,784,988,1175][i%9];v.gain.setValueAtTime(.022,audioCtx.currentTime);v.gain.exponentialRampToValueAtTime(.0001,audioCtx.currentTime+.13);o.connect(v).connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+.14);}catch{}}
+function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.8.2 · ENCORE ∞';
+const VERSION='0.9.1 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
 let inventoryScroll=0,activeEvent=null,animationPlayer=null,scoredIds=new Set(),freshDeal=false;
 let cinematic=null,resolutionRaf=0;
-const resolutionAudio=new ResolutionAudio(()=>sound&&!document.hidden);
+const resolutionAudio=new StageAudio(()=>sound&&!document.hidden);
+const audioLevels=read('encore.mix',{music:.38,effects:.85,voice:1});
+resolutionAudio.setLevels(audioLevels);
+function syncAudio(){resolutionAudio.setScene(audioScene(game,view,animating));}
 let motion=read('encore.motion',true);
+const juice=new Juice(app,()=>motion),advance=new RewardAdvance();
+let autoReadyScheduled=false;
+function maybeAutoReady(){
+ if(autoReadyScheduled||busy||animating||document.hidden||!game||mode==='multi'&&!connected||!advance.pending)return;
+ autoReadyScheduled=true;queueMicrotask(async()=>{
+  autoReadyScheduled=false;if(busy||animating||document.hidden||!game||mode==='multi'&&!connected||!advance.take(game,myId))return;
+  intro=false;view='game';$('#details')?.close();await send('ready');
+ });
+}
 let healthTimer=null,checkingServer=false,networkState='checking';
 const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family==='voice'?'energy':t?.kind==='duck'?'fans':'utility';
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.8.2</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.1</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -61,7 +75,7 @@ function lobbyView(){
  const code=session.code.match(/.{1,4}/g).join(' ');
  return `<section class="band-lobby"><div class="lobby-heading"><span class="tape">TOURNÉE EN COOP</span><h1>TON BAND<span>${game.players.length}<small>/2</small></span></h1></div><div class="band-seats">${game.players.map(p=>`<div class="band-seat ${online.includes(p.id)?'joined':''}"><span class="seat-avatar">${classPortrait()}</span><div><strong>${esc(p.name)} ${p.id===myId?'<small>TOI</small>':''}</strong><span>${musicianStatus(p)}</span></div></div>`).join('')}${!full?'<div class="band-seat empty-seat"><span class="seat-avatar">+</span><div><strong>UNE PLACE LIBRE</strong><span>Invite ton deuxième musicien.</span></div></div>':''}</div><div class="band-invite"><span>CODE DU BAND</span><button class="band-code" data-action="copy-code" aria-label="Copier le code du band">${esc(code)}</button><button class="primary" data-action="invite">COPIER L’INVITATION</button></div><p class="lobby-message" role="status">${!connected?'Reconnexion en cours…':!full?'Partage le lien. Ton band arrive ici.':!allOnline?'Ton partenaire se reconnecte…':host?'Le band est là. À toi de lancer !':'Le créateur lance la tournée.'}</p><button class="primary start-band" data-action="start" ${!host||!allOnline||!connected||busy?'disabled':''}>${!full?'EN ATTENTE DU 2e':!host?'LE CRÉATEUR LANCE…':'LANCER LA TOURNÉE'}</button></section>`;
 }
-function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><button class="secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><button class="secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="secondary" data-action="${game?'finish-tour':'back'}">${game?'BILAN AVANT DE QUITTER':'RETOUR'}</button><p class="version">${VERSION}</p></section>`;}
+function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><button class="secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><div class="audio-mix">${[['music','MUSIQUE'],['effects','EFFETS & FOULE'],['voice','VOIX']].map(([key,label])=>`<label>${label}<input type="range" min="0" max="100" value="${Math.round(resolutionAudio.levels[key]*100)}" data-mix="${key}" aria-label="${label}"></label>`).join('')}</div><button class="secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="secondary" data-action="${game?'finish-tour':'back'}">${game?'BILAN AVANT DE QUITTER':'RETOUR'}</button><p class="version">${VERSION}</p><p class="audio-credits">Musique : Abstraction, « Candy » (CC0) · Sons : JDSherbert<br>Ambiance des menus et foule synthétique : ENCORE!</p></section>`;}
 function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>t[key]?'OVERDRIVE +'+(score[key]-t[key]):score[key]===t[key]?'OBJECTIF ATTEINT':'OBJECTIF DU SHOW'}</small></div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
 function tileButton(t,index,extra=''){
  return tileCard(t,{index,resolved:!!t?.m,focused:(animationPlayer||me())?.focusedIds?.includes(t?.id),classes:`${extra} ${animating?'unscored':''} ${freshDeal?'deal-in':''} ${t?.m>1?'lit':''}`});
@@ -75,7 +89,7 @@ function grid(){
 }
 function resolutionView(){
  const g=cinematic.group;
- return `<div class="resolution-shade" aria-hidden="true"></div><div class="resolution-top"><div><small>SUR SCÈNE · ${g.index+1}/${cinematic.plan.groups.length}</small><strong>${esc(g.player.name)}</strong></div><span class="stage-mark">${String(g.index+1).padStart(2,'0')}</span></div>${meters()}${grid()}<div class="resolution-tally">${[['q','star','QUALITÉ'],['e','bolt','ÉNERGIE']].map(([k,i,label])=>`<div class="charge-counter charge-${k}" data-charge="${k}"><span>${icon(i)} ${label}</span><b>0</b><i></i></div>`).join('')}</div><div class="resolution-caption" role="status"><strong>FAIS DU BRUIT !</strong><span class="resolution-fans"></span></div><div class="resolution-pop" aria-hidden="true"><small>FAIS DU BRUIT POUR</small><strong>${esc(g.player.name)}</strong><span>À TOI DE JOUER.</span></div><div class="resource-flights" aria-hidden="true"></div>`;
+ return `<div class="resolution-shade" aria-hidden="true"></div><div class="resolution-top"><div><small>SUR SCÈNE · ${g.index+1}/${cinematic.plan.groups.length}</small><strong>${esc(g.player.name)}</strong></div><button class="live-sound" data-action="sound" aria-pressed="${sound}" aria-label="${sound?'Couper le son':'Activer le son'}">${icon('sound')} ${sound?'SON':'MUET'}</button></div>${meters()}${grid()}<div class="resolution-tally">${[['q','star','QUALITÉ'],['e','bolt','ÉNERGIE']].map(([k,i,label])=>`<div class="charge-counter charge-${k}" data-charge="${k}"><span>${icon(i)} ${label}</span><b>0</b><i></i></div>`).join('')}</div><div class="resolution-caption" role="status"><strong>FAIS DU BRUIT !</strong><span class="resolution-fans"></span></div><div class="resolution-pop" aria-hidden="true"><strong>${esc(g.player.name)}</strong></div><div class="resource-flights" aria-hidden="true"></div>`;
 }
 function players(){return `<div class="bandmates">${game.players.map(p=>`<button class="bandmate ${p.id===myId?'current-musician':''}" data-action="profile" data-id="${esc(p.id)}" aria-label="Profil de ${esc(p.name)}"><span class="portrait">${classPortrait()}</span><span class="musician-mini"><strong>${esc(p.name)}</strong><span>${p.fans} FANS</span>${mode==='multi'?`<small class="musician-status">${musicianStatus(p)}</small>`:''}</span></button>`).join('')}<button class="band-total" data-action="stats"><b>${game.players.reduce((n,p)=>n+p.fans,0)}</b><span>FANS DU BAND ↗</span></button></div>`;}
 let statsPlayer='band',statsRange='all',statsMode='production';
@@ -98,7 +112,7 @@ function inventoryView(){return inventoryMarkup(me(),{
 });}
 function draftView(){
  const p=me(),kind=p.songOffers.includes(draftSelection)?draftSelection:p.songOffers[0],locked=busy||mode==='multi'&&!connected;
- return `<section class="choice-screen song-reward-screen"><div class="choice-toolbar"><button class="back" data-action="back">← PLATEAU</button><button class="skip-reward" data-action="skip-song" ${locked?'disabled':''}>PASSER →</button></div><span class="tape">CHANSON ${game.round} TERMINÉE</span><h1>UNE TUILE EN PLUS ?</h1><p class="screen-help">Sélectionne une tuile pour lire son effet. Tu peux <strong>passer</strong> et garder ton inventaire.</p><div class="tile-gallery reward-gallery">${p.songOffers.map(k=>tileCard({kind:k,level:0},{action:'select-song',attributes:`data-kind="${k}" aria-pressed="${k===kind}"`,classes:k===kind?'chosen':''})).join('')}</div>${kind?`<div class="choice-detail">${tileDetails({kind,level:0})}<button class="primary" data-action="choose-song" data-kind="${kind}" ${locked?'disabled':''}>PRENDRE CETTE TUILE</button></div>`:''}</section>`;
+ return `<section class="choice-screen song-reward-screen"><div class="choice-toolbar"><button class="back" data-action="back">← PLATEAU</button><button class="skip-reward" data-action="skip-song" ${locked?'disabled':''}>PASSER →</button></div><span class="tape">CHANSON ${game.round} TERMINÉE</span><h1>UNE TUILE EN PLUS ?</h1><p class="screen-help">Sélectionne une tuile pour lire son effet. Prends une tuile ou passe : la prochaine chanson démarre.</p><div class="tile-gallery reward-gallery">${p.songOffers.map(k=>tileCard({kind:k,level:0},{action:'select-song',attributes:`data-kind="${k}" aria-pressed="${k===kind}"`,classes:k===kind?'chosen':''})).join('')}</div>${kind?`<div class="choice-detail">${tileDetails({kind,level:0})}<button class="primary" data-action="choose-song" data-kind="${kind}" ${locked?'disabled':''}>PRENDRE & JOUER →</button></div>`:''}</section>`;
 }
 function rewardsView(){
  const p=me(),locked=busy||mode==='multi'&&!connected,adding=rewardAction==='add';
@@ -116,7 +130,7 @@ new ResizeObserver(()=>fitBoard()).observe(app);
 window.addEventListener('resize',fitBoard);
 document.fonts?.ready.then(fitBoard);
 function render(){
- hideTooltip();
+ hideTooltip();syncAudio();maybeAutoReady();
  if(animating&&view==='game'&&$('.grid')){paintResolution();return;}
  if(view==='rewards'&&game?.phase!=='reward')view='game';
  if(view==='draft'&&(game?.phase!=='draft'||me()?.drafted))view='game';
@@ -130,7 +144,7 @@ function render(){
  if(modal&&!animating){const dlg=$('#details');if(modal.kind==='inspect'){const t=me()?.inventory.find(t=>t.id===modal.tileId)||me()?.board.find(t=>t?.id===modal.tileId);if(t){inspect(t);return;}}else if(['rules','focus','show'].includes(modal.kind)){dlg.innerHTML=modal.html;dlg.className=modal.classes;dlg.dataset.kind=modal.kind;dlg.showModal();return;}}
  if(game&&view==='game'&&!animating){
   if(mode==='multi'&&game.phase==='lobby'){intro=false;return;}
-  if(intro){intro=false;showIntro();}
+  if(intro){intro=false;if(!advance.pending)showIntro();}
  }
 }
 function inspect(t){
@@ -140,6 +154,7 @@ function inspect(t){
 }
 function rules(){const dlg=$('#details');dlg.dataset.kind='rules';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>Comment jouer</h2><ol><li>Le guitariste-chanteur commence avec 5 tuiles et 1 focus.</li><li>Chaque chanson pige jusqu’à 9 tuiles distinctes. Les cases restantes sont vides.</li><li>Les synergies touchent les quatre côtés, sauf les effets qui concernent toute la grille. Une guitare entre deux voix vaut ×4; les voix valent ×2.</li><li>Entre les chansons, observe le plateau, puis appuie sur Continuer pour choisir parmi 3 tuiles différentes. Tu peux obtenir une sorte déjà présente dans ton inventaire.</li><li>Dans l’inventaire, affecte ton focus à une copie pour doubler son poids de pige. Déplace-le librement avant de te déclarer prêt. Le focus temporaire expire à la fin du show.</li><li>Joue les 5 chansons et atteins les deux objectifs. Dépasse-les pour entrer en overdrive; le surplus contribue aux fans de performance.</li><li>Entre les shows, ajoute, améliore ou retire une tuile, ou passe. Les améliorations sont permanentes, sans plafond. Après un échec, garde ton inventaire et retente le niveau. La tournée continue sans dernier niveau. En coop, les points s’additionnent; chacun choisit sa tuile et son focus.</li></ol><p>Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.</p><button class="primary" data-action="close">FERMER</button>`;dlg.showModal();}
 function overdriveHit(level){
+ resolutionAudio.overdrive(level);juice.overdrive(level);
  if(motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches){$('.console')?.classList.add('drive-impact');frames.push(setTimeout(()=>$('.console')?.classList.remove('drive-impact'),400));try{navigator.vibrate?.(level===2?[35,35,60]:30);}catch{}}
  if(sound){[0,2,4,6].forEach((n,i)=>frames.push(setTimeout(()=>beep(n),i*65)));}
 }
@@ -165,7 +180,7 @@ function paintResolution(){
  if(activeEvent&&$('.readout'))$('.readout').innerHTML=`<span>${esc(activeEvent.name)} · ${esc(TILES[activeEvent.kind].name)}</span> ${points(activeEvent)||'<span>SYNERGIE</span>'}`;
 }
 function stopResolution(){
- cancelAnimationFrame(resolutionRaf);frames.forEach(clearTimeout);frames=[];resolutionAudio.stop();
+ juice.clear();cancelAnimationFrame(resolutionRaf);frames.forEach(clearTimeout);frames=[];resolutionAudio.stop();
  animating=false;activeEvent=null;animationPlayer=null;displayScore=null;cinematic=null;
  document.body.classList.remove('resolving');
 }
@@ -177,7 +192,7 @@ function transferPackets(g){
   const source=$(`[data-charge="${key}"]`).getBoundingClientRect(),target=$(`[data-stat="${key}"]`).getBoundingClientRect();
   const x=source.x+source.width/2,y=source.y+source.height/2,dx=target.x+target.width/2-x,dy=target.y+target.height/2-y;
   const packet=document.createElement('div');packet.className=`resource-packet packet-${key}`;
-  packet.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px`;
+  packet.style.cssText=`left:${x}px;top:${y}px;--dx:${dx}px;--dy:${dy}px;--flight-time:${g.impact-g.transfer}ms`;
   packet.innerHTML=`${icon(ic)}<b>+${g.total[key]}</b>`;layer.append(packet);
  }
 }
@@ -190,14 +205,14 @@ function paintCinematic(frame){
  }
  const phaseKey=g.index+':'+frame.phase,eventKey=frame.event?g.index+':'+frame.event.index:null;
  const phaseChanged=c.phaseKey!==phaseKey,eventChanged=c.eventKey!==eventKey;c.phaseKey=phaseKey;
- $('.console').dataset.resolution=frame.phase;
+ $('.console').dataset.resolution=frame.phase;$('.console').style.setProperty('--beat-time',frame.beat+'ms');
  if(phaseChanged){
   if(frame.phase==='intro'){resolutionAudio.announce(g.player.name);$('.resolution-caption strong').textContent='FAIS DU BRUIT !';}
   if(frame.phase==='hold')$('.resolution-caption strong').textContent='ENVOIE LA SAUCE !';
   if(frame.phase==='transfer'){resolutionAudio.transfer();transferPackets(g);$('.resolution-caption strong').textContent='POUR LE BAND !';}
-  if(frame.phase==='impact'){resolutionAudio.boom();$('.resolution-caption strong').textContent='BOOM !';}
+  if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);$('.resolution-caption strong').textContent='BOOM !';}
  }
- if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
+ if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise)resolutionAudio.critical(praise.rank);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
  activeEvent=frame.event;
  for(const event of g.events.slice(0,frame.completed))scoredIds.add(g.player.id+':'+event.index);
  if(frame.event&&frame.progress>=1)scoredIds.add(g.player.id+':'+frame.event.index);
@@ -221,16 +236,20 @@ function animate(previous){
  animating=true;displayScore={q:previous.q,e:previous.e};view='game';
  cinematic={plan,group:plan.groups[0],mounted:-1,phaseKey:null,eventKey:null,lastValue:0,lastTick:0};
  document.body.classList.add('resolving');updateActivity();
- const started=performance.now();
+ animationPlayer=plan.groups[0].player;app.innerHTML=shell(gameView());fitBoard();syncAudio();
+ $('.resolution-caption strong').textContent='SONG '+game.round;
+ resolutionAudio.song(game.round);
+ const prelude=1200,started=performance.now();
  function tick(now){
   if(!animating)return;
-  const frame=resolutionFrame(plan,now-started);
-  if(frame.done){stopResolution();render();return;}
+  if(now-started<prelude){resolutionRaf=requestAnimationFrame(tick);return;}
+  const frame=resolutionFrame(plan,now-started-prelude);
+  if(frame.done){stopResolution();render();resolutionAudio.crowd(game.phase==='reward'&&!game.retry?.8:.4);return;}
   paintCinematic(frame);resolutionRaf=requestAnimationFrame(tick);
  }
  tick(started);
 }
-function accept(g){const previous=game;game=normalizeGame(g);busy=false;if(mode==='solo')save('encore.solo',{game,myId});if(previous&&(g.show!==previous.show||previous.phase==='lobby'&&g.phase==='show')){intro=true;resultDismissed=false;}if(previous&&g.round>previous.round&&g.show===previous.show){resultDismissed=false;animate(previous);}else render();}
+function accept(g){const previous=game;game=normalizeGame(g);advance.observe(previous,game,myId);busy=false;if(mode==='solo')save('encore.solo',{game,myId});if(previous&&(g.show!==previous.show||previous.phase==='lobby'&&g.phase==='show')){intro=true;resultDismissed=false;}if(previous&&g.round>previous.round&&g.show===previous.show){resultDismissed=false;animate(previous);}else render();maybeAutoReady();}
 function receive(data){
  if(mode!=='multi')return;
  const changed=JSON.stringify(online)!==JSON.stringify(data.online)||JSON.stringify(activities)!==JSON.stringify(data.activities||{})||!connected;activities=data.activities||{};
@@ -249,7 +268,7 @@ async function send(type,extra={}){
  finally{if(current===connection){busy=false;render();current.sync();}}
 }
 function getName(){name=$('#name')?.value.trim()||name||'Sans nom';save('encore.name',name);return name;}
-function clearNetwork(){lastActivity=null;activities={};stopResolution();generation++;connection?.close();connection=null;connected=false;busy=false;}
+function clearNetwork(){advance.clear();lastActivity=null;activities={};stopResolution();generation++;connection?.close();connection=null;connected=false;busy=false;}
 function solo(){inventoryScroll=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[player(myId,name)];view='game';save('encore.solo',{game,myId});render();}
 async function connect(code,newSession=false){
  getName();clearNetwork();game=null;myId=null;online=[];inventoryScroll=0;intro=true;resultDismissed=false;mode='multi';view='game';
@@ -263,12 +282,13 @@ async function connect(code,newSession=false){
  });
  await connection.open();
 }
-app.addEventListener('input',e=>{if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value;});
+app.addEventListener('input',e=>{if(e.target.dataset.mix){resolutionAudio.setLevels({[e.target.dataset.mix]:Number(e.target.value)/100});save('encore.mix',resolutionAudio.levels);return;}if(e.target.id==='name'){name=e.target.value;save('encore.name',name);}if(e.target.id==='code')invite=e.target.value;});
 installTooltips(app,()=>animating);
 app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;if(a==='noop')return;
- if(a==='sound'){sound=!sound;save('encore.sound',sound);if(sound){resolutionAudio.unlock();beep();if(animating)resolutionAudio.announce(animationPlayer.name);}else resolutionAudio.stop();const control=$('.live-sound');if(control){control.setAttribute('aria-pressed',sound);control.setAttribute('aria-label',sound?'Couper le son':'Activer le son');control.innerHTML=icon('sound')+' '+(sound?'SON':'MUET');}if(!animating)render();return;}
+ if(a==='sound'){sound=!sound;save('encore.sound',sound);if(sound){resolutionAudio.unlock();beep();if(animating)resolutionAudio.announce(animationPlayer.name);}else resolutionAudio.suspend();const control=$('.live-sound');if(control){control.setAttribute('aria-pressed',sound);control.setAttribute('aria-label',sound?'Couper le son':'Activer le son');control.innerHTML=icon('sound')+' '+(sound?'SON':'MUET');}if(!animating)render();return;}
  resolutionAudio.unlock();
  if(animating)return;
+ resolutionAudio.ui(a);
  if(a==='profile'){profile(b.dataset.id);return;}
  if(a==='stats'){statsPlayer='band';view='stats';render();return;}
  if(a==='stats-player'){statsPlayer=b.dataset.id;render();return;}
@@ -321,6 +341,6 @@ async function checkServer(){
 checkServer();
 window.addEventListener('online',()=>{if(connection)connection.sync();else if(!networkReady)checkServer();});
 window.addEventListener('offline',()=>{if(connection){connected=false;render();}});
-window.addEventListener('visibilitychange',()=>{if(document.hidden){resolutionAudio.stop();}else{if(animating){stopResolution();render();}connection?.sync();}});
-window.addEventListener('pagehide',()=>stopResolution());
+window.addEventListener('visibilitychange',()=>{if(document.hidden){resolutionAudio.suspend();}else{if(animating){stopResolution();render();}syncAudio();maybeAutoReady();connection?.sync();}});
+window.addEventListener('pagehide',()=>{stopResolution();resolutionAudio.suspend();});
 window.addEventListener('pageshow',e=>{if(e.persisted)render();});

@@ -1,0 +1,38 @@
+name: Audio preview (main unchanged)
+on:
+  push:
+    branches: [preview/audio-0.9.0]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}audio-test/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: preview
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm run check && npm test
+        working-directory: preview
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          path: production
+      - name: Add isolated audio preview alongside current main
+        run: mkdir -p production/dist/audio-test && cp -a preview/dist/. production/dist/audio-test/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: production/dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

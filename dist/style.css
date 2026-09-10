@@ -251,3 +251,5 @@ body.resolving .live-sound{position:relative;z-index:50;background:#172014;borde
 .resolution-mode .resolution-caption .resolution-fans{min-height:19px;line-height:1.15}
 .resolution-mode[data-resolution="impact"] .resolution-caption strong{font-size:30px;line-height:1.18}
 @media(max-height:600px){.resolution-mode .resolution-caption{min-height:68px;padding-block:3px}.resolution-mode .resolution-caption strong{font-size:19px}}
+
+.audio-mix{display:grid;gap:16px;padding:12px 2px}.audio-mix label{display:grid;grid-template-columns:1fr 1.1fr;align-items:center;gap:14px;font-size:13px;font-weight:900}.audio-mix input{width:100%;min-height:32px;accent-color:#ff6b2b}

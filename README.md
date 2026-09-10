@@ -1,10 +1,13 @@
 # Encore!
 
-## 🎮 [Jouer à Encore](https://jutrasimon.github.io/Encore/)
+## 🎮 [Tester ENCORE 0.9.1 audio + VFX](https://jutrasimon.github.io/Encore/audio-test/)
+
+Branche `preview/audio-0.9.0`. [Version principale](https://jutrasimon.github.io/Encore/).
+Point de reprise et validation : [docs/audio-0.9.1-handoff.md](docs/audio-0.9.1-handoff.md).
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.8.2.
+vert, coque crème et accents orange. Version 0.9.1.
 
 ## Jouer à deux
 
@@ -38,7 +41,7 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
 clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
-chacun choisit sa récompense. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Le choix ramène au plateau avant de lancer la prochaine chanson. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
+chacun choisit sa récompense. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Le même enchaînement s’applique à la sortie du Studio. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
@@ -129,3 +132,28 @@ de synergies entre grilles, de métaprogression entre tournées. Les sauvegardes
 Portraits carrés cliquables, fans du band additionnés, onglet Band et profils individuels. Le plateau ajuste sa taille à la hauteur disponible; inventaire et rapports gardent leur défilement. Le son se règle dans Réglages et la version est gravée en bas de la coque. Chaque tuile partage les mêmes détails au survol, au focus clavier et au clic.
 
 Les résolutions enregistrent les productions, fans directs et bonus de fin de show, liens, redéclenchements, multiplicateurs, occupation de grille et contributions par sorte de tuile. Les graphiques proposent production, cumul et variation entre chansons, filtres joueur/band et show/tournée. Les 250 dernières chansons détaillées sont conservées pour borner les réponses réseau; les compteurs de carrière restent cumulatifs. Les anciennes sauvegardes conservent leurs fans sans inventer les mesures absentes. Le bilan est accessible au Studio et avant de quitter.
+
+## Audio et impacts (0.9.1)
+
+« Three Red Hearts - Candy » d’Abstraction joue doucement pendant les chansons.
+Le fond backstage accompagne les menus. Le mix donne la priorité aux effets.
+SFX JDSherbert : impacts, validation, crescendo, transfert, overdrive.
+Annonces « Song one », nom seul avec rappel vocal atténué, puis « Overdrive »
+ou « Double overdrive » au franchissement des objectifs. Le timbre et la diction
+viennent des voix installées; le rappel est une seconde énonciation atténuée,
+pas un échantillon de Mortal Kombat ni un délai audio appliqué à la synthèse.
+
+Les tuiles vibrent, pivotent, grossissent et brillent pendant leur production.
+Les gros scores déclenchent GREAT!, AWESOME!, FANTASTIC! et UNBELIEVABLE!.
+Les Speed Lines et les sprites du pack Pixel VFX 1-Bit fourni servent aux
+impacts, ondes de choc, éclairs et explosions. Survol : déformation SVG selon
+la vitesse du pointeur, inclinaison et particules. Animations réduites respectées.
+
+Résolution à 1,5× minimum; accélération quadratique selon le temps écoulé,
+jusqu’à 2,25× à 9 secondes. Chronologie calculée avant la lecture : aucune
+variation des règles ou des scores. Canvas unique, 80 particules et 16 sprites
+simultanés maximum, pause quand l’onglet est masqué.
+
+Crédits et provenance : [dist/vfx/CREDITS.md](dist/vfx/CREDITS.md).
+Licence musique : [Abstraction-LICENSE.txt](dist/audio/Abstraction-LICENSE.txt).
+Sons : JDSherbert, [licence fournie](dist/audio/JDSherbert-LICENSE.pdf).
