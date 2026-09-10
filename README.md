@@ -1,13 +1,13 @@
 # Encore!
 
-## 🎮 [Tester ENCORE 0.9.1 audio + VFX](https://jutrasimon.github.io/Encore/audio-test/)
+## 🎮 [Jouer à ENCORE 0.9.4](https://jutrasimon.github.io/Encore/)
 
-Branche `preview/audio-0.9.0`. [Version principale](https://jutrasimon.github.io/Encore/).
-Point de reprise et validation : [docs/audio-0.9.1-handoff.md](docs/audio-0.9.1-handoff.md).
+Version principale sur `main`. [Version de test](https://jutrasimon.github.io/Encore/audio-test/) sur `preview/audio-0.9.0`.
+Les sauvegardes du jeu principal et de la version de test restent séparées.
 
 Roguelite musical pour navigateur, mobile d'abord. Solo et coopération à deux,
 sans création de compte. Direction artistique : console Game Boy pirate, écran
-vert, coque crème et accents orange. Version 0.9.1.
+vert, coque crème et accents orange. Version 0.9.4.
 
 ## Jouer à deux
 
