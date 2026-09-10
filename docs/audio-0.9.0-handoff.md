@@ -1,3 +1,5 @@
+> Archive historique. Pour reprendre le projet, lire [l’état courant](current-state.md). Les règles de défaite de la 0.7.0 sont remplacées par la 0.9.9.
+
 > Historique : remplacé par [audio-0.9.1-handoff.md](audio-0.9.1-handoff.md). Les animations demandées sont maintenant autorisées et implémentées.
 
 # ENCORE 0.9.0 audio : point de reprise

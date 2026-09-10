@@ -35,7 +35,10 @@ export function normalizeGame(input){
  // Preserve the current show's goal for saves created before the rebalance.
  if(!g.stageTarget&&g.round>0&&!g.balanceVersion){const legacy=[[24,25],[34,36],[44,46]][g.show];if(legacy)g.stageTarget={q:legacy[0]*g.players.length,e:legacy[1]*g.players.length};}
  g.balanceVersion=3;
- if(['won','lost'].includes(g.phase)){g.retry=g.phase==='lost';g.phase='reward';}
+ // Legacy victories may continue into the endless tour; defeats stay terminal.
+ if(g.phase==='won')g.phase='reward';
+ if(g.phase==='reward'&&g.retry)g.phase='lost';
+ if(g.phase==='lost')g.retry=false;
 
  for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=Object.keys(TILES).slice(0,3);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
  return g;
@@ -145,7 +148,7 @@ function playRound(g,rng){
  if(g.round===showInfo(g.show).rounds){
   const target=targets(g),won=g.q>=target.q&&g.e>=target.e;
   for(const p of g.players){const gain=Math.floor((p.q+p.e)/10);p.fans+=gain;p.showFans=gain;p.career.bonusFans+=gain;const row=song.players.find(r=>r.id===p.id);row.bonusFans=gain;row.fans=p.fans;p.offers=shuffle(Object.keys(TILES),rng).slice(0,3);p.focusTemporary=0;pruneFocus(p);p.songOffers=[];}
-  g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=!won;g.phase='reward';
+  g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=false;g.phase=won?'reward':'lost';
  }else{
   g.phase='draft';for(const p of g.players){p.songOffers=songOffers(p,rng);p.drafted=false;}
  }
@@ -186,7 +189,7 @@ export function command(input,id,msg,seed=1){
   }else if(msg.action==='remove'){
    if(!p.inventory.some(t=>t.id===msg.tileId))throw Error('Tuile introuvable.');p.inventory=p.inventory.filter(t=>t.id!==msg.tileId);pruneFocus(p);
   }else if(msg.action!=='skip')throw Error('Choix inconnu.');
-  p.rewarded=true;if(g.players.every(p=>p.rewarded)){if(!g.retry)g.show++;g.attempt++;g.phase='show';resetShow(g);}
+  p.rewarded=true;if(g.players.every(p=>p.rewarded)){g.show++;g.attempt++;g.phase='show';resetShow(g);}
  }else throw Error('Action inconnue.');
  g.revision++;return g;
 }

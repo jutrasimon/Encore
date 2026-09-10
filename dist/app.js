@@ -1,16 +1,16 @@
-import {Juice,scoreCallout} from './juice.js?v=0.9.8';
-import {RewardAdvance} from './autoplay.js?v=0.9.8';
-import {statsMarkup} from './stats-ui.js?v=0.9.8';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.8';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.8';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.8';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.8';
+import {Juice,scoreCallout} from './juice.js?v=0.9.9';
+import {RewardAdvance} from './autoplay.js?v=0.9.9';
+import {statsMarkup} from './stats-ui.js?v=0.9.9';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.9';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.9';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.9';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.9';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.8';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.8';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.9';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.9';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.8';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.9';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -24,7 +24,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.8 · ENCORE ∞';
+const VERSION='0.9.9 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -50,7 +50,7 @@ const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir',
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.8</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.9</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -98,15 +98,15 @@ function statsView(){return statsMarkup(game,{playerId:statsPlayer,range:statsRa
 function profile(id){statsPlayer=id;statsRange='all';view='stats';render();}
 
 function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button><div class="round">CHANSON <b>${game.round}</b><span>/ ${showInfo(game.show).rounds}</span></div></div>`;}
-function gameView(){if(animating&&cinematic)return resolutionView();if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>`;}
-function playAction(){return `<div class="action-slot">${animating?'<button class="primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="primary" data-action="rewards">CONTINUER</button>':'<button class="primary" data-action="result">CONTINUER</button>'}</div>`;}
+function gameView(){if(animating&&cinematic)return resolutionView();if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}${game.phase==='reward'?'<strong class="tape">SHOW RÉUSSI · STUDIO</strong>':game.phase==='lost'?'<strong class="tape">OBJECTIF MANQUÉ · FIN DE TOURNÉE</strong>':''}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>`;}
+function playAction(){return `<div class="action-slot">${animating?'<button class="primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="primary" data-action="rewards">PASSER AU STUDIO</button>':'<button class="primary" data-action="result">VOIR LE BILAN</button>'}</div>`;}
 function showIntro(){if(animating)return;const dlg=$('#details');dlg.dataset.kind='show';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button>${screen()}<div class="intro-objectives">${icon('star')} ${targets(game).q} ${icon('bolt')} ${targets(game).e}</div><p>Atteins les deux objectifs en ${showInfo(game.show).rounds} chansons. Le show continue même en overdrive. Chaque niveau réussi ouvre un niveau plus difficile.</p>${game.phase==='lobby'?phaseAction():'<button class="primary" data-action="close">FERMER</button>'}`;dlg.showModal();}
 function showResult(){if(animating)return;const dlg=$('#details');dlg.dataset.kind='result';dlg.innerHTML=`<button class="dialog-close" data-action="dismiss-result" aria-label="Fermer">${icon('close')}</button>${phaseAction()}`;dlg.showModal();}
 function phaseAction(){const p=me();if(game.phase==='lobby')return `<div class="lobby"><h2>${game.players.length===2?'Le band est là.':'La balance est prête.'}</h2><p>${mode==='multi'?'Partage le lien avant de lancer la tournée.':'Une tournée infinie. Ton inventaire devient de plus en plus fort.'}</p>${mode==='multi'?'<button class="secondary" data-action="invite">COPIER LE LIEN D’INVITATION</button>':''}${game.players[0].id===myId?`<button class="primary" data-action="start" ${busy||mode==='multi'&&!connected?'disabled':''}>LANCER LA TOURNÉE ${icon('arrow')}</button>`:'<p>Le créateur lance la tournée.</p>'}</div>`;
  if(game.phase==='draft')return `<button class="primary" data-action="draft" ${p.drafted||busy?'disabled':''}>${p.drafted?'TON PARTENAIRE CHOISIT…':'CONTINUER'} ${icon('arrow')}</button>`;
  if(game.phase==='show')return `<button class="primary play" data-action="ready" ${busy||animating||p.ready||mode==='multi'&&!connected?'disabled':''}>${icon('bolt')}${p.ready?'TON PARTENAIRE SE PRÉPARE…':game.round?'JOUER LA CHANSON SUIVANTE':'JOUER LA PREMIÈRE CHANSON'}${icon('arrow')}</button>`;
- if(game.phase==='reward')return `<div class="result"><span class="tape">${game.retry?'OBJECTIF MANQUÉ':'SHOW RÉUSSI'}</span><h2>${game.retry?'On se reprend.':'La salle en redemande.'}</h2><p>+${p.showFans} fans de performance, en plus des fans gagnés par tes tuiles.</p><button class="primary" data-action="rewards" ${animating||p.rewarded?'disabled':''}>${p.rewarded?'TON BAND CHOISIT ENCORE…':'PASSER AU STUDIO'} ${icon('arrow')}</button></div>`;
- return `<div class="result"><span class="tape">${game.phase==='won'?'TOURNÉE BOUCLÉE!':'SHOW TERMINÉ'}</span><h2>${game.phase==='won'?p.fans+' fans':'Le show s’arrête ici.'}</h2><p>${game.phase==='won'?'Les trois shows sont réussis.':'Il fallait atteindre les deux objectifs. '}</p><div class="tour-results">${game.history.map(h=>`<span>${h.won?'✓':'×'} ${showInfo(h.show).name} · ${points(h)}</span>`).join('')}</div><button class="primary" data-action="again">NOUVELLE TOURNÉE ${icon('repeat')}</button></div>`;}
+ if(game.phase==='reward')return `<div class="result"><span class="tape">SHOW RÉUSSI</span><h2>La salle en redemande.</h2><p>+${p.showFans} fans de performance, en plus des fans gagnés par tes tuiles.</p><button class="primary" data-action="rewards" ${animating||p.rewarded?'disabled':''}>${p.rewarded?'TON BAND CHOISIT ENCORE…':'PASSER AU STUDIO'} ${icon('arrow')}</button></div>`;
+ return `<div class="result"><span class="tape">${game.phase==='won'?'TOURNÉE BOUCLÉE!':'FIN DE TOURNÉE'}</span><h2>${game.phase==='won'?p.fans+' fans':'Le band quitte la scène.'}</h2><p>${game.phase==='won'?'Les trois shows sont réussis.':'Il fallait atteindre les deux objectifs. '}</p><div class="tour-results">${game.history.map(h=>`<span>${h.won?'✓':'×'} ${showInfo(h.show).name} · ${points(h)}</span>`).join('')}</div><button class="secondary" data-action="stats">BILAN DU BAND</button><button class="primary" data-action="again">NOUVELLE TOURNÉE ${icon('repeat')}</button></div>`;}
 function focusButton(t){const p=me();if(p.inventory.find(n=>n.id===t.id)?.exhausted)return '<p class="focus-unavailable">ÉPUISÉE · FOCUS INDISPONIBLE</p>';const focused=p.focusedIds.includes(t.id),locked=animating||busy||p.ready||!['lobby','show','draft','reward'].includes(game.phase);return `<button class="focus-toggle ${focused?'active':''}" data-action="focus" data-id="${esc(t.id)}" aria-pressed="${focused}" ${locked?'disabled':''}>${focused?'FOCUS ACTIF':'FOCUS +'}</button>`;}
 function inventoryView(){return inventoryMarkup(me(),{
  locked:animating||busy||me().ready||!['lobby','show','draft','reward'].includes(game.phase),
@@ -154,7 +154,7 @@ function inspect(t){
  dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><div class="inspect-preview">${tileCard(t,{action:'noop',resolved:!!t?.m})}</div>${empty?'<h2>Case vide</h2><p>Complète la grille quand moins de 9 tuiles sont disponibles.</p>':tileDetails(t)}${t?.m?`<div class="detail-score"><strong>CETTE CHANSON</strong><span>${points(t)||'Effet de soutien'}</span>${t.m>1?`<b>×${t.m}</b>`:''}${t.repeats?'<b>Rejouée '+t.repeats+' fois</b>':''}</div>`:''}${!empty&&me()?.inventory.some(x=>x.id===t.id)?focusButton(t):''}<button class="secondary" data-action="close">FERMER</button>`;
  dlg.showModal();
 }
-function rules(){const dlg=$('#details');dlg.dataset.kind='rules';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>Comment jouer</h2><ol><li>Le guitariste-chanteur commence avec 5 tuiles et 1 focus.</li><li>Chaque chanson pige jusqu’à 9 tuiles distinctes. Les cases restantes sont vides.</li><li>Les synergies touchent les quatre côtés, sauf les effets qui concernent toute la grille. Une guitare entre deux voix vaut ×4; les voix valent ×2.</li><li>Entre les chansons, observe le plateau, puis appuie sur Continuer pour choisir parmi 3 tuiles différentes. Tu peux obtenir une sorte déjà présente dans ton inventaire.</li><li>Dans l’inventaire, affecte ton focus à une copie pour doubler son poids de pige. Déplace-le librement avant de te déclarer prêt. Le focus temporaire expire à la fin du show.</li><li>Joue les 5 chansons et atteins les deux objectifs. Dépasse-les pour entrer en overdrive; le surplus contribue aux fans de performance.</li><li>Entre les shows, ajoute, améliore ou retire une tuile, ou passe. Les améliorations sont permanentes, sans plafond. Après un échec, garde ton inventaire et retente le niveau. La tournée continue sans dernier niveau. En coop, les points s’additionnent; chacun choisit sa tuile et son focus.</li></ol><p>Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.</p><button class="primary" data-action="close">FERMER</button>`;dlg.showModal();}
+function rules(){const dlg=$('#details');dlg.dataset.kind='rules';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>Comment jouer</h2><ol><li>Le guitariste-chanteur commence avec 5 tuiles et 1 focus.</li><li>Chaque chanson pige jusqu’à 9 tuiles distinctes. Les cases restantes sont vides.</li><li>Les synergies touchent les quatre côtés, sauf les effets qui concernent toute la grille. Une guitare entre deux voix vaut ×4; les voix valent ×2.</li><li>Entre les chansons, observe le plateau, puis appuie sur Continuer pour choisir parmi 3 tuiles différentes. Tu peux obtenir une sorte déjà présente dans ton inventaire.</li><li>Dans l’inventaire, affecte ton focus à une copie pour doubler son poids de pige. Déplace-le librement avant de te déclarer prêt. Le focus temporaire expire à la fin du show.</li><li>Joue les 5 chansons et atteins les deux objectifs. Dépasse-les pour entrer en overdrive; le surplus contribue aux fans de performance.</li><li>Entre les shows, ajoute, améliore ou retire une tuile, ou passe. Les améliorations sont permanentes, sans plafond. Un objectif manqué termine la tournée. Une nouvelle tournée repart avec les cinq tuiles de départ. La tournée continue sans dernier niveau. En coop, les points s’additionnent; chacun choisit sa tuile et son focus.</li></ol><p>Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.</p><button class="primary" data-action="close">FERMER</button>`;dlg.showModal();}
 function overdriveHit(level){
  resolutionAudio.overdrive(level);juice.overdrive(level);
  if(motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches){$('.console')?.classList.add('drive-impact');frames.push(setTimeout(()=>$('.console')?.classList.remove('drive-impact'),400));try{navigator.vibrate?.(level===2?[35,35,60]:30);}catch{}}
@@ -294,7 +294,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(animating)return;
  resolutionAudio.ui(a);
  if(a==='profile'){profile(b.dataset.id);return;}
- if(a==='stats'){statsPlayer='band';view='stats';render();return;}
+ if(a==='stats'){$('#details')?.close();statsPlayer='band';view='stats';render();return;}
  if(a==='stats-player'){statsPlayer=b.dataset.id;render();return;}
  if(a==='stats-range'){statsRange=b.dataset.range;render();return;}
  if(a==='stats-mode'){statsMode=b.dataset.mode;render();return;}
@@ -314,7 +314,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='start'||a==='ready'){if($('#details').open)$('#details').close();send(a);}
  if(a==='inventory'){if($('#details').open)$('#details').close();view='inventory';render();}
  if(a==='back'){view='game';render();}
- if(a==='rewards'){view='rewards';rewardAction='add';rewardSelection=null;render();}
+ if(a==='rewards'&&game?.phase==='reward'){view='rewards';rewardAction='add';rewardSelection=null;render();}
  if(a==='reward-tab'){rewardAction=b.dataset.kind;rewardSelection=null;render();}
  if(a==='choose-add')send('reward',{action:'add',kind:b.dataset.kind});
  if(a==='choose-upgrade')send('reward',{action:'upgrade',tileId:b.dataset.id});
@@ -337,7 +337,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
 render();
 async function checkServer(){
  if(checkingServer)return;checkingServer=true;clearTimeout(healthTimer);networkState='checking';if(!game)render();
- try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===3);}
+ try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===4);}
  catch{networkReady=false;}
  finally{checkingServer=false;networkState=networkReady?'online':'offline';if(!game)render();}
  if(!networkReady)healthTimer=setTimeout(checkServer,15000);

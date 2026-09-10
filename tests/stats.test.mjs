@@ -6,7 +6,7 @@ const act=(g,id,type,extra={})=>command(g,id,{type,revision:g.revision,show:g.sh
 function band(){let g=newGame();g.players=[player('a','<A>'),player('b','B')];g.players[0].inventory.push(tile('duck','duck'));return act(g,'a','start');}
 function round(g){g=act(g,'a','ready');return act(g,'b','ready');}
 test('per-song and career totals reconcile with authoritative production and fans, including show bonus',()=>{
- let g=band();for(let i=0;i<5;i++){g=round(g);if(i<4){g=act(g,'a','draft',{action:'skip'});g=act(g,'b','draft',{action:'skip'});}}
+ let g=band();g.players.forEach(p=>p.inventory.forEach(t=>t.level=30));for(let i=0;i<5;i++){g=round(g);if(i<4){g=act(g,'a','draft',{action:'skip'});g=act(g,'b','draft',{action:'skip'});}}
  assert.equal(g.songs.length,5);const rows=songRows(g);assert.equal(rows.reduce((n,r)=>n+r.q,0),g.q);assert.equal(rows.reduce((n,r)=>n+r.e,0),g.e);
  assert.equal(rows.reduce((n,r)=>n+r.f+r.bonusFans,0),g.players.reduce((n,p)=>n+p.fans,0));
  for(const p of g.players){assert.equal(p.career.songs,5);assert.equal(p.career.q,p.q);assert.equal(p.career.f+p.career.bonusFans,p.fans);assert.equal(Object.values(p.career.byTile).reduce((n,t)=>n+t.q+t.e,0),p.q+p.e);assert.equal(p.career.heat.reduce((a,b)=>a+b,0),p.q+p.e);}

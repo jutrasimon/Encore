@@ -2,6 +2,7 @@
 export class RewardAdvance{
  constructor(){this.pending=null;this.sent=null;}
  observe(previous,next,id){
+  if(['lost','won'].includes(next?.phase)){this.clear();return;}
   const before=previous?.players.find(p=>p.id===id),after=next?.players.find(p=>p.id===id);
   if(!before||!after)return;
   const started=previous.phase==='lobby'&&next.phase==='show';

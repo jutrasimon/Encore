@@ -1,3 +1,5 @@
+> Archive historique. Pour reprendre le projet, lire [l’état courant](current-state.md). Les règles de défaite de la 0.7.0 sont remplacées par la 0.9.9.
+
 # ENCORE 0.9.1 : point de reprise
 
 Base distante vérifiée : 7deaa19 (0.8.2), main et preview/audio-0.9.0.

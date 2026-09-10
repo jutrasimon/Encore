@@ -38,9 +38,9 @@ test('coop waits for both choices, then each client readies once despite duplica
  const played=act(ready,'b','ready');assert.equal(played.round,2);assert.equal(played.phase,'draft');
  a.observe(ready,played,'a');b.observe(ready,played,'b');assert.equal(a.take(played,'a'),false);assert.equal(b.take(played,'b'),false);
 });
-test('studio choice or skip queues first song even on a retry of the same show',()=>{
+test('successful studio choice or skip queues first song of the next show',()=>{
  for(const action of ['skip','add','upgrade','remove']){
-  let g=setup();for(let i=0;i<5;i++){g=act(g,'a','ready');if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});}
+  let g=setup();g.players[0].inventory.forEach(t=>t.level=30);for(let i=0;i<5;i++){g=act(g,'a','ready');if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});}
   assert.equal(g.phase,'reward');const advance=new RewardAdvance(),p=g.players[0];
   const next=act(g,'a','reward',{action,kind:p.offers[0],tileId:p.inventory[0].id});advance.observe(g,next,'a');
   assert.equal(next.round,0);assert.equal(advance.take(next,'a'),true);assert.equal(act(next,'a','ready').round,1);

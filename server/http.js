@@ -11,7 +11,7 @@ export function handler(store) {
   if(origin&&!allowedOrigins.has(origin))return respond({error:'Origine non autorisée.'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   const path=new URL(request.url).pathname.split('/').at(-1);
-  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:3});
+  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:4,build:'0.9.9'});
   if(request.method!=='POST')return respond({error:'Méthode non autorisée.'},405);
   try {
     const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');
