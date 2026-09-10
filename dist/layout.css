@@ -7,6 +7,7 @@ html,body{overflow:hidden;overscroll-behavior:none}
 .screen-body>.show-top,.screen-body>.meters,.screen-body>.drive-status,.choice-screen>.reward-tabs,.choice-screen>.studio-toolbar,.choice-actions,.inventory-screen>.section-title,.inventory-screen>.focus-summary,.inventory-screen>.screen-help,.settings-screen>h1,.stats-screen>h1,.stats-screen>.tape,.stats-screen>.stats-tabs,.home>h1,.band-lobby>.lobby-heading,.band-lobby>.start-band{flex-shrink:0}
 .content-box{min-height:0;min-width:0;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#687750 transparent;border:2px solid #657b4c;border-radius:5px}
 .content-box:focus-visible{outline:2px solid #baff42;outline-offset:-3px}
+.choice-screen>.tile-gallery,.inventory-screen .collection.tile-gallery{grid-auto-rows:max-content}
 .choice-screen .choice-detail{flex:1;min-height:0;margin:0;padding:0;background:#1c2915;overflow:auto}
 .choice-detail>.tile-explanation{border:0;border-left:5px solid var(--tile-color);border-radius:0;min-height:100%;box-sizing:border-box}
 .choice-screen>.reward-gallery{flex:0 0 auto;min-height:0;margin:0;padding:3px;max-height:30dvh;overflow:auto;overscroll-behavior:contain;scrollbar-width:thin}
