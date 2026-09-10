@@ -16,7 +16,8 @@ export function resolutionPlan(players,previous,reduced=false){
   for(const event of notes){const duration=(reduced?140:620)/resolutionSpeed(cursor);group.timings.push({start:cursor,duration});cursor+=duration;}
   group.charge=at+intro;group.hold=cursor;
   group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer);
-  group.end=group.impact+(reduced?500:1800);
+  group.outro=group.impact+(reduced?500:1800);
+  group.end=group.outro+(reduced?200:750);
   for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;
   group.total=total;groups.push(group);score={q:score.q+total.q,e:score.e+total.e};at=group.end;
  }
@@ -27,7 +28,7 @@ const mix=(a,b,t)=>Math.round(a+(b-a)*Math.max(0,Math.min(1,t)));
 export function resolutionFrame(plan,elapsed){
  const g=plan.groups.find(g=>elapsed<g.end);
  if(!g)return {done:true,score:{...plan.total}};
- const local={q:0,e:0,f:0},score={...g.base};let event=null,phase='intro',progress=0,completed=0;
+ const local={q:0,e:0,f:0},score={...g.base};let event=null,phase='intro',progress=0,completed=0,opacity=1;
  if(elapsed>=g.charge){
   phase='charge';const n=Math.min(g.events.length,g.timings.filter(t=>elapsed>=t.start+t.duration).length);
   completed=n;
@@ -43,7 +44,8 @@ export function resolutionFrame(plan,elapsed){
   for(const k of ['q','e']){const amount=mix(0,g.total[k],deposited);local[k]=g.total[k]-amount;score[k]=g.base[k]+amount;}
  }
  if(elapsed>=g.impact){phase='impact';local.q=local.e=0;score.q=g.base.q+g.total.q;score.e=g.base.e+g.total.e;}
- return {done:false,group:g,phase,event,progress,completed,beat:g.timings[nForBeat(g,completed)]?.duration||g.beat,local,score};
+ if(elapsed>=g.outro){phase='outro';progress=Math.min(1,(elapsed-g.outro)/(g.end-g.outro));opacity=1-progress*progress*(3-2*progress);}
+ return {done:false,group:g,phase,event,progress,completed,beat:g.timings[nForBeat(g,completed)]?.duration||g.beat,local,score,opacity};
 }
 
 // Three rows/columns span a 300-unit SVG, including the physical gaps between tiles.

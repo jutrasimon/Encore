@@ -11,14 +11,22 @@ test('same cast order, frozen boards and repeated production totals on every cli
  assert.deepEqual(p.total,{q:10+players.reduce((n,p)=>n+p.totals.q,0),e:8+players.reduce((n,p)=>n+p.totals.e,0)});
  assert.deepEqual(players[0].board, p.groups[0].player.board);
 });
-test('charge stays personal, transfer conserves every point, second player starts only after impact',()=>{
+test('charge stays personal, transfer conserves every point, next scene waits for impact and fade',()=>{
  for(const reduced of [false,true]){
   const p=resolutionPlan(players,{q:10,e:8},reduced),a=p.groups[0],b=p.groups[1];
   assert.equal(resolutionFrame(p,0).phase,'intro');
   for(let t=a.charge;t<a.transfer;t+=17)assert.deepEqual(resolutionFrame(p,t).score,a.base);
   const hold=resolutionFrame(p,a.hold);assert.equal(hold.phase,'hold');assert.deepEqual(hold.local,a.total);
   for(let t=a.transfer;t<a.impact;t+=7){const f=resolutionFrame(p,t);for(const k of ['q','e'])assert.equal(f.score[k]+f.local[k],a.base[k]+a.total[k]);}
-  assert.equal(resolutionFrame(p,a.end-1).phase,'impact');assert.equal(resolutionFrame(p,a.end).group.player.id,'b');
+  for(const g of p.groups){
+   assert.ok(g.outro-g.impact>=(reduced?500:1600),'the entire explosion finishes before the screen fades');
+   assert.equal(resolutionFrame(p,g.outro-1).phase,'impact');
+   const score={q:g.base.q+g.total.q,e:g.base.e+g.total.e};
+   let previousOpacity=1;
+   for(let t=g.outro;t<g.end;t+=17){const f=resolutionFrame(p,t);assert.equal(f.done,false);assert.equal(f.phase,'outro');assert.equal(f.group,g);assert.deepEqual(f.score,score);assert.ok(f.opacity>=0&&f.opacity<=previousOpacity);previousOpacity=f.opacity;}
+   assert.ok(resolutionFrame(p,g.end-1).opacity<.001,'the reveal is transparent before its DOM is replaced');
+  }
+  assert.equal(resolutionFrame(p,a.end).group.player.id,'b');
   assert.deepEqual(resolutionFrame(p,b.start).score,{q:a.base.q+a.total.q,e:a.base.e+a.total.e});
   assert.deepEqual(resolutionFrame(p,p.duration),{done:true,score:p.total});
  }
