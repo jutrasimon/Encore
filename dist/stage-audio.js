@@ -2,6 +2,7 @@ import {ResolutionAudio} from './resolution-audio.js?v=0.9.2';
 
 export const PLAYLIST=['djartmusic-stand-up-and-fight-sport-action-martial-arts-boxing-317261.mp3', 'djartmusic-fun-with-my-8-bit-game-301278.mp3', 'djartmusic-time-stands-electric-253526.mp3'];
 const MUSIC=PLAYLIST[0];
+const MUSIC_GAIN=.8;
 const SAMPLES=['cursor','select','reward','open','close','error','score-hit','critical','whoosh','overdrive'];
 export function audioScene(game,view,animating=false){
  return {key:MUSIC,live:true};
@@ -44,7 +45,7 @@ export class StageAudio extends ResolutionAudio{
   for(const [key,t] of this.tracks){
    clearTimeout(t.pauseTimer);t.pauseTimer=null;
    const wanted=key===this.scene.key&&this.levels.music>0;
-   const volume=wanted?this.levels.music*(this.ducked?.5:1):0;
+   const volume=wanted?MUSIC_GAIN*this.levels.music*(this.ducked?.5:1):0;
    const p=t.gain.gain;p.cancelScheduledValues(this.ctx.currentTime);p.setTargetAtTime(volume,this.ctx.currentTime,.18);
    if(wanted&&t.media.paused&&!t.starting){
     t.starting=true;const epoch=this.epoch;

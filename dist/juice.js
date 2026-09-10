@@ -82,6 +82,13 @@ export class Juice{
   this.raf=0;const dt=Math.min(50,now-this.last);this.last=now;const c=this.ctx;
   c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,this.w,this.h);c.imageSmoothingEnabled=false;
   if(this.reduced()||document.hidden){this.clear();return;}
+  // Clip every canvas effect, including its glow, inside the visible game frame.
+  c.save();
+  const frame=this.root.querySelector('.grid-wrap')||this.root.querySelector('.console');
+  if(frame){
+   const r=frame.getBoundingClientRect(),inset=Math.max(frame.clientLeft,frame.clientTop),radius=Math.max(0,(parseFloat(getComputedStyle(frame).borderRadius)||0)-inset);
+   c.beginPath();c.roundRect(r.x+inset,r.y+inset,Math.max(0,r.width-inset*2),Math.max(0,r.height-inset*2),radius);c.clip();
+  }
   this.warp*=Math.pow(.75,dt/16);document.getElementById('cursor-displacement')?.setAttribute('scale',this.warp.toFixed(1));
   if(this.warp<.15){this.warp=0;this.release();}
   this.bursts=this.bursts.filter(b=>(b.life+=dt)<b.ttl);
@@ -90,7 +97,7 @@ export class Juice{
   if(this.lines){const b=this.lines;b.life+=dt;const im=this.assets.get(`speed-${b.kind}-${Math.floor(b.life/45)%10+1}`);if(im?.complete&&im.naturalWidth){c.globalAlpha=b.alpha*(1-b.life/b.ttl);const r=b.rect;c.drawImage(im,r.x-r.width*.2,r.y-r.height*.2,r.width*1.4,r.height*1.4);}if(b.life>=b.ttl)this.lines=null;}
   this.particles=this.particles.filter(p=>(p.life+=dt)<p.ttl);
   for(const p of this.particles){p.x+=p.vx*dt/1000;p.y+=p.vy*dt/1000;p.vy+=dt*.22;c.globalAlpha=1-p.life/p.ttl;c.fillStyle=p.color;c.fillRect(p.x,p.y,p.size,p.size);}
-  c.globalAlpha=1;if(this.bursts.length||this.particles.length||this.lines||this.warp)this.raf=requestAnimationFrame(t=>this.draw(t));
+  c.restore();c.globalAlpha=1;if(this.bursts.length||this.particles.length||this.lines||this.warp)this.raf=requestAnimationFrame(t=>this.draw(t));
  }
  clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
 }
