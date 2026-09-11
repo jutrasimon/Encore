@@ -1,6 +1,10 @@
-# État courant : preview ENCORE 0.9.16 / principal 0.9.9
+# État courant : preview ENCORE 0.9.16.1 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Compteur restauré 0.9.16.1
+
+Base `46a6e53`. À la demande utilisateur, retrait du bandeau rose et du tampon sur le compteur, retour au panneau sombre compact CHANSON X / 5 avec chiffre lime, en jeu comme pendant le reveal. Les autres décorations et les règles restent inchangées. Validation : 105 tests réussis et compteur contrôlé dans le navigateur local.
 
 ## Cadre, confirmations et icônes 0.9.16
 

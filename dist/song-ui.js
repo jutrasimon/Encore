@@ -4,7 +4,7 @@ import {showVisualMarkup} from './show-art.js?v=0.9.16';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const finishedShow=g=>!!g&&['reward','lost','won'].includes(g.phase);
 export const lastSong=g=>!!g&&g.round===showInfo(g.show).rounds;
-export function songCounter(g){const n=showInfo(g.show).rounds;return `<div class="round song-counter ${lastSong(g)?'song-final':''}" data-song="${g.show}:${g.round}" aria-label="${lastSong(g)?'Dernière chanson. ':''}Chanson ${g.round} sur ${n}"><span>${lastSong(g)?'DERNIÈRE CHANSON':'CHANSON'}</span><b>${g.round}<small> / ${n}</small></b></div>`;}
+export function songCounter(g){const n=showInfo(g.show).rounds;return `<div class="round song-counter ${lastSong(g)?'song-final':''}" data-song="${g.show}:${g.round}" aria-label="${lastSong(g)?'Dernière chanson. ':''}Chanson ${g.round} sur ${n}">CHANSON <b>${g.round}</b><span>/ ${n}</span></div>`;}
 export const songDecor=()=>'<div class="song-decor" aria-hidden="true"><i class="splat splat-a"></i><i class="splat splat-b"></i><i class="splat splat-c"></i><i class="splat splat-d"></i></div>';
 export function verdictMarkup(g,p){
  const won=g.phase!=='lost',goal=targets(g),show=showInfo(g.show),fans=g.players.reduce((n,p)=>n+p.fans,0);
@@ -12,7 +12,7 @@ export function verdictMarkup(g,p){
 }
 export class SongEffects{
  constructor(root,reduced){this.root=root;this.reduced=reduced;this.song=null;this.lastBurst=-Infinity;}
- sync(g){if(!g){this.song=null;return;}const key=g.show+':'+g.round;if(this.song===key)return;this.song=key;if(this.reduced()||!g.round)return;this.root.querySelector('.song-counter')?.animate([{transform:'scale(1.12) rotate(-5deg)',opacity:0},{transform:'scale(1) rotate(0)',opacity:1}],{duration:250,easing:'cubic-bezier(.2,.8,.3,1)'});}
+ sync(g){if(!g){this.song=null;return;}const key=g.show+':'+g.round;if(this.song===key)return;this.song=key;if(this.reduced()||!g.round)return;}
  burst(){
   const now=performance.now();if(this.reduced()||now-this.lastBurst<500)return;this.lastBurst=now;
   const decor=this.root.querySelector('.song-decor');if(!decor)return;
