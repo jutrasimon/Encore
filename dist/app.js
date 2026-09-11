@@ -1,18 +1,19 @@
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.14';
-import {Juice,scoreCallout} from './juice.js?v=0.9.14';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.14';
-import {RewardAdvance} from './autoplay.js?v=0.9.14';
-import {statsMarkup} from './stats-ui.js?v=0.9.14';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.14';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.14';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.14';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.14';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.9.15';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.15';
+import {Juice,scoreCallout} from './juice.js?v=0.9.15';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.15';
+import {RewardAdvance} from './autoplay.js?v=0.9.15';
+import {statsMarkup} from './stats-ui.js?v=0.9.15';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.15';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.15';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.15';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.15';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.14';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.14';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.15';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.15';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.14';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.15';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -26,7 +27,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.14 · ENCORE ∞';
+const VERSION='0.9.15 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -40,10 +41,12 @@ let motion=read('encore.motion',true);
 const juice=new Juice(app,()=>motion),advance=new RewardAdvance();
 const screenMotion=new ScreenMotion(app,()=>motion);
 const showVisual=new ShowVisual();
+const songEffects=new SongEffects(app,()=>!motion||matchMedia('(prefers-reduced-motion: reduce)').matches);
+function showingVerdict(){return !!game&&view==='game'&&!animating&&finishedShow(game)&&!resultDismissed;}
 function syncShowVisual(frame){
  const p=animationPlayer||me(),score=displayScore||game;
  const ending=!animating||frame&&['impact','outro'].includes(frame.phase)&&frame.group.index===cinematic.plan.groups.length-1;
- showVisual.update($('.show-visual canvas'),{show:game?.show||0,role:p?.role,performanceLayout:true,
+ showVisual.update($('.show-visual canvas'),{show:game?.show||0,role:p?.role,performanceLayout:!showingVerdict(),resultLayout:showingVerdict(),
   performance:frame?.phase==='charge'?TILES[frame.event?.kind]?.family:null,
   result:ending?(game?.phase==='lost'?'sad':game?.phase==='reward'||game?.phase==='won'?'happy':null):null,
   overdrive:!!game&&overdriveLevel(score,targets(game))>0,intensity:frame?Math.min(1,(frame.local.q+frame.local.e)/40):0,
@@ -53,7 +56,7 @@ function syncShowVisual(frame){
 function mount(content,preserveDialog=false){
  const key=!game?'home':`${view}:${animating?'performance-'+cinematic.group.index:game.phase==='lobby'?'lobby':'board'}`;
  const before=screenMotion.capture(key);
- juice.release();mountScreen(app,shell(content),preserveDialog);fitBoard();screenMotion.settle(before);syncShowVisual();
+ juice.release();mountScreen(app,shell(content),preserveDialog);fitBoard();screenMotion.settle(before);syncShowVisual();songEffects.sync(game);
 }
 let autoReadyScheduled=false;
 function maybeAutoReady(){
@@ -69,7 +72,7 @@ const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
 function header(){return '';}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.14</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''} ${lastSong(game)&&!showingVerdict()?'last-song':''}">${game&&!showingVerdict()?songDecor():''}<div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!showingVerdict()&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.15</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="action-button secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="action-button text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="action-button primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="action-button secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="action-button secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="action-button secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -96,7 +99,7 @@ function lobbyView(){
  return `<section class="band-lobby"><div class="lobby-heading"><span class="tape">TOURNÉE EN COOP</span><h1>TON BAND<span>${game.players.length}<small>/2</small></span></h1></div><div class="lobby-content content-box" data-scroll="lobby" role="region" aria-label="Musiciens et invitation" tabindex="0"><div class="band-seats">${game.players.map(p=>`<div class="band-seat ${online.includes(p.id)?'joined':''}"><span class="seat-avatar">${classPortrait(p)}</span><div><strong>${esc(p.name)} ${p.id===myId?'<small>TOI</small>':''}</strong><span>${musicianStatus(p)}</span></div></div>`).join('')}${!full?'<div class="band-seat empty-seat"><span class="seat-avatar">+</span><div><strong>UNE PLACE LIBRE</strong><span>Invite ton deuxième musicien.</span></div></div>':''}</div><div class="band-invite"><span>CODE DU BAND</span><button class="band-code" data-action="copy-code" aria-label="Copier le code du band">${esc(code)}</button><button class="action-button primary" data-action="invite">COPIER L’INVITATION</button></div><p class="lobby-message" role="status">${!connected?'Reconnexion en cours…':!full?'Partage le lien. Ton band arrive ici.':!allOnline?'Ton partenaire se reconnecte…':host?'Le band est là. À toi de lancer !':'Le créateur lance la tournée.'}</p></div><button class="action-button primary start-band" data-action="start" ${!host||!allOnline||!connected||busy?'disabled':''}>${!full?'EN ATTENTE DU 2e':!host?'LE CRÉATEUR LANCE…':'LANCER LA TOURNÉE'}</button></section>`;
 }
 function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><div class="settings-content content-box" data-scroll="settings" role="region" aria-label="Options du jeu" tabindex="0"><button class="action-button secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><div class="audio-mix">${[['music','MUSIQUE'],['effects','EFFETS'],['voice','VOIX']].map(([key,label])=>`<label>${label}<input type="range" min="0" max="100" value="${Math.round(resolutionAudio.levels[key]*100)}" data-mix="${key}" aria-label="${label}"></label>`).join('')}</div><button class="action-button secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="action-button secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="action-button secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="action-button secondary" data-action="${game?'finish-tour':'back'}">${game?'BILAN AVANT DE QUITTER':'RETOUR'}</button><p class="version">${VERSION}</p><p class="audio-credits">Musique : DJARTMUSIC · Sons : JDSherbert</p></div></section>`;}
-function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>t[key]?'OVERDRIVE +'+(score[key]-t[key]):score[key]===t[key]?'OBJECTIF ATTEINT':'OBJECTIF DU SHOW'}</small></div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
+function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>=t[key]?'ATTEINT':'OBJECTIF DU SHOW'}</small></div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
 function tileButton(t,index,extra=''){
  return tileCard(t,{index,resolved:!!t?.m,focused:(animationPlayer||me())?.focusedIds?.includes(t?.id),classes:`${extra} ${animating?'unscored':''} ${freshDeal?'deal-in':''} ${t?.m>1?'lit':''}`});
 }
@@ -109,23 +112,23 @@ function grid(){
 }
 function resolutionView(){
  const g=cinematic.group;
- return `<div class="resolution-shade" aria-hidden="true"></div><div class="resolution-top"><div><small>SUR SCÈNE · ${g.index+1}/${cinematic.plan.groups.length}</small><strong>${esc(g.player.name)}</strong></div><button class="live-sound" data-action="sound" aria-pressed="${sound}" aria-label="${sound?'Couper le son':'Activer le son'}">${icon('sound')} ${sound?'SON':'MUET'}</button></div>${meters()}${grid()}<div class="resolution-tally">${[['q','star','QUALITÉ'],['e','bolt','ÉNERGIE']].map(([k,i,label])=>`<div class="charge-counter charge-${k}" data-charge="${k}"><span>${icon(i)} ${label}</span><b>0</b><i></i></div>`).join('')}</div><div class="resolution-caption" role="status"><strong>FAIS DU BRUIT !</strong><span class="resolution-fans"></span></div>${showVisualMarkup()}<div class="resolution-pop" aria-hidden="true"><strong>${esc(g.player.name)}</strong></div><div class="resource-flights" aria-hidden="true"></div>`;
+ return `<div class="resolution-shade" aria-hidden="true"></div><div class="resolution-top"><div><small>SUR SCÈNE · ${g.index+1}/${cinematic.plan.groups.length}</small><strong>${esc(g.player.name)}</strong></div>${songCounter(game)}<button class="live-sound" data-action="sound" aria-pressed="${sound}" aria-label="${sound?'Couper le son':'Activer le son'}">${icon('sound')} ${sound?'SON':'MUET'}</button></div>${meters()}${grid()}<div class="resolution-tally">${[['q','star','QUALITÉ'],['e','bolt','ÉNERGIE']].map(([k,i,label])=>`<div class="charge-counter charge-${k}" data-charge="${k}"><span>${icon(i)} ${label}</span><b>0</b><i></i></div>`).join('')}</div><div class="resolution-caption" role="status"><strong>FAIS DU BRUIT !</strong><span class="resolution-fans"></span></div>${showVisualMarkup()}<div class="resolution-pop" aria-hidden="true"><strong>${esc(g.player.name)}</strong></div><div class="resource-flights" aria-hidden="true"></div>`;
 }
 function players(){return `<div class="bandmates">${game.players.map(p=>`<button class="bandmate ${p.id===myId?'current-musician':''}" data-action="profile" data-id="${esc(p.id)}" aria-label="Profil de ${esc(p.name)}"><span class="portrait">${classPortrait(p)}</span><span class="musician-mini"><strong>${esc(p.name)}</strong><span>${p.fans} FANS</span>${mode==='multi'?`<small class="musician-status">${musicianStatus(p)}</small>`:''}</span></button>`).join('')}<button class="band-total" data-action="stats"><b>${game.players.reduce((n,p)=>n+p.fans,0)}</b><span>FANS DU BAND ↗</span></button></div>`;}
 let statsPlayer='band',statsRange='all',statsMode='production';
 function statsView(){return statsMarkup(game,{playerId:statsPlayer,range:statsRange,chartMode:statsMode});}
 function profile(id){statsPlayer=id;statsRange='all';view='stats';render();}
 
-function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button><div class="round">CHANSON <b>${game.round}</b><span>/ ${showInfo(game.show).rounds}</span></div></div>`;}
-function gameView(){if(animating&&cinematic)return resolutionView();if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}${game.phase==='reward'?'<strong class="tape">SHOW RÉUSSI · STUDIO</strong>':game.phase==='lost'?'<strong class="tape">OBJECTIF MANQUÉ · FIN DE TOURNÉE</strong>':''}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>`;}
-function playAction(){return `<div class="action-slot">${animating?'<button class="action-button primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="action-button primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="action-button primary" data-action="rewards">PASSER AU STUDIO</button>':'<button class="action-button primary" data-action="result">VOIR LE BILAN</button>'}</div>`;}
+function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button>${songCounter(game)}</div>`;}
+function gameView(){if(animating&&cinematic)return resolutionView();if(showingVerdict())return verdictMarkup(game,me());if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}<div class="readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':p.last?`<span>DERNIÈRE CHANSON</span> ${points(p.last)}`:'Prêt pour la première chanson'}</div>`;}
+function playAction(){if(finishedShow(game))return '<div class="action-slot"><button class="action-button primary" data-action="result">RETOUR AU VERDICT</button></div>';return `<div class="action-slot">${animating?'<button class="action-button primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="action-button primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="action-button primary" data-action="rewards">PASSER AU STUDIO</button>':'<button class="action-button primary" data-action="result">VOIR LE BILAN</button>'}</div>`;}
 function showIntro(){
  if(animating)return;const dlg=$('#details'),show=showInfo(game.show),goal=targets(game);preloadShowCover(game.show);
  dlg.className='';dlg.dataset.kind='show';dlg.setAttribute('aria-label','Présentation du show '+show.name);
  const action=game.phase==='lobby'?phaseAction().replace('LANCER LA TOURNÉE','MONTER SUR SCÈNE'):'<button class="action-button primary" data-action="close">MONTER SUR SCÈNE '+icon('arrow')+'</button>';
  dlg.innerHTML=`<header class="show-intro-header"><span class="intro-brand">ENCORE!<small>PUNK MUSIC ROGUELITE</small></span><button class="dialog-close" data-action="close" aria-label="Fermer la présentation">${icon('close')}</button></header><div class="show-intro-heading"><span class="tape">SHOW ${String(game.show+1).padStart(2,'0')}</span><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p></div><div class="show-intro-art"><img src="${showAsset(game.show,'cover')}" alt="${esc(show.name)} — salle avant le concert" fetchpriority="high" decoding="async" width="1536" height="1024"></div><section class="show-goals" aria-label="Objectifs du show"><h3>OBJECTIFS DU SHOW</h3><div class="show-goal-grid">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="show-goal goal-${key}">${icon(ic)}<span>${label}<b>${goal[key]}</b></span></div>`).join('')}</div></section><p class="show-entry-note">Atteins les deux objectifs en ${show.rounds} chansons.</p><div class="show-entry">${action}</div>`;dlg.showModal();
 }
-function showResult(){if(animating)return;const dlg=$('#details');dlg.dataset.kind='result';dlg.innerHTML=`<button class="dialog-close" data-action="dismiss-result" aria-label="Fermer">${icon('close')}</button>${phaseAction()}`;dlg.showModal();}
+function showResult(){if(animating)return;resultDismissed=false;view='game';render();}
 function phaseAction(){const p=me();if(game.phase==='lobby')return `<div class="lobby"><h2>${game.players.length===2?'Le band est là.':'La balance est prête.'}</h2><p>${mode==='multi'?'Partage le lien avant de lancer la tournée.':'Une tournée infinie. Ton inventaire devient de plus en plus fort.'}</p>${mode==='multi'?'<button class="action-button secondary" data-action="invite">COPIER LE LIEN D’INVITATION</button>':''}${game.players[0].id===myId?`<button class="action-button primary" data-action="start" ${busy||mode==='multi'&&!connected?'disabled':''}>LANCER LA TOURNÉE ${icon('arrow')}</button>`:'<p>Le créateur lance la tournée.</p>'}</div>`;
  if(game.phase==='draft')return `<button class="action-button primary" data-action="draft" ${p.drafted||busy?'disabled':''}>${p.drafted?'TON PARTENAIRE CHOISIT…':'CONTINUER'} ${icon('arrow')}</button>`;
  if(game.phase==='show')return `<button class="action-button primary play" data-action="ready" ${busy||animating||p.ready||mode==='multi'&&!connected?'disabled':''}>${icon('bolt')}${p.ready?'TON PARTENAIRE SE PRÉPARE…':game.round?'JOUER LA CHANSON SUIVANTE':'JOUER LA PREMIÈRE CHANSON'}${icon('arrow')}</button>`;
@@ -192,11 +195,13 @@ function paintResolution(){
  if(metersEl)metersEl.dataset.overdrive=level;
  for(const key of ['q','e']){
   const el=$('[data-stat="'+key+'"]');if(!el)continue;
+  const previous=Number(el.querySelector('.stat-value').textContent);
+  if(previous<target[key]&&displayScore[key]>=target[key]&&motion&&!matchMedia('(prefers-reduced-motion: reduce)').matches)el.animate([{boxShadow:'0 0 0 transparent'},{boxShadow:'0 0 22px #baff42',offset:.4},{boxShadow:'0 0 0 transparent'}],{duration:350});
   el.querySelector('.stat-value').textContent=displayScore[key];
   el.querySelector('.meter-track i').style.width=Math.min(100,displayScore[key]/target[key]*100)+'%';
   el.querySelector('.meter-track').setAttribute('aria-valuenow',Math.min(displayScore[key],target[key]));
   el.classList.toggle('overdrive',displayScore[key]>target[key]);
-  el.querySelector('.overdrive-label').textContent=displayScore[key]>target[key]?'OVERDRIVE +'+(displayScore[key]-target[key]):displayScore[key]===target[key]?'OBJECTIF ATTEINT':'OBJECTIF DU SHOW';
+  el.querySelector('.overdrive-label').textContent=displayScore[key]>=target[key]?'ATTEINT':'OBJECTIF DU SHOW';
  }
  const status=$('.drive-status');if(status){status.textContent=level===2?'DOUBLE OVERDRIVE':level===1?'OVERDRIVE':'';status.classList.toggle('double-drive',level===2);}
  document.querySelectorAll('.grid .tile').forEach((el,i)=>{
@@ -241,7 +246,7 @@ function paintCinematic(frame){
   if(frame.phase==='transfer'){resolutionAudio.transfer();transferPackets(g);$('.resolution-caption strong').textContent='POUR LE BAND !';}
   if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);const verdict=scoreCallout(g.total);if(verdict&&!c.overdriveAnnounced)resolutionAudio.verdict(verdict.text);$('.resolution-caption strong').textContent='POINTS AJOUTÉS AU SHOW';}
  }
- if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise)resolutionAudio.critical(praise.rank);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
+ if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise){resolutionAudio.critical(praise.rank);songEffects.burst();}$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
  activeEvent=frame.event;
  for(const event of g.events.slice(0,frame.completed))scoredIds.add(g.player.id+':'+event.index);
  if(frame.event&&frame.progress>=1)scoredIds.add(g.player.id+':'+frame.event.index);
@@ -267,13 +272,16 @@ function animate(previous){
  document.body.classList.add('resolving');updateActivity();
  animationPlayer=plan.groups[0].player;mount(gameView());syncAudio();
  $('.resolution-caption strong').textContent='SONG '+game.round;
- resolutionAudio.song(game.round);
+ resolutionAudio.song(game.round,lastSong(game));
  const prelude=1200,started=performance.now();
  function tick(now){
   if(!animating)return;
   if(now-started<prelude){resolutionRaf=requestAnimationFrame(tick);return;}
   const frame=resolutionFrame(plan,now-started-prelude);
-  if(frame.done){stopResolution();render();return;}
+  if(frame.done){
+   const current=cinematic,finish=()=>{if(cinematic!==current||!animating)return;stopResolution();render();$('.show-verdict h1')?.focus({preventScroll:true});};
+   if(finishedShow(game)&&!reduced){const fade=$('.grid-wrap')?.animate([{opacity:1},{opacity:0}],{duration:180,fill:'forwards'});if(fade)fade.finished.catch(()=>{}).then(finish);else finish();}else finish();return;
+  }
   paintCinematic(frame);resolutionRaf=requestAnimationFrame(tick);
  }
  tick(started);
@@ -333,6 +341,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='choose-song'){await send('draft',{kind:b.dataset.kind});}
  if(a==='skip-song'){await send('draft',{action:'skip'});}
  if(a==='skip-reward'){await send('reward',{action:'skip'});}
+ if(a==='result-detail'){resultDismissed=true;view='game';render();return;}
  if(a==='nav'){view=b.dataset.view;if(view==='stats')statsPlayer='band';render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
  if(a==='rules')rules();if(a==='close')$('#details').close();
  if(a==='solo')solo();if(a==='resume'){intro=false;resultDismissed=false;const s=read('encore.solo');if([1,2].includes(s?.game?.version)){clearNetwork();mode='solo';myId=s.myId;game=normalizeGame(s.game);view='game';render();}else toast('Sauvegarde incompatible. Lance une nouvelle tournée.');}

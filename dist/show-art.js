@@ -50,7 +50,7 @@ export class ShowVisual{
  update(canvas,state,now=performance.now()){
   if(!canvas){this.detach();return;}
   const rect=canvas.parentElement.getBoundingClientRect();
-  const height=state.performanceLayout?Math.max(1,Math.round(920*rect.height/Math.max(1,rect.width))):307;
+  const height=state.performanceLayout||state.resultLayout?Math.max(1,Math.round(920*rect.height/Math.max(1,rect.width))):307;
   const resized=canvas.height!==height;if(resized)canvas.height=height;
   const changed=resized||this.canvas!==canvas||!canvas.dataset.pose;this.canvas=canvas;this.state=state;
   const key=showArt(state.show).directory+':'+(state.role||'guitarist-singer');
@@ -81,7 +81,7 @@ export class ShowVisual{
   if(back)c.drawImage(back,0,0,1536,1024);
   if(background)c.drawImage(background,0,0,1536,1024);
   if(s.overdrive){const halo=c.createRadialGradient(768,730,10,768,730,320);halo.addColorStop(0,'#baff4250');halo.addColorStop(1,'#baff4200');c.fillStyle=halo;c.fillRect(400,512,736,512);}
-  const size=s.performanceLayout?Math.min(435,Math.max(180,viewHeight-140)):435,feet=s.performanceLayout?990:930;
+  const size=s.resultLayout?Math.min(760,Math.max(300,viewHeight-40)):s.performanceLayout?Math.min(435,Math.max(180,viewHeight-140)):435,feet=s.resultLayout?970:s.performanceLayout?990:930;
   if(character)c.drawImage(character,pose%3*512,Math.floor(pose/3)*512,512,512,768-size/2,feet-494*size/512,size,size);
   if(foreground)c.drawImage(foreground,0,100,1536,1024);
   if(audience){const r=showArt(s.show).crowd[crowd],scale=.72;c.drawImage(audience,...r,(1536-r[2]*scale)/2,1045-r[3]*scale,r[2]*scale,r[3]*scale);}

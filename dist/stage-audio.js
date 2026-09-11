@@ -83,12 +83,12 @@ export class StageAudio extends ResolutionAudio{
    ['tile','inspect-inventory','inspect-offer','show-details','rules','profile'].includes(action)?'open':'cursor';
   this.sample(name,.38);
  }
- song(number){
+ song(number,last=false){
   if(!this.enabled())return;
   this.tone(65,32,.45,.15);this.sample('select',.35);
   if(!this.levels.voice)return;
   const words=['','one','two','three','four','five'];this.duck(1700);
-  this.speak('Song '+(words[number]||number)+'!',{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:1.12});
+  this.speak(last?'Last song!':'Song '+(words[number]||number)+'!',{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:1.12});
  }
  announce(name){
   if(!this.enabled())return;

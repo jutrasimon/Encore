@@ -1,6 +1,6 @@
 # Illustrations de shows (V1)
 
-Intégration visuelle 0.9.14, à partir de `ENCORE-Images-V1.zip` et du portrait fourni le 11 septembre 2026. Les PNG sources sont conservés sans retouche dans `dist/art/stage/`.
+Intégration visuelle 0.9.15, à partir de `ENCORE-Images-V1.zip` et du portrait fourni le 11 septembre 2026. Les PNG sources sont conservés sans retouche dans `dist/art/stage/`.
 
 - `dist/show-art.js` : `CLASS_ART` associe portrait et poses à `guitarist-singer`. `SHOW_ART` associe les trois lieux et les rectangles de foule à l’ordre des shows. Les lieux se répètent sans changer leur difficulté.
 - `ShowVisual` reçoit les états de présentation. Il ne commande jamais le moteur. Le jeu appelle son rendu depuis sa boucle de résolution existante ; aucun timer supplémentaire ne tourne entre les chansons.
@@ -13,3 +13,9 @@ Intégration visuelle 0.9.14, à partir de `ENCORE-Images-V1.zip` et du portrait
 Les assets du lot représentent environ 43 Mo. Ils sont chargés à la demande et mis en cache par le navigateur ; la première scène peut donc arriver après l’interface sur une connexion lente. Une optimisation de livraison des textures pourra être faite séparément sans remplacer les originaux de l’artiste.
 
 Les covers sans personnage fournies ensuite sont stockées dans `shows/*/cover.png` ; les anciennes intros restent archivées. Elles sont opaques, indépendantes de la classe et préchargées. Le micro sur pied est retiré du registre, du chargement et du rendu. Le PNG original est conservé comme source inutilisée.
+
+## Fin de show et dernière chanson
+
+`dist/song-ui.js` rend les verdicts depuis les valeurs du moteur et orchestre uniquement les accents de présentation. Le personnage utilise les poses content/triste existantes de sa classe, avec un cadrage plus grand dans le verdict. La grille reste accessible via Voir le détail.
+
+`dist/art/finale/` conserve les PNG fournis sans retouche : `song-banner.png` (2172 × 724), `splats.png`, `splats-alt.png` et `comics.png` (1536 × 1024). Ces trois planches ont six cellules de 512 × 512, affichées par fonds CSS à 300 % × 200 %. Leur alpha est conservé, notamment le rose. L’atelier affiche toutes les cellules sur fond clair et sombre. Les décorations en jeu restent dans les marges, sous les contrôles, et respectent le mouvement réduit.

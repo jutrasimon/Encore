@@ -8,7 +8,7 @@ test('show objectives precede the player banner, then the board and last-song re
  const gameView=source.split('\n').find(line=>line.startsWith('function gameView()'));
  for(const mode of ['solo','multi']){
   const html=runInNewContext(gameView+';gameView()',{
-   animating:false,mode,connected:true,game:{phase:'show'},me:()=>({last:{q:5,e:4}}),
+   showingVerdict:()=>false,animating:false,mode,connected:true,game:{phase:'show'},me:()=>({last:{q:5,e:4}}),
    showHeader:()=>'<header/>',meters:()=>'<objectives/>',players:()=>'<players/>',grid:()=>'<board/>',points:()=>'<score/>',showVisualMarkup:()=>'<stage/>'
   });
   assert.ok(html.startsWith('<header/><objectives/><players/><board/>'));

@@ -1,6 +1,14 @@
-# État courant : preview ENCORE 0.9.14 / principal 0.9.9
+# État courant : preview ENCORE 0.9.15 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Verdict plein écran et dernière chanson 0.9.15
+
+Base preview `208182eb0894bc0b6ad2c1e7f2e05260629b3494`. Le dernier reveal conserve toute sa durée, explosion comprise, puis la grille disparaît en 180 ms. Le verdict remplace le plateau : personnage content/triste lié à la classe, objectifs réels et statut atteint/manque, fans, dernière chanson, accès Studio ou bilan. Voir le détail conserve les neuf cases et permet de revenir au verdict. Navigation et règles inchangées.
+
+Bandeau rose avec compteur HTML, tampon 250 ms par chanson, décors dans les marges et projecteurs discrets à la dernière chanson, annonce sonore sur l’événement existant. Éclats BD de 350 ms, deux maximum, et bref éclairage de la jauge atteinte. Les décors ne capturent aucun clic ; mouvement réduit fixe. Les quatre nouveaux PNG ont déjà un canal alpha : aucun détourage. L’atelier présente leurs découpes sur fonds clair et sombre.
+
+Validation : syntaxe et 103 tests, incluant cinq chansons solo/coop, succès/échec, Studio, nouveau départ et sauvegardes. Navigateur local : fixtures produites par le moteur après quatre chansons, cinquième chanson animée vers les deux verdicts, retour aux neuf cases, reprise d’une défaite sauvegardée, bilan, Studio obligatoire puis chanson 1 du show suivant. Format 320 × 700 sans débordement ; scène du reveal vérifiée sous les compteurs après la transition. Pas de nouveau parcours complet en coop réelle dans le navigateur pour cette passe. Aucun moteur, serveur ou principal modifié. URL preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Intros et covers 0.9.14
 
