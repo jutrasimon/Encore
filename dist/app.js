@@ -1,16 +1,17 @@
-import {Juice,scoreCallout} from './juice.js?v=0.9.9';
-import {RewardAdvance} from './autoplay.js?v=0.9.9';
-import {statsMarkup} from './stats-ui.js?v=0.9.9';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.9';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.9';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.9';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.9';
+import {Juice,scoreCallout} from './juice.js?v=0.9.10';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.10';
+import {RewardAdvance} from './autoplay.js?v=0.9.10';
+import {statsMarkup} from './stats-ui.js?v=0.9.10';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.10';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.10';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.10';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.10';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.9';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.9';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.10';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.10';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.9';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.10';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -24,7 +25,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.9 · ENCORE ∞';
+const VERSION='0.9.10 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -36,12 +37,19 @@ resolutionAudio.setLevels(audioLevels);
 function syncAudio(){resolutionAudio.setScene(audioScene(game,view,animating));}
 let motion=read('encore.motion',true);
 const juice=new Juice(app,()=>motion),advance=new RewardAdvance();
+const screenMotion=new ScreenMotion(app,()=>motion);
+function mount(content){
+ const key=!game?'home':`${view}:${animating?'performance-'+cinematic.group.index:game.phase==='lobby'?'lobby':'board'}`;
+ const before=screenMotion.capture(key);
+ juice.release();mountScreen(app,shell(content));fitBoard();screenMotion.settle(before);
+}
 let autoReadyScheduled=false;
 function maybeAutoReady(){
  if(autoReadyScheduled||busy||animating||document.hidden||!game||mode==='multi'&&!connected||!advance.pending)return;
  autoReadyScheduled=true;queueMicrotask(async()=>{
   autoReadyScheduled=false;if(busy||animating||document.hidden||!game||mode==='multi'&&!connected||!advance.take(game,myId))return;
-  intro=false;view='game';$('#details')?.close();await send('ready');
+  intro=false;view='game';$('#details')?.close();
+  if(!await send('ready'))advance.clear();
  });
 }
 let healthTimer=null,checkingServer=false,networkState='checking';
@@ -50,7 +58,7 @@ const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir',
 function header(){return '';}
 function screen(){const show=showInfo(game?.show||0);return `<div class="lcd"><img src="./stage.png" alt="Concert punk sur écran vert"></div><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p>`;}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Band'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.9</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''}"><div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.10</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -140,7 +148,7 @@ function render(){
  const oldDialog=$('#details');const modal=oldDialog?.open?{html:oldDialog.innerHTML,kind:oldDialog.dataset.kind,tileId:oldDialog.dataset.tileId,classes:oldDialog.className}:null;
  const collection=$('.collection');if(collection)inventoryScroll=collection.scrollTop;
  const focusedTile=document.activeElement?.dataset.action==='focus'?document.activeElement.dataset.id:null;
- app.innerHTML=shell(view==='settings'?settingsView():!game?home():view==='stats'?statsView():view==='inventory'?inventoryView():view==='rewards'?rewardsView():view==='draft'?draftView():gameView());
+ mount(view==='settings'?settingsView():!game?home():view==='stats'?statsView():view==='inventory'?inventoryView():view==='rewards'?rewardsView():view==='draft'?draftView():gameView());
  for(const [key,top] of scrolls){const el=app.querySelector(`[data-scroll="${key}"]`);if(el)el.scrollTop=top;}fitBoard();updateActivity();
  if(view==='inventory'){const list=$('.collection');if(list)list.scrollTop=inventoryScroll;if(focusedTile){const target=[...document.querySelectorAll('.collection .focus-toggle')].find(b=>b.dataset.id===focusedTile);target?.focus({preventScroll:true});}}
  if(modal&&!animating){const dlg=$('#details');if(modal.kind==='inspect'){const t=me()?.inventory.find(t=>t.id===modal.tileId)||me()?.board.find(t=>t?.id===modal.tileId);if(t){inspect(t);return;}}else if(['rules','focus','show'].includes(modal.kind)){dlg.innerHTML=modal.html;dlg.className=modal.classes;dlg.dataset.kind=modal.kind;dlg.showModal();return;}}
@@ -201,10 +209,9 @@ function transferPackets(g){
 function paintCinematic(frame){
  const c=cinematic,g=frame.group,changed=c.mounted!==g.index;
  if(changed){
-  c.group=g;c.mounted=g.index;animationPlayer=g.player;activeEvent=null;scoredIds=new Set();
-  app.innerHTML=shell(gameView());
+  c.group=g;c.mounted=g.index;c.overdriveAnnounced=false;animationPlayer=g.player;activeEvent=null;scoredIds=new Set();
+  mount(gameView());
   const consoleEl=$('.console');consoleEl.style.setProperty('--stage-color',['#baff42','#ff5aae','#60e9ff','#ffba42'][g.index%4]);
-  if(g.index>0)consoleEl.classList.add('reveal-arrive');
  }
  const phaseKey=g.index+':'+frame.phase,eventKey=frame.event?g.index+':'+frame.event.index:null;
  const phaseChanged=c.phaseKey!==phaseKey,eventChanged=c.eventKey!==eventKey;c.phaseKey=phaseKey;
@@ -214,17 +221,17 @@ function paintCinematic(frame){
   if(frame.phase==='intro'){resolutionAudio.announce(g.player.name);$('.resolution-caption strong').textContent='FAIS DU BRUIT !';}
   if(frame.phase==='hold')$('.resolution-caption strong').textContent='ENVOIE LA SAUCE !';
   if(frame.phase==='transfer'){resolutionAudio.transfer();transferPackets(g);$('.resolution-caption strong').textContent='POUR LE BAND !';}
-  if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);const verdict=scoreCallout(g.total);if(verdict)resolutionAudio.verdict(verdict.text);$('.resolution-caption strong').textContent='';}
+  if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);const verdict=scoreCallout(g.total);if(verdict&&!c.overdriveAnnounced)resolutionAudio.verdict(verdict.text);$('.resolution-caption strong').textContent='POINTS AJOUTÉS AU SHOW';}
  }
  if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise)resolutionAudio.critical(praise.rank);$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
  activeEvent=frame.event;
  for(const event of g.events.slice(0,frame.completed))scoredIds.add(g.player.id+':'+event.index);
  if(frame.event&&frame.progress>=1)scoredIds.add(g.player.id+':'+frame.event.index);
  const oldLevel=overdriveLevel(displayScore,targets(game));displayScore=frame.score;paintResolution();
- if(overdriveLevel(displayScore,targets(game))>oldLevel)overdriveHit(overdriveLevel(displayScore,targets(game)));
+ if(overdriveLevel(displayScore,targets(game))>oldLevel){c.overdriveAnnounced=true;overdriveHit(overdriveLevel(displayScore,targets(game)));}
  for(const key of ['q','e']){
   const el=$(`[data-charge="${key}"]`),num=el.querySelector('b');
-  if(num.textContent!==String(frame.local[key])){num.textContent=frame.local[key];el.classList.add('counter-tick');}
+  const ticking=num.textContent!==String(frame.local[key]);if(ticking)num.textContent=frame.local[key];el.classList.toggle('counter-tick',ticking);
   el.querySelector('i').style.width=(g.total[key]?frame.local[key]/g.total[key]*100:0)+'%';
  }
  const fans=$('.resolution-fans');fans.textContent=frame.local.f?'+'+frame.local.f+' FANS':'';
@@ -240,7 +247,7 @@ function animate(previous){
  animating=true;displayScore={q:previous.q,e:previous.e};view='game';
  cinematic={plan,group:plan.groups[0],mounted:-1,phaseKey:null,eventKey:null,lastValue:0,lastTick:0};
  document.body.classList.add('resolving');updateActivity();
- animationPlayer=plan.groups[0].player;app.innerHTML=shell(gameView());fitBoard();syncAudio();
+ animationPlayer=plan.groups[0].player;mount(gameView());syncAudio();
  $('.resolution-caption strong').textContent='SONG '+game.round;
  resolutionAudio.song(game.round);
  const prelude=1200,started=performance.now();
@@ -248,7 +255,7 @@ function animate(previous){
   if(!animating)return;
   if(now-started<prelude){resolutionRaf=requestAnimationFrame(tick);return;}
   const frame=resolutionFrame(plan,now-started-prelude);
-  if(frame.done){stopResolution();render();$('.console')?.classList.add('reveal-arrive');return;}
+  if(frame.done){stopResolution();render();return;}
   paintCinematic(frame);resolutionRaf=requestAnimationFrame(tick);
  }
  tick(started);
@@ -262,13 +269,13 @@ function receive(data){
  else if(changed)render();
 }
 async function send(type,extra={}){
- if(busy||animating||!game)return;
+ if(busy||animating||!game)return false;
  const msg={type,revision:game.revision,show:game.show,round:game.round,...extra};
- if(mode==='solo'){try{accept(command(game,myId,msg,rnd()));}catch(e){toast(e.message);}return;}
+ if(mode==='solo'){try{accept(command(game,myId,msg,rnd()));return true;}catch(e){toast(e.message);return false;}}
  if(!connection||!connected){toast('Connexion en cours. Ta partie est conservée.');return;}
  busy=true;render();const current=connection;
- try{const data=await current.send(msg);if(current===connection)receive(data);}
- catch(e){if(current===connection)toast(e.message);}
+ try{const data=await current.send(msg);if(current!==connection)return false;receive(data);return true;}
+ catch(e){if(current===connection)toast(e.message);return false;}
  finally{if(current===connection){busy=false;render();current.sync();}}
 }
 function getName(){name=$('#name')?.value.trim()||name||'Sans nom';save('encore.name',name);return name;}

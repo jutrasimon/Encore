@@ -1,6 +1,22 @@
-# État courant : ENCORE 0.9.9
+# État courant : preview ENCORE 0.9.10 / principal 0.9.9
 
-Correctif du 10 septembre 2026, basé sur `main` 3fd49f6 (0.9.8).
+Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Finition 0.9.10
+
+- Rendu incrémental des écrans : contrôles, focus et défilement conservés lors des mises à jour; transitions courtes sur les changements de vue.
+- Retour au plateau sans fondu noir complet; raccord du plateau commun et sortie raccourcie après la fin des explosions.
+- Impacts et stickers reviennent à leur position de repos; effets conservés, survol adouci, couleurs des ressources cohérentes et annonces moins concurrentes. Les compteurs reçoivent les points à l’arrivée visuelle du transfert.
+- Le client réessaie une fois après un refus HTTP 429, avec le même identifiant d’action et une attente supérieure à la garde serveur de 200 ms. Un échec final laisse la validation manuelle disponible.
+- Animations réduites et petits écrans pris en compte.
+- Aucun changement de `dist/engine.js`, d’authentification ou de fonction serveur. Le serveur reste en 0.9.9, protocole 2 / règles 4.
+
+## Vérifications de cette passe
+
+- `npm run check` et 89 tests passent (Node avec `--experimental-test-isolation=none` dans cette session Windows).
+- Essais navigateur en cours sur localhost : résolution solo, choix intermédiaires, écran 390 × 844.
+- Publication preview et validation complète solo/coop à vérifier avant livraison.
+
 
 ## Règles
 
@@ -19,7 +35,7 @@ Le plateau reste visible après la résolution. « Passer au Studio » ouvre les
 - Vérifier les SHA et les workflows distants à chaque reprise : ce fichier décrit la version, pas une preuve de publication.
 - Les sauvegardes principal/test ont des préfixes distincts. La preview utilise le même serveur multijoueur.
 - Validation : `npm run check`, `npm test`, puis essais dans le navigateur. Les tests `progression.test.mjs` protègent la boucle complète en solo et à deux, les blocages après défaite et la migration.
-- Le navigateur distant ne peut pas ouvrir le serveur localhost de cette session. Les essais visuels se font sur la preview publiée.
+- Le navigateur intégré de cette session peut ouvrir localhost:8000. La livraison doit aussi être contrôlée sur la preview publiée.
 - Les sources n’ont aucune dépendance npm. Le connecteur GitHub peut publier avec Git Data si le terminal n’a pas d’identifiants. Ne jamais afficher les binaires en base64.
 
 ## Suite connue

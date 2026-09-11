@@ -17,7 +17,7 @@ export function resolutionPlan(players,previous,reduced=false){
   group.charge=at+intro;group.hold=cursor;
   group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer);
   group.outro=group.impact+(reduced?500:1800);
-  group.end=group.outro+(reduced?200:750);
+  group.end=group.outro+(reduced?100:240);
   for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;
   group.total=total;groups.push(group);score={q:score.q+total.q,e:score.e+total.e};at=group.end;
  }
@@ -40,7 +40,7 @@ export function resolutionFrame(plan,elapsed){
  if(elapsed>=g.transfer){
   phase='transfer';progress=(elapsed-g.transfer)/(g.impact-g.transfer);
   // The packet travels first; both counters then exchange the very same integers.
-  const deposited=Math.max(0,(progress-.35)/.65);
+  const deposited=Math.max(0,(progress-.72)/.28);
   for(const k of ['q','e']){const amount=mix(0,g.total[k],deposited);local[k]=g.total[k]-amount;score[k]=g.base[k]+amount;}
  }
  if(elapsed>=g.impact){phase='impact';local.q=local.e=0;score.q=g.base.q+g.total.q;score.e=g.base.e+g.total.e;}

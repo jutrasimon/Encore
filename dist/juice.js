@@ -24,13 +24,13 @@ export class Juice{
  }
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}
  move(e){
-  if(this.reduced()||e.pointerType==='touch')return;
+  if(this.reduced()||e.pointerType==='touch'||this.root.querySelector('.resolution-mode'))return;
   const el=e.target.closest('.tile,.home h1,.primary');
   if(this.hovered!==el){this.release();this.hovered=el;}
   if(!el)return;
   const r=el.getBoundingClientRect(),speed=this.pointer?Math.min(24,Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)):3;
-  el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*9+'deg');el.classList.add('pointer-warp');
-  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(19,this.warp+speed*.6);
+  el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*5+'deg');el.classList.add('pointer-warp');
+  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(9,this.warp+speed*.3);
   if(speed>3)this.particles.push({x:e.clientX,y:e.clientY,vx:(Math.random()-.5)*100,vy:(Math.random()-.5)*100,life:0,ttl:250,size:2+Math.random()*3,color:Math.random()>.5?'#ff5aae':'#baff42'});
   this.particles=this.particles.slice(-80);this.wake();
  }
@@ -47,6 +47,9 @@ export class Juice{
  }
  float(text,color='#baff42',rank=1){
   const board=this.root.querySelector('.grid-wrap');if(!board||document.hidden)return;
+  const now=performance.now();
+  if(rank!==5&&this.lastPraise&&now-this.lastPraise.time<650&&rank<=this.lastPraise.rank)return;
+  this.lastPraise={time:now,rank};
   const r=board.getBoundingClientRect(),el=document.createElement('strong');el.className=`hype-callout rank-${rank}`;el.textContent=text;
   el.style.cssText=`left:${r.x+r.width/2}px;top:${Math.max(95,r.y+r.height*.32)}px;--hype:${color}`;
   // At most one praise and one overdrive message; bursts can overlap without text piling up.
@@ -57,7 +60,7 @@ export class Juice{
  }
  hit(event,beat=400){
   const tile=this.root.querySelectorAll('.grid .tile')[event.index];if(!tile)return;
-  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,call=scoreCallout(event),color=event.q>event.e?'#baff42':event.f>event.e?'#ffbb42':'#ff5aae';
+  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,call=scoreCallout(event),color=event.q>event.e?'#baff42':event.f>event.e?'#ff89c9':'#ffb441';
   tile.style.setProperty('--hit-time',Math.max(150,beat)+'ms');
   this.burst(call?'critical-star':'hit-spark',x,y,r.width*(call?2:1.3),color,Math.min(460,beat+100));
   this.spray(x,y,color,call?18:7);
@@ -99,5 +102,5 @@ export class Juice{
   for(const p of this.particles){p.x+=p.vx*dt/1000;p.y+=p.vy*dt/1000;p.vy+=dt*.22;c.globalAlpha=1-p.life/p.ttl;c.fillStyle=p.color;c.fillRect(p.x,p.y,p.size,p.size);}
   c.restore();c.globalAlpha=1;if(this.bursts.length||this.particles.length||this.lines||this.warp)this.raf=requestAnimationFrame(t=>this.draw(t));
  }
- clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
+ clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.lastPraise=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
 }

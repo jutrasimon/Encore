@@ -36,6 +36,14 @@ test('empty and zero-production boards still get an entrance and a finite finish
  assert.deepEqual(resolutionFrame(p,p.groups[0].hold).local,{q:0,e:0,f:0});assert.equal(resolutionFrame(p,Infinity).done,true);
  assert.deepEqual(resolutionFrame(resolutionPlan([],{q:5,e:6}),0),{done:true,score:{q:5,e:6}});
 });
+
+test('the score lands with the resource packet, after its travel and before the impact',()=>{
+ const plan=resolutionPlan(players,{q:10,e:8}),g=plan.groups[0],duration=g.impact-g.transfer;
+ assert.deepEqual(resolutionFrame(plan,g.transfer+duration*.71).score,g.base);
+ const arriving=resolutionFrame(plan,g.transfer+duration*.9);
+ assert.ok(arriving.score.q>g.base.q);assert.ok(arriving.local.q>0);
+ assert.deepEqual(resolutionFrame(plan,g.impact).score,{q:g.base.q+g.total.q,e:g.base.e+g.total.e});
+});
 test('electric arcs zigzag and reach exact tile centers for adjacent and global synergies',()=>{
  for(const [a,b,end] of [[0,1,'150 50'],[0,8,'250 250'],[8,0,'50 50'],[3,4,'150 150']]){
   const d=electricPath(a,b);assert.ok(d.endsWith('L '+end));assert.ok(d.split(' L ').length>6);assert.ok(!d.includes('NaN'));assert.notEqual(d,electricPath(a,b,1));
