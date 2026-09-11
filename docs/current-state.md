@@ -2,6 +2,10 @@
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
 
+## Ajustement du survol des actions
+
+Sur la base preview `6152320`, la distorsion et la traînée de particules s’appliquent aussi aux actions principales, à Passer et au bouton solo. Hors résolution, le canvas est limité à la coque plutôt qu’au plateau pour ne pas couper les particules des boutons. Pendant la résolution, les impacts restent limités au plateau. Les boutons désactivés et les animations réduites restent exclus.
+
 ## Finition 0.9.10
 
 - Rendu incrémental des écrans : contrôles, focus et défilement conservés lors des mises à jour; transitions courtes sur les changements de vue.

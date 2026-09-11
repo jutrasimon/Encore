@@ -25,7 +25,8 @@ export class Juice{
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}
  move(e){
   if(this.reduced()||e.pointerType==='touch'||this.root.querySelector('.resolution-mode'))return;
-  const el=e.target.closest('.tile,.home h1,.primary');
+  const target=e.target.closest('.tile,.home h1,.primary,.skip-reward,.home .secondary');
+  const el=target&&!target.matches(':disabled')&&!target.closest('[inert]')?target:null;
   if(this.hovered!==el){this.release();this.hovered=el;}
   if(!el)return;
   const r=el.getBoundingClientRect(),speed=this.pointer?Math.min(24,Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)):3;
@@ -85,9 +86,9 @@ export class Juice{
   this.raf=0;const dt=Math.min(50,now-this.last);this.last=now;const c=this.ctx;
   c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,this.w,this.h);c.imageSmoothingEnabled=false;
   if(this.reduced()||document.hidden){this.clear();return;}
-  // Clip every canvas effect, including its glow, inside the visible game frame.
+  // Resolution impacts stay on the board; pointer trails can reach the action buttons.
   c.save();
-  const frame=this.root.querySelector('.grid-wrap')||this.root.querySelector('.console');
+  const frame=this.root.querySelector('.resolution-mode .grid-wrap')||this.root.querySelector('.console');
   if(frame){
    const r=frame.getBoundingClientRect(),inset=Math.max(frame.clientLeft,frame.clientTop),radius=Math.max(0,(parseFloat(getComputedStyle(frame).borderRadius)||0)-inset);
    c.beginPath();c.roundRect(r.x+inset,r.y+inset,Math.max(0,r.width-inset*2),Math.max(0,r.height-inset*2),radius);c.clip();
