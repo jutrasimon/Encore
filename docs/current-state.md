@@ -13,11 +13,13 @@ Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb
 
 ## Vérifications de cette passe
 
-- `npm run check` et 90 tests passent; la commande standard `npm test` a également été exécutée avec les sous-processus autorisés.
-- Essais navigateur : cinq chansons solo avec défaite et reprise, nouveau départ, puis cinq chansons avec réussite et Studio. Coop réelle à deux : cinq chansons, réussite, attente au Studio et choix ajouter/améliorer/retirer inspectés. Tailles 390 × 844 et bureau.
-- Correction de la reprise de l’auto-ready après reconnexion d’un joueur ayant déjà choisi, en attente de son partenaire. Les choix non faits restent obligatoires.
-- Première publication preview `8c69347` : workflow GitHub Actions 34561170232 réussi; six fichiers servis comparés aux sources. Ajustements complémentaires et fin de tournée coop en cours de contrôle.
-
+- `npm run check` et `npm test` : 91 tests. Les sous-processus Node nécessitent une exécution autorisée dans cette session Windows; le mode sans isolation passe aussi.
+- Navigateur intégré : deux tournées solo de cinq chansons, défaite terminale, reprise après rechargement, nouveau départ avec cinq tuiles, réussite (57 qualité / 36 énergie), sauvegarde au Studio et ajout avant le show suivant.
+- Coop réelle à deux : cinq chansons, quatre choix, réussite (123 / 84), Studio obligatoire avec attente de chacun, amélioration et retrait. Reconnexion pendant le passage au show suivant corrigée et vérifiée; deuxième show de cinq chansons terminé en défaite (178 / 91 pour des objectifs 140 / 128), conservée après rechargement. Nouveau band vérifié séparément.
+- Écrans contrôlés à 390 × 844 et au format 320 × 700 du banc `mobile-preview.html`, ainsi qu’au bureau. Inventaire, choix, détails, réglages, animations réduites et conservation du focus vérifiés. Aucun avertissement ni erreur dans les journaux des deux clients coop contrôlés.
+- Workflows preview 34561170232, 34561770990 et 34561922688 réussis. Les fichiers servis ont été comparés aux sources. Vérifier le dernier workflow de la branche à chaque reprise.
+- Principal réellement servi : 0.9.9. Santé du serveur : build 0.9.9, protocole 2, règles 4. Aucun moteur ni serveur modifié pendant cette passe.
+- Limites : pas d’essai sur téléphone physique ni d’évaluation auditive du mix sur appareil. La sensation finale attend le retour utilisateur sur la preview; aucune promotion sur `main` autorisée à ce stade.
 
 ## Règles
 

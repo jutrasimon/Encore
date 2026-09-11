@@ -1,17 +1,17 @@
-import {Juice,scoreCallout} from './juice.js?v=0.9.10.2';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.10.2';
-import {RewardAdvance} from './autoplay.js?v=0.9.10.2';
-import {statsMarkup} from './stats-ui.js?v=0.9.10.2';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.10.2';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.10.2';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.10.2';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.10.2';
+import {Juice,scoreCallout} from './juice.js?v=0.9.10.3';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.10.3';
+import {RewardAdvance} from './autoplay.js?v=0.9.10.3';
+import {statsMarkup} from './stats-ui.js?v=0.9.10.3';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.10.3';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.10.3';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.10.3';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.10.3';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.10.2';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.10.2';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.10.3';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.10.3';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.10.2';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.10.3';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -159,7 +159,7 @@ function render(){
 }
 function inspect(t){
  const empty=!t||t.kind==='empty',dlg=$('#details');dlg.dataset.kind='inspect';dlg.dataset.tileId=t?.id||'';dlg.className='tile-dialog';
- dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><div class="inspect-preview">${tileCard(t,{action:'noop',resolved:!!t?.m})}</div>${empty?'<h2>Case vide</h2><p>Complète la grille quand moins de 9 tuiles sont disponibles.</p>':tileDetails(t)}${t?.m?`<div class="detail-score"><strong>CETTE CHANSON</strong><span>${points(t)||'Effet de soutien'}</span>${t.m>1?`<b>×${t.m}</b>`:''}${t.repeats?'<b>Rejouée '+t.repeats+' fois</b>':''}</div>`:''}${!empty&&me()?.inventory.some(x=>x.id===t.id)?focusButton(t):''}<button class="secondary" data-action="close">FERMER</button>`;
+ mountScreen(dlg,`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><div class="inspect-preview">${tileCard(t,{action:'noop',resolved:!!t?.m})}</div>${empty?'<h2>Case vide</h2><p>Complète la grille quand moins de 9 tuiles sont disponibles.</p>':tileDetails(t)}${t?.m?`<div class="detail-score"><strong>CETTE CHANSON</strong><span>${points(t)||'Effet de soutien'}</span>${t.m>1?`<b>×${t.m}</b>`:''}${t.repeats?'<b>Rejouée '+t.repeats+' fois</b>':''}</div>`:''}${!empty&&me()?.inventory.some(x=>x.id===t.id)?focusButton(t):''}<button class="secondary" data-action="close">FERMER</button>`);
  dlg.showModal();
 }
 function rules(){const dlg=$('#details');dlg.dataset.kind='rules';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>Comment jouer</h2><ol><li>Le guitariste-chanteur commence avec 5 tuiles et 1 focus.</li><li>Chaque chanson pige jusqu’à 9 tuiles distinctes. Les cases restantes sont vides.</li><li>Les synergies touchent les quatre côtés, sauf les effets qui concernent toute la grille. Une guitare entre deux voix vaut ×4; les voix valent ×2.</li><li>Entre les chansons, observe le plateau, puis appuie sur Continuer pour choisir parmi 3 tuiles différentes. Tu peux obtenir une sorte déjà présente dans ton inventaire.</li><li>Dans l’inventaire, affecte ton focus à une copie pour doubler son poids de pige. Déplace-le librement avant de te déclarer prêt. Le focus temporaire expire à la fin du show.</li><li>Joue les 5 chansons et atteins les deux objectifs. Dépasse-les pour entrer en overdrive; le surplus contribue aux fans de performance.</li><li>Entre les shows, ajoute, améliore ou retire une tuile, ou passe. Les améliorations sont permanentes, sans plafond. Un objectif manqué termine la tournée. Une nouvelle tournée repart avec les cinq tuiles de départ. La tournée continue sans dernier niveau. En coop, les points s’additionnent; chacun choisit sa tuile et son focus.</li></ol><p>Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.</p><button class="primary" data-action="close">FERMER</button>`;dlg.showModal();}
