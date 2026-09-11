@@ -60,3 +60,24 @@ dialog::backdrop{background:#060c09b8;animation:reveal-arrive 180ms ease-out}
 .resolution-mode .show-visual canvas{object-fit:fill}
 .resolution-mode .resolution-caption{justify-content:flex-start;padding-top:3px;pointer-events:none;text-shadow:0 2px 5px #000,0 0 8px #000}
 .resolution-mode .resolution-caption .resolution-fans:empty{display:none}
+/* Show cover: all titles, objectives and actions remain real UI. */
+dialog[data-kind="show"]{width:min(520px,calc(100vw - 20px));max-width:520px;max-height:calc(100dvh - 20px);padding:18px;color:#fff3d3;background:radial-gradient(ellipse at top,#263017,#0e180d 75%);border:3px solid #8e9478;border-radius:12px;overflow-y:auto;scrollbar-width:thin;box-shadow:0 12px 70px #000b}
+.show-intro-header{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:10px}
+.intro-brand{font-size:32px;font-weight:900;line-height:.9;transform:rotate(-3deg)}.intro-brand small{display:block;margin-top:6px;font-size:10px;letter-spacing:2px;color:#baff42}
+dialog[data-kind="show"] .dialog-close{position:static;display:grid;place-items:center;flex:0 0 40px;width:40px;height:40px;padding:8px;border:1px solid #899566;background:#1c2918;color:#fff3d3;border-radius:6px;transform:none}
+dialog[data-kind="show"] .dialog-close:hover{background:#baff42;color:#10190f;border-color:#baff42}
+dialog[data-kind="show"] .dialog-close:focus-visible{outline:2px solid #baff42;outline-offset:3px}
+.show-intro-heading{text-align:center}.show-intro-heading .tape{display:inline-block;margin:4px 0 8px;letter-spacing:3px;font-size:16px;transform:rotate(-2deg)}
+dialog[data-kind="show"] .show-intro-heading h2{margin:0;font-size:clamp(30px,9vw,52px);line-height:1;text-transform:uppercase;color:#fff3d3}
+dialog[data-kind="show"] .show-intro-heading p{margin:8px 0 12px;font-size:clamp(14px,4vw,19px);line-height:1.25;letter-spacing:1px;text-transform:uppercase;color:#dedcc0}
+dialog[data-kind="show"] .show-intro-art{position:relative;width:100%;height:auto;max-height:none;aspect-ratio:3/2;margin:0;border:0;border-radius:3px;overflow:hidden}
+dialog[data-kind="show"] .show-intro-art img{width:100%;height:100%;object-fit:contain}
+.show-intro-art:after{content:'';position:absolute;inset:65% 0 0;pointer-events:none;background:linear-gradient(transparent,#0e180d)}
+.show-goals h3{text-align:center;font-size:16px;letter-spacing:3px;margin:8px 0 10px;color:#fff3d3}.show-goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.show-goal{display:flex;justify-content:center;align-items:center;gap:12px;padding:8px;border:2px solid #baff42;border-radius:5px;color:#baff42;background:#10190f}.show-goal.goal-e{color:#ffb344;border-color:#ffb344}.show-goal>svg{width:clamp(30px,10vw,55px);height:55px}.show-goal>span{font-size:17px;line-height:1;color:#fff3d3}.show-goal b{display:block;font-size:48px;line-height:1.1}
+dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-height:1.2;margin:8px 0;color:#bdc5a6}
+.show-entry .primary{width:100%;margin:0;min-height:48px;font-size:24px}.show-entry .lobby{display:contents}.show-entry .lobby>h2,.show-entry .lobby>h2+p{display:none}.show-entry .lobby>p:last-child{color:#fff3d3}.show-entry .secondary{margin:0 0 8px}
+@media(max-height:740px){dialog[data-kind="show"]{width:min(440px,calc(100vw - 20px));padding:12px}.show-intro-header{margin-bottom:6px}.intro-brand{font-size:26px}.show-intro-heading .tape{font-size:13px;margin:2px 0 5px}dialog[data-kind="show"] .show-intro-heading h2{font-size:32px}dialog[data-kind="show"] .show-intro-heading p{font-size:14px;margin:5px 0 8px}.show-goals h3{font-size:13px;margin:6px 0}.show-goal{padding:5px}.show-goal b{font-size:36px}.show-goal>span{font-size:14px}.show-goal>svg{height:40px}.show-entry .primary{min-height:44px;font-size:21px}}
+@media(max-height:580px){dialog[data-kind="show"] .show-intro-art{width:min(100%,42dvh);margin-inline:auto}.intro-brand small{display:none}.show-intro-header{margin-bottom:2px}}
+.show-intro-heading .tape{background:#baff42;color:#10190f}
+.show-entry .lobby>.primary,.show-entry>.primary{display:flex;align-items:center;justify-content:center;gap:12px;color:#10190f}

@@ -5,7 +5,7 @@
 <label>Pose <select id="pose"><option value="">Rythme</option><option value="voice">Chant</option><option value="guitar">Riff</option><option value="happy">Content</option><option value="neutral">Neutre</option><option value="sad">Triste</option></select></label>
 <label><input id="drive" type="checkbox">Overdrive</label><label><input id="reduced" type="checkbox">Mouvement réduit</label><label><input id="paused" type="checkbox">Pause</label><main></main>
 <script type="module">
-import {ShowVisual,showVisualMarkup,showAsset} from './show-art.js?v=0.9.13';
-const names=['Le sous-sol','Le petit pub','Le toit pirate'],visuals=names.map((name,i)=>{const el=document.createElement('article');el.innerHTML=`<h2>${name}</h2><img src="${showAsset(i,'intro')}" alt="${name}">${showVisualMarkup()}`;document.querySelector('main').append(el);return new ShowVisual();});
+import {ShowVisual,showVisualMarkup,showAsset} from './show-art.js?v=0.9.14';
+const names=['Le sous-sol','Le petit pub','Le toit pirate'],visuals=names.map((name,i)=>{const el=document.createElement('article');el.innerHTML=`<h2>${name}</h2><img src="${showAsset(i,'cover')}" alt="${name}">${showVisualMarkup()}`;document.querySelector('main').append(el);return new ShowVisual();});
 function draw(now){const pose=document.querySelector('#pose').value;document.documentElement.style.setProperty('--width',document.querySelector('#width').value+'px');visuals.forEach((v,i)=>v.update(document.querySelectorAll('canvas')[i],{show:i,role:'guitarist-singer',performance:pose,result:['happy','neutral','sad'].includes(pose)?pose:null,overdrive:document.querySelector('#drive').checked,reduced:document.querySelector('#reduced').checked,paused:document.querySelector('#paused').checked,intensity:.8,hit:String(Math.floor(now/1000))},now));requestAnimationFrame(draw);}requestAnimationFrame(draw);
 </script></html>

@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.13 / principal 0.9.9
+# État courant : preview ENCORE 0.9.14 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Intros et covers 0.9.14
+
+Base preview `d6675e7`. Trois nouvelles covers opaques sans personnage, associées au lieu via son index et préchargées depuis le rendu du jeu. Intro recomposée : en-tête ENCORE et croix intégrée, numéro, titre, ambiance, cover 3:2 avec fondu inférieur, objectifs issus de `targets(game)` et bouton Monter sur scène. Ce bouton conserve l’action start et ses conditions dans le lobby ; en consultation d’un show commencé, il ferme la présentation sans rejouer une chanson. Le microphone sur pied n’est plus chargé ni dessiné dans les scènes (les tuiles Voix restent identiques).
+
+Validation : syntaxe et 98 tests, dont covers, objectifs coop et conditions d’entrée. Navigateur : intro solo réelle, format 320 × 700, image au ratio 1.5, contenu sans défilement ni débordement, bouton accessible, démarrage par Monter sur scène. Le plateau et le pied du reveal restent ceux de 0.9.13. Aucun moteur ou serveur modifié. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Correction du placement 0.9.13
 

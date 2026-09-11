@@ -5,7 +5,7 @@ import {classArt,showArt,showAsset,performancePose,removeMagenta} from '../dist/
 test('show art repeats with venues while role art uses the engine role ID',()=>{
  for(let i=0;i<9;i++){
   assert.equal(showArt(i),showArt(i%3));
-  for(const name of ['intro','back','background','foreground','crowd-sheet'])assert.ok(existsSync(new URL('../dist/'+showAsset(i,name),import.meta.url)));
+  for(const name of ['cover','intro','back','background','foreground','crowd-sheet'])assert.ok(existsSync(new URL('../dist/'+showAsset(i,name),import.meta.url)));
  }
  for(const path of Object.values(classArt('guitarist-singer')))assert.ok(existsSync(new URL('../dist/'+path,import.meta.url)));
  assert.equal(classArt('legacy'),classArt('guitarist-singer'));

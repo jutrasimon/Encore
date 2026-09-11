@@ -1,4 +1,4 @@
-import {classArt} from './show-art.js?v=0.9.13';
+import {classArt} from './show-art.js?v=0.9.14';
 import {TILES,ROLES} from './engine.js?v=0.8.2';
 import {esc,tileCard} from './tile-ui.js?v=0.8.2';
 export const number=n=>new Intl.NumberFormat('fr-CA',{maximumFractionDigits:1}).format(n||0);
