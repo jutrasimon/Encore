@@ -9,3 +9,7 @@
 - Publier d’abord une version de test reviewable sur la branche existante `preview/audio-0.9.0`, puis la promouvoir sur `main` après validation. Vérifier le succès GitHub Actions et la version réellement servie. Conserver les sauvegardes séparées.
 - Mettre à jour `docs/current-state.md` quand l’état change. Les documents `audio-*-handoff.md` et `0.7.0.md` sont des archives, pas des instructions courantes.
 - Ne pas dire « testé dans le navigateur » ou « publié » sans avoir effectué et vérifié l’action correspondante. Signaler précisément les limites restantes.
+
+- Cadre visuel invariant : tous les écrans, présentations et popups restent dans le rectangle exact du téléphone (`.console`). Une présentation modale remplace visuellement tout cet écran, jamais une fenêtre plus large que le jeu. Vérifier les limites après redimensionnement mobile.
+- En coop, chaque joueur confirme « Monter sur scène » avant la première chanson de chaque show, via `ready`. Aucun auto-ready à `round === 0` ne doit contourner cette confirmation ; les choix draft/Studio restent obligatoires.
+- Icônes de statistiques : utiliser `StatIcon` (`dist/stat-icon.js`) et les trois masques PNG communs ; ne pas réintroduire étoiles ou caractères éclair pour les valeurs.

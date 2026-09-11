@@ -1,3 +1,4 @@
+import {StatIcon} from './stat-icon.js?v=0.9.16';
 // Compact, code-native functional symbols; all names remain visible alongside them.
 const paths={
  charge:'M8 3V1h8v2M6 3h12v19H6zM9 8h6m-3-3v6M9 16h6',
@@ -26,4 +27,4 @@ const paths={
  sound:'M3 9h4l5-5v16l-5-5H3zM16 8c3 2 3 6 0 8M19 4c6 5 6 11 0 16',
  empty:'M6 12h12',close:'M5 5l14 14M19 5 5 19',arrow:'M5 12h14m-6-6 6 6-6 6'
 };
-export function icon(name){return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="${paths[name]||paths.star}"/></svg>`;}
+export function icon(name){const stat={star:'quality',bolt:'energy',choir:'fans'}[name];if(stat)return StatIcon(stat,20,'currentColor');return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="${paths[name]||paths.star}"/></svg>`;}

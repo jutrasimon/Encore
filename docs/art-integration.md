@@ -19,3 +19,7 @@ Les covers sans personnage fournies ensuite sont stockées dans `shows/*/cover.p
 `dist/song-ui.js` rend les verdicts depuis les valeurs du moteur et orchestre uniquement les accents de présentation. Le personnage utilise les poses content/triste existantes de sa classe, avec un cadrage plus grand dans le verdict. La grille reste accessible via Voir le détail.
 
 `dist/art/finale/` conserve les PNG fournis sans retouche : `song-banner.png` (2172 × 724), `splats.png`, `splats-alt.png` et `comics.png` (1536 × 1024). Ces trois planches ont six cellules de 512 × 512, affichées par fonds CSS à 300 % × 200 %. Leur alpha est conservé, notamment le rose. L’atelier affiche toutes les cellules sur fond clair et sombre. Les décorations en jeu restent dans les marges, sous les contrôles, et respectent le mouvement réduit.
+
+## Statistiques 0.9.16
+
+Les trois PNG originaux de 1254 × 1254 sont dans `dist/art/stats/`. `StatIcon(type, size=20, color='#fff3d3')` accepte quality, energy et fans, expose un libellé accessible et produit un masque CSS sans animation permanente. Les anciennes entrées icon(star/bolt/choir) délèguent à ce composant pour éviter les divergences entre écrans. Les limites alpha sont normalisées par dimension maximale, sans étirer ni réécrire les images ; couleurs héritées du contexte, crème dans les textes sombres, lime/orange/rose selon les panneaux.

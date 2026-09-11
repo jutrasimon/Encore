@@ -1,4 +1,4 @@
-import {tileDetails} from './tile-ui.js?v=0.8.2';
+import {tileDetails} from './tile-ui.js?v=0.9.16';
 let tip,owner,timer;
 export function hideTooltip(){clearTimeout(timer);owner?.removeAttribute('aria-describedby');owner=null;if(tip){if(tip.matches(':popover-open'))tip.hidePopover();tip.remove();tip=null;}}
 export function installTooltips(root,isBusy=()=>false){

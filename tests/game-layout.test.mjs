@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {runInNewContext} from 'node:vm';
 
-test('show objectives precede the player banner, then the board and last-song readout',()=>{
+test('show objectives precede the player banner, then the board without a duplicate bottom score',()=>{
  const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
  const gameView=source.split('\n').find(line=>line.startsWith('function gameView()'));
  for(const mode of ['solo','multi']){
@@ -12,7 +12,8 @@ test('show objectives precede the player banner, then the board and last-song re
    showHeader:()=>'<header/>',meters:()=>'<objectives/>',players:()=>'<players/>',grid:()=>'<board/>',points:()=>'<score/>',showVisualMarkup:()=>'<stage/>'
   });
   assert.ok(html.startsWith('<header/><objectives/><players/><board/>'));
-  assert.ok(html.indexOf('DERNIÈRE CHANSON')>html.indexOf('<board/>'));
+  assert.ok(!html.includes('DERNIÈRE CHANSON'));
+  assert.match(source,/class="last-song-stat"/);
   assert.equal(html.split('<players/>').length,2);
   assert.ok(!html.includes('<stage/>'),'normal play reserves all space for the board');
  }

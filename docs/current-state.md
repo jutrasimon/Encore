@@ -1,6 +1,16 @@
-# État courant : preview ENCORE 0.9.15 / principal 0.9.9
+# État courant : preview ENCORE 0.9.16 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Cadre, confirmations et icônes 0.9.16
+
+Base preview `2c01231c86d73ab1ed01d371a53f6d487b4081b0`. Tous les dialogues occupent le rectangle exact de la console, recalculé au redimensionnement. La présentation indique simplement le nombre de chansons. Les consignes AGENTS.md rendent cette limite persistante.
+
+En coop, le créateur prépare le show ; chaque musicien confirme ensuite Monter sur scène. La commande ready existante porte cette confirmation ; l’auto-ready est bloqué à round 0, y compris après Studio et reconnexion. Le premier clic affiche les joueurs prêts/en attente, le deuxième démarre. Moteur, sauvegardes, serveur et authentification inchangés.
+
+Les PNG diamant/éclair/personnage-cœur sont des masques alpha communs via StatIcon(type, size, color), avec proportions et marges compensées en CSS. Jauges, tuiles, explications, bilans, fans, transferts de points et Studio utilisent le même rendu. Dernier score sous les jauges, ligne inférieure retirée, portrait centré et fans alignés avec le nom, flèche après BAND supprimée.
+
+Validation : syntaxe, 105 tests dont les parcours moteur de cinq chansons solo/coop et un contrôle de double confirmation. Navigateur : dimensions popup/console identiques à 496 × 886 et 308 × 688, solo animé, valeurs et icônes lisibles à 320 px, masques contrôlés sur fonds clair/sombre à 20/28/40 px, espaces de 6 px de part et d’autre du bandeau, portrait centré et nom/fans sur le même axe ; vraie session coop à deux clients, aucun reveal après le premier clic, passage à 1/5 sur les deux clients uniquement après le second. Pas de nouveau parcours complet de cinq chansons en coop navigateur dans cette passe. URL preview : https://jutrasimon.github.io/Encore/audio-test/. Principal conservé en 0.9.9.
 
 ## Verdict plein écran et dernière chanson 0.9.15
 
