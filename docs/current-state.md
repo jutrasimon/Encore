@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.18 / principal 0.9.9
+# État courant : preview ENCORE 0.9.19 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Distribution des cases vides 0.9.19
+
+Base `7b17f71`. Les neuf emplacements participent à la distribution, y compris les cases nulles/vides : masquées au départ, elles arrivent avec le même mouvement et le même son de pose. Aucun changement de tirage, de durée d’annonce, de moteur ou de serveur. Mouvement réduit immédiat conservé.
+
+Validation : 115 tests réussis, incluant les parcours moteur solo/coop existants et les distributions avec zéro à neuf tuiles occupées. Contrôle navigateur local du composant avec les vrais rendus de tuiles : neuf opacités à zéro avant la distribution, cases vides animées séquentiellement, styles transitoires nettoyés à la fin. Pas de nouveau parcours complet de cinq chansons en navigateur pour cette correction. Preview : https://jutrasimon.github.io/Encore/audio-test/ ; serveur preview toujours 0.9.18/rules 5, principal 0.9.9 inchangé.
 
 ## Studio à trois catégories 0.9.18
 

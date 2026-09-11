@@ -1,5 +1,5 @@
 import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.9.18';
-import {paintDeal} from './deal-ui.js?v=0.9.18';
+import {paintDeal} from './deal-ui.js?v=0.9.19';
 import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.9.18';
 import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.18';
 import {Juice,scoreCallout} from './juice.js?v=0.9.18';
@@ -29,7 +29,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.18 · ENCORE ∞';
+const VERSION='0.9.19 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;

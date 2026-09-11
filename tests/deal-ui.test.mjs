@@ -2,12 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {dealFrame} from '../dist/deal-ui.js';
 import {stageCast} from '../dist/show-art.js';
-test('deal only moves occupied slots and settles before the existing intro ends',()=>{
- for(const count of [1,5,9]){const board=Array.from({length:9},(_,i)=>i<count?{kind:'guitar',id:String(i)}:null),before=JSON.stringify(board);
+test('deal moves occupied and empty slots and settles before the existing intro ends',()=>{
+ for(const count of [0,1,5,9]){const board=Array.from({length:9},(_,i)=>i<count?{kind:'guitar',id:String(i)}:null),before=JSON.stringify(board);
   const waiting=dealFrame(board,-1,800),middle=dealFrame(board,220,800),end=dealFrame(board,799,800);
-  assert.equal(waiting.length,count);assert.ok(waiting.every(t=>t.progress===0));assert.ok(middle.some(t=>t.progress>0));assert.ok(end.every(t=>t.progress===1));assert.equal(JSON.stringify(board),before);
+  assert.equal(waiting.length,9);assert.deepEqual(waiting.map(t=>t.index),[0,1,2,3,4,5,6,7,8]);assert.ok(waiting.every(t=>t.progress===0));assert.ok(middle.some(t=>t.progress>0));assert.ok(end.every(t=>t.progress===1));assert.equal(JSON.stringify(board),before);
  }
 });
+test('explicit empty tiles and null slots share the same deal sequence',()=>{const state=dealFrame([{kind:'empty'},null,{kind:'voice'}],220,800);assert.equal(state.length,3);assert(state[0].progress>state[1].progress);assert(state[1].progress>state[2].progress);});
 test('reduced motion distributes immediately',()=>assert.ok(dealFrame([{kind:'voice'},null],0,467,true).every(t=>t.progress===1)));
 test('two actual players stay on stage and only the active one performs',()=>{
  const players=[{id:'a',role:'guitarist-singer'},{id:'b',role:'guitarist-singer'}];

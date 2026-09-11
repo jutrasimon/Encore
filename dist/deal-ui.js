@@ -1,8 +1,8 @@
 // Visual distribution of the already drawn board; never draws or changes a game tile.
 export function dealFrame(board,elapsed,intro,reduced=false){
- const occupied=board.map((tile,index)=>tile&&tile.kind!=='empty'?index:-1).filter(i=>i>=0);
- const duration=Math.min(180,intro*.23),step=Math.min(55,(intro-duration-80)/Math.max(1,occupied.length));
- return occupied.map((index,rank)=>({index,progress:reduced?1:Math.max(0,Math.min(1,(elapsed-60-rank*step)/duration))}));
+ const slots=Array.from({length:board.length},(_,index)=>index);
+ const duration=Math.min(180,intro*.23),step=Math.min(55,(intro-duration-80)/Math.max(1,slots.length));
+ return slots.map((index,rank)=>({index,progress:reduced?1:Math.max(0,Math.min(1,(elapsed-60-rank*step)/duration))}));
 }
 export function paintDeal(root,board,elapsed,intro,reduced){
  const tiles=root.querySelectorAll('.grid .tile'),state=dealFrame(board,elapsed,intro,reduced);
