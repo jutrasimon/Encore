@@ -23,3 +23,9 @@ Les covers sans personnage fournies ensuite sont stockées dans `shows/*/cover.p
 ## Statistiques 0.9.16
 
 Les trois PNG originaux de 1254 × 1254 sont dans `dist/art/stats/`. `StatIcon(type, size=20, color='#fff3d3')` accepte quality, energy et fans, expose un libellé accessible et produit un masque CSS sans animation permanente. Les anciennes entrées icon(star/bolt/choir) délèguent à ce composant pour éviter les divergences entre écrans. Les limites alpha sont normalisées par dimension maximale, sans étirer ni réécrire les images ; couleurs héritées du contexte, crème dans les textes sombres, lime/orange/rose selon les panneaux.
+
+## Duo et distribution 0.9.17
+
+ShowVisual accepte `players` et `activePlayerId`. `stageCast` conserve l’ordre des joueurs, leurs rôles et leurs positions ; seul l’actif suit les poses de production. Les textures sont mises en cache par classe, sans rechargement à chaque tour. Le partenaire assombri reste visible. L’éclairage passe progressivement d’un musicien à l’autre en 300 ms ; le mouvement réduit applique le changement immédiatement. Le résultat concerne tous les personnages.
+
+`dist/deal-ui.js` anime seulement les tuiles de la grille déjà calculée par le moteur. La distribution suit l’horloge de l’intro existante et se termine avant la première production. Pas de timer indépendant ni de second tirage. Le son est un petit impact synthétique à chaque pose, sous les réglages d’effets existants.

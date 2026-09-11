@@ -1,6 +1,14 @@
-# État courant : preview ENCORE 0.9.16.1 / principal 0.9.9
+# État courant : preview ENCORE 0.9.17 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Distribution et duo sur scène 0.9.17
+
+Base `44ee981`. Grille recentrée verticalement dans son espace disponible ; navigation Band renommée Stats. Pendant l’annonce existante du nom, les tuiles déjà tirées arrivent du centre vers leurs emplacements par intervalles de 55 ms maximum, avec une pose de 180 ms et un petit son percussif. Aucun nouveau tirage ni allongement du reveal. Le nom est affiché dans le pied de scène pour laisser les neuf slots visibles. En mouvement réduit, distribution immédiate sans déplacements ni série percussive.
+
+Le rendu de scène reçoit les joueurs réels et le joueur actif. En duo, deux personnages liés à leurs classes occupent des positions fixes côte à côte : seul l’actif prend les poses de jeu, l’autre reste immobile et assombri. Éclairage croisé de 300 ms au changement de joueur. Les deux prennent la pose de résultat à la fin du show. Atelier enrichi avec duo et sélection du joueur actif.
+
+Validation : 108 tests, dont distribution avant la fin de l’intro, cases vides, mouvement réduit, absence de mutation et alternance des poses. Navigateur local : centrage mesuré, navigation Stats, chanson solo complète avec annonce et distribution ; duo contrôlé dans les trois lieux via l’atelier et alternance A/B. Les tests moteur couvrent cinq chansons solo/coop, Studio, défaite et sauvegardes ; pas de nouveau parcours complet en coop réelle dans le navigateur pour cette passe. Aucun moteur ni serveur modifié. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Compteur restauré 0.9.16.1
 

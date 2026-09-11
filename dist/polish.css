@@ -128,7 +128,7 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .navigation .stat-icon{display:none}
 @media(max-width:380px){.meter>.stat-icon{--icon-context:28px}.tile-points .stat-icon{--icon-context:22px}.last-song-stat{font-size:10px;gap:3px}#details[data-kind="show"][open]{padding:12px;gap:6px}}
 
-.console:not(.resolution-mode) .screen-body[data-screen="game"]>.grid-wrap{margin:0 auto}
+.console:not(.resolution-mode) .screen-body[data-screen="game"]>.grid-wrap{margin:auto 0}
 .meter>.stat-icon,.goal-q>.stat-icon{color:var(--green)}.goal-e>.stat-icon{color:#ffb43e}
 .square-tile .tile-points>span{gap:5px}.stat-icon{pointer-events:none}
 
@@ -139,3 +139,8 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .round.song-counter,.resolution-top>.round.song-counter{display:flex;flex-direction:row;align-items:center;justify-content:center;flex:0 0 auto;gap:4px;min-width:0;height:50px;padding:6px 8px;background:#20251a;border:1px solid #404735;border-radius:3px;color:#fff3d3;font-size:14px;line-height:1;white-space:nowrap}
 .round.song-counter b{font-size:30px;line-height:1;color:#b8ff41}.round.song-counter>span{font-size:14px;color:#fff3d3}
 @media(max-width:380px){.round.song-counter,.resolution-top>.round.song-counter{height:44px;padding:5px;gap:3px;font-size:11px}.round.song-counter b{font-size:27px}.round.song-counter>span{font-size:12px}}
+
+.resolution-mode[data-resolution="intro"] .resolution-pop{top:var(--deal-name-top,78%);bottom:auto;left:10px;right:10px;padding:3px 8px;border-width:2px;pointer-events:none;animation:none;transform:none;background:#10190fe6}
+.resolution-mode[data-resolution="intro"] .resolution-pop strong{font-size:clamp(22px,5vw,32px);line-height:1.1}
+
+.resolution-mode[data-resolution="intro"] .resolution-pop strong{margin:0}

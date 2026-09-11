@@ -21,6 +21,10 @@ export function performancePose({result,overdrive,performance:action,reduced,pau
  if(reduced||paused)return 0;
  return overdrive?2:action==='voice'?1:action==='guitar'?2:0;
 }
+export function stageCast(state){
+ const players=state.players?.length?state.players:[{id:state.activePlayerId,role:state.role}];
+ return players.map((p,index)=>({id:p.id,role:p.role,index,active:players.length===1||p.id===state.activePlayerId,pose:state.result?performancePose(state):players.length===1||p.id===state.activePlayerId?performancePose(state):0,x:players.length===1?768:508+index*520}));
+}
 export function removeMagenta(pixels){
  for(let i=0;i<pixels.length;i+=4){
   const excess=Math.min(pixels[i],pixels[i+2])-pixels[i+1];
@@ -53,11 +57,12 @@ export class ShowVisual{
   const height=state.performanceLayout||state.resultLayout?Math.max(1,Math.round(920*rect.height/Math.max(1,rect.width))):307;
   const resized=canvas.height!==height;if(resized)canvas.height=height;
   const changed=resized||this.canvas!==canvas||!canvas.dataset.pose;this.canvas=canvas;this.state=state;
-  const key=showArt(state.show).directory+':'+(state.role||'guitarist-singer');
+  const cast=stageCast(state),key=showArt(state.show).directory+':'+cast.map(p=>p.role||'guitarist-singer').join(',');
+  if(this.activeId!==state.activePlayerId){this.previousId=this.activeId;this.activeId=state.activePlayerId;this.switchAt=now;}
   if(key!==this.key){
    this.key=key;this.assets=null;this.lastFrame='';this.lastBurst=-Infinity;this.burstUntil=0;
-   const generation=++this.generation,art=classArt(state.role);
-   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),texture(art.poses),texture(ROOT+'shared/crowd-expression-sheet.png')]).then(assets=>{
+   const generation=++this.generation;
+   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),Promise.all(cast.map(p=>texture(classArt(p.role).poses))),texture(ROOT+'shared/crowd-expression-sheet.png')]).then(assets=>{
     if(generation!==this.generation)return;
     this.assets=assets;this.draw(performance.now(),true);
    });
@@ -70,19 +75,26 @@ export class ShowVisual{
   const canvas=this.canvas;if(!canvas?.isConnected)return;
   const s=this.state,still=s.reduced||s.paused||document.hidden||!!s.result;
   const pose=performancePose(s),crowd=still?0:[0,1,2,1][Math.floor(now/(s.overdrive?135:s.intensity>.6?190:310))%4];
-  const burst=!still&&now<this.burstUntil,signature=[this.key,pose,crowd,burst,s.overdrive,!!s.result].join(':');
+  const cast=stageCast(s),crossfade=s.reduced||s.paused||this.previousId===undefined?1:Math.min(1,(now-this.switchAt)/300);
+  const burst=!still&&now<this.burstUntil,signature=[this.key,pose,crowd,burst,s.overdrive,!!s.result,s.activePlayerId,Math.round(crossfade*20)].join(':');
   if(!force&&signature===this.lastFrame)return;this.lastFrame=signature;
-  canvas.dataset.pose=String(pose);canvas.dataset.crowd=String(crowd);
+  canvas.dataset.pose=String(pose);canvas.dataset.crowd=String(crowd);canvas.dataset.cast=JSON.stringify(cast.map(p=>({id:p.id,active:p.active,pose:p.pose})));
   const c=canvas.getContext('2d');const scale=canvas.width/1536,viewHeight=canvas.height/scale,top=1024-viewHeight;
   c.setTransform(scale,0,0,scale,0,-top*scale);
   c.fillStyle='#10190f';c.fillRect(0,top,1536,viewHeight);
   if(!this.assets)return;
-  const [back,background,foreground,audience,character,expressions]=this.assets;
+  const [back,background,foreground,audience,characters,expressions]=this.assets;
   if(back)c.drawImage(back,0,0,1536,1024);
   if(background)c.drawImage(background,0,0,1536,1024);
   if(s.overdrive){const halo=c.createRadialGradient(768,730,10,768,730,320);halo.addColorStop(0,'#baff4250');halo.addColorStop(1,'#baff4200');c.fillStyle=halo;c.fillRect(400,512,736,512);}
   const size=s.resultLayout?Math.min(760,Math.max(300,viewHeight-40)):s.performanceLayout?Math.min(435,Math.max(180,viewHeight-140)):435,feet=s.resultLayout?970:s.performanceLayout?990:930;
-  if(character)c.drawImage(character,pose%3*512,Math.floor(pose/3)*512,512,512,768-size/2,feet-494*size/512,size,size);
+  for(const member of cast){
+   const character=characters[member.index];if(!character)continue;
+   const previous=member.id===this.previousId?1:0,current=member.active?1:0,light=s.result?1:previous+(current-previous)*crossfade;
+   const memberSize=size*(cast.length>1?.88:1);
+   c.save();c.filter=`brightness(${.55+.45*light})`;c.globalAlpha=.9+.1*light;
+   c.drawImage(character,member.pose%3*512,Math.floor(member.pose/3)*512,512,512,member.x-memberSize/2,feet-494*memberSize/512,memberSize,memberSize);c.restore();
+  }
   if(foreground)c.drawImage(foreground,0,100,1536,1024);
   if(audience){const r=showArt(s.show).crowd[crowd],scale=.72;c.drawImage(audience,...r,(1536-r[2]*scale)/2,1045-r[3]*scale,r[2]*scale,r[3]*scale);}
   if(burst&&expressions){const cell=s.overdrive?4:0;for(const [x,y] of [[290,765],[1090,755]])c.drawImage(expressions,cell%3*512,Math.floor(cell/3)*512,512,512,x,y,145,145);}

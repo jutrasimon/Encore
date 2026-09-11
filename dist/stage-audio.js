@@ -95,6 +95,7 @@ export class StageAudio extends ResolutionAudio{
   if(!this.levels.voice){this.tone(105,36,.4,.13,'sawtooth');return;}
   this.duck(2800);super.announce(name,this.levels.voice);
  }
+ deal(){if(this.enabled())this.tone(240,95,.045,.035,'triangle');}
  hit(index){super.hit(index);this.sample('score-hit',.34,1+index*.025);}
  critical(rank){this.sample('critical',.38+rank*.035,1+rank*.04);}
  verdict(text){
