@@ -44,7 +44,10 @@ export class ShowVisual{
  constructor(){this.canvas=null;this.assets=null;this.key=null;this.generation=0;this.state={};this.lastFrame='';this.lastBurst=-Infinity;this.burstUntil=0;}
  update(canvas,state,now=performance.now()){
   if(!canvas){this.detach();return;}
-  const changed=this.canvas!==canvas||!canvas.dataset.pose;this.canvas=canvas;this.state=state;
+  const rect=canvas.parentElement.getBoundingClientRect();
+  const height=state.performanceLayout?Math.max(1,Math.round(920*rect.height/Math.max(1,rect.width))):307;
+  const resized=canvas.height!==height;if(resized)canvas.height=height;
+  const changed=resized||this.canvas!==canvas||!canvas.dataset.pose;this.canvas=canvas;this.state=state;
   const key=showArt(state.show).directory+':'+(state.role||'guitarist-singer');
   if(key!==this.key){
    this.key=key;this.assets=null;this.lastFrame='';this.lastBurst=-Infinity;this.burstUntil=0;
@@ -65,19 +68,20 @@ export class ShowVisual{
   const burst=!still&&now<this.burstUntil,signature=[this.key,pose,crowd,burst,s.overdrive,!!s.result].join(':');
   if(!force&&signature===this.lastFrame)return;this.lastFrame=signature;
   canvas.dataset.pose=String(pose);canvas.dataset.crowd=String(crowd);
-  const c=canvas.getContext('2d');c.setTransform(canvas.width/1536,0,0,canvas.height/512,0,-512*canvas.height/512);
-  c.fillStyle='#10190f';c.fillRect(0,512,1536,512);
+  const c=canvas.getContext('2d');const scale=canvas.width/1536,viewHeight=canvas.height/scale,top=1024-viewHeight;
+  c.setTransform(scale,0,0,scale,0,-top*scale);
+  c.fillStyle='#10190f';c.fillRect(0,top,1536,viewHeight);
   if(!this.assets)return;
   const [back,background,foreground,audience,character,microphone,expressions]=this.assets;
   if(back)c.drawImage(back,0,0,1536,1024);
   if(background)c.drawImage(background,0,0,1536,1024);
   if(s.overdrive){const halo=c.createRadialGradient(768,730,10,768,730,320);halo.addColorStop(0,'#baff4250');halo.addColorStop(1,'#baff4200');c.fillStyle=halo;c.fillRect(400,512,736,512);}
-  const size=435,feet=930;
+  const size=s.performanceLayout?Math.min(435,Math.max(180,viewHeight-140)):435,feet=s.performanceLayout?990:930;
   if(character)c.drawImage(character,pose%3*512,Math.floor(pose/3)*512,512,512,768-size/2,feet-494*size/512,size,size);
   if(microphone&&!s.result)c.drawImage(microphone,733,feet-310,207,310);
   if(foreground)c.drawImage(foreground,0,100,1536,1024);
   if(audience){const r=showArt(s.show).crowd[crowd],scale=.72;c.drawImage(audience,...r,(1536-r[2]*scale)/2,1045-r[3]*scale,r[2]*scale,r[3]*scale);}
   if(burst&&expressions){const cell=s.overdrive?4:0;for(const [x,y] of [[290,765],[1090,755]])c.drawImage(expressions,cell%3*512,Math.floor(cell/3)*512,512,512,x,y,145,145);}
-  const fade=c.createLinearGradient(0,512,0,575);fade.addColorStop(0,'#10190fb0');fade.addColorStop(1,'#10190f00');c.fillStyle=fade;c.fillRect(0,512,1536,64);
+  const fade=c.createLinearGradient(0,top,0,top+110);fade.addColorStop(0,'#10190fb0');fade.addColorStop(1,'#10190f00');c.fillStyle=fade;c.fillRect(0,top,1536,110);
  }
 }

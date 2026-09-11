@@ -14,5 +14,14 @@ test('show objectives precede the player banner, then the board and last-song re
   assert.ok(html.startsWith('<header/><objectives/><players/><board/>'));
   assert.ok(html.indexOf('DERNIÈRE CHANSON')>html.indexOf('<board/>'));
   assert.equal(html.split('<players/>').length,2);
+  assert.ok(!html.includes('<stage/>'),'normal play reserves all space for the board');
  }
+});
+
+test('reveal scenery follows the counters and stays outside board sizing',()=>{
+ const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
+ const view=source.slice(source.indexOf('function resolutionView()'),source.indexOf('function players()'));
+ assert.ok(view.indexOf('showVisualMarkup()')>view.indexOf('resolution-caption'));
+ const css=readFileSync(new URL('../dist/polish.css',import.meta.url),'utf8');
+ assert.match(css,/\.resolution-mode \.show-visual\{position:absolute;inset:auto 0 0/);
 });

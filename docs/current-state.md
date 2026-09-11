@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.12 / principal 0.9.9
+# État courant : preview ENCORE 0.9.13 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Correction du placement 0.9.13
+
+Base preview `9e510f9`. Retrait de la bande décorative en jeu normal pour restaurer la grille. Pendant le reveal, la scène est positionnée hors flux, en pleine largeur sous les compteurs jusqu’au bas de la console. Le texte d’annonce la surplombe. Le canvas adapte son cadrage sans déformer les proportions ; les poses de fin apparaissent dans la dernière séquence du reveal.
+
+Vérification navigateur sur un reveal figé généré depuis les fonctions réelles : à 500 × 900, la grille mesure 427.33 px avec et sans illustration. Cadrage aussi contrôlé à 320 × 700. Tests de non-régression de placement ajoutés ; aucune règle ni durée de résolution modifiée. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Illustrations 0.9.12
 
