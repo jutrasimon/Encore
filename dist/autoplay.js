@@ -6,6 +6,8 @@ export class RewardAdvance{
   const before=previous?.players.find(p=>p.id===id),after=next?.players.find(p=>p.id===id);
   if(!after)return;
   if(!before){
+   // A show snapshot proves launch and all required choices are already committed.
+   if(next.phase==='show'&&!after.ready)this.pending={readyKey:`${next.show}:${next.attempt||0}:${next.round}`};
    // Reconnecting while a partner is still choosing must retain our committed choice.
    if(next.phase==='draft'&&after.drafted||next.phase==='reward'&&after.rewarded)
     this.pending={show:next.show,round:next.round,attempt:next.attempt||0,rewarded:next.phase==='reward'};

@@ -1,17 +1,17 @@
-import {Juice,scoreCallout} from './juice.js?v=0.9.10';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.10';
-import {RewardAdvance} from './autoplay.js?v=0.9.10';
-import {statsMarkup} from './stats-ui.js?v=0.9.10';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.10';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.10';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.10';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.10';
+import {Juice,scoreCallout} from './juice.js?v=0.9.10.2';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.10.2';
+import {RewardAdvance} from './autoplay.js?v=0.9.10.2';
+import {statsMarkup} from './stats-ui.js?v=0.9.10.2';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.10.2';
+import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.10.2';
+import {tileCard,tileDetails} from './tile-ui.js?v=0.9.10.2';
+import {inventoryMarkup} from './inventory-ui.js?v=0.9.10.2';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.10';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.10';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.10.2';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.10.2';
 import {icon} from './icons.js';
 import {SERVER_URL} from './config.js';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.10';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.10.2';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -154,7 +154,7 @@ function render(){
  if(modal&&!animating){const dlg=$('#details');if(modal.kind==='inspect'){const t=me()?.inventory.find(t=>t.id===modal.tileId)||me()?.board.find(t=>t?.id===modal.tileId);if(t){inspect(t);return;}}else if(['rules','focus','show'].includes(modal.kind)){dlg.innerHTML=modal.html;dlg.className=modal.classes;dlg.dataset.kind=modal.kind;dlg.showModal();return;}}
  if(game&&view==='game'&&!animating){
   if(mode==='multi'&&game.phase==='lobby'){intro=false;return;}
-  if(intro){intro=false;if(!advance.pending)showIntro();}
+  if(intro){intro=false;if(!advance.pending&&game.phase==='lobby')showIntro();}
  }
 }
 function inspect(t){

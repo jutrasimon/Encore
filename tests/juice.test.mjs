@@ -61,6 +61,13 @@ test('reconnecting after a committed choice waits for the partner, then auto-rea
   const unchosen=new RewardAdvance();unchosen.observe(null,waiting,'b');assert.equal(unchosen.pending,null);
  }
 });
+
+test('reconnecting after the partner completed the choices resumes only an open show',()=>{
+ for(const phase of ['show','draft','reward','lost','lobby']){
+  const advance=new RewardAdvance(),g={phase,show:1,round:0,players:[{id:'a',ready:false}]};
+  advance.observe(null,g,'a');assert.equal(advance.take(g,'a'),phase==='show');assert.equal(advance.take(g,'a'),false);
+ }
+});
 test('resolution accelerates gently from 1.5x to a hard 2.25x ceiling and conserves totals',()=>{
  assert.equal(resolutionSpeed(0),1.5);assert.equal(resolutionSpeed(4500),1.6875);assert.equal(resolutionSpeed(9000),2.25);assert.equal(resolutionSpeed(999999),2.25);
  let g=setup(['a','b']);g=act(act(g,'a','ready'),'b','ready');const p=resolutionPlan(g.players,{q:0,e:0});
