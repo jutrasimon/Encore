@@ -1,6 +1,6 @@
-import {TILES} from './engine.js?v=0.8.2';
+import {TILES} from './engine.js?v=0.9.18';
 import {sticker,FAMILY_ART} from './art.js?v=0.8.2';
-import {icon} from './icons.js?v=0.9.16';
+import {icon} from './icons.js?v=0.9.18';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];

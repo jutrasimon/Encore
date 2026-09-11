@@ -46,7 +46,7 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
 clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
-chacun choisit sa récompense. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Le même enchaînement s’applique à la sortie du Studio. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
+chacun prépare ses trois catégories au Studio. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Au Studio, chaque joueur termine Ajouter, Améliorer et Retirer (ou passe chaque catégorie), puis confirme Partir en show. En coop, les deux départs sont requis, puis chacun confirme Monter sur scène. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
@@ -57,7 +57,7 @@ Le solo est sauvegardé localement, indépendamment du serveur.
 
 - Chaque show dure cinq chansons. Les quatre premières sont suivies du choix d’une tuile ou de Passer.
 - Après la cinquième chanson, le plateau et le résultat restent visibles.
-- Les deux objectifs atteints : **Passer au Studio**, puis ajouter, améliorer, retirer une tuile ou passer. Le show suivant démarre après le choix de chacun.
+- Les deux objectifs atteints : **Passer au Studio**, puis un choix indépendant dans chacune des catégories Ajouter, Améliorer et Retirer. Chaque catégorie peut être passée et ne peut appliquer qu’une action par visite. À 3/3, chacun confirme Partir en show. Les confirmations et les propositions sont sauvegardées par joueur; Bilan ne les réinitialise pas.
 - Un objectif manqué : **fin de tournée**, bilan consultable et nouvelle tournée avec cinq tuiles de départ. Aucun retry du show avec les gains.
 - La progression reste sans dernier niveau tant que les shows sont réussis.
 - Les anciennes sauvegardes en attente de retry passent en fin de tournée sans effacer leur bilan. Les reprises déjà commencées ne sont pas annulées rétroactivement.

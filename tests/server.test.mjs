@@ -107,3 +107,12 @@ test('HTTP skip is idempotent and unlocks the next song after both players pass'
  const x=await a('room',msgA);assert.equal(x.game.phase,'draft');const replay=await a('room',msgA);assert.equal(replay.game.revision,x.game.revision);
  const y=await b('room',msgB);assert.equal(y.game.phase,'show');assert(y.game.players.every(p=>p.inventory.length===5));
 });
+
+test('Studio HTTP confirmations persist across reconnect and action ID retries',async()=>{
+ const {a,store,code}=await setup();const room=store.rooms.get(code);room.game.phase='reward';room.game.players.forEach(p=>p.offers=['guitar','voice','pick']);let g=structuredClone(room.game),count=g.players[0].inventory.length;
+ const msg=action(code,g,'reward',{category:'add',action:'add',kind:'guitar'});const first=await a('room',msg);assert.equal(first.status,200);assert.equal(first.game.players[0].inventory.length,count+1);
+ const repeated=await a('room',msg);assert.deepEqual(repeated.game,first.game);
+ const reconnected=await client(handler(store),tokens[0])('room',{code,type:'hello',name:'Simon'});assert.deepEqual(reconnected.game,first.game);
+ resetRate(store,code);assert.equal((await a('room',action(code,reconnected.game,'reward',{category:'add',action:'add',kind:'voice'}))).status,400);
+ assert.equal(store.rooms.get(code).game.players[0].inventory.length,count+1);
+});

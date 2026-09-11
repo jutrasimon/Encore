@@ -1,7 +1,7 @@
-import {icon} from './icons.js?v=0.9.16';
-import {classArt} from './show-art.js?v=0.9.16';
-import {TILES,ROLES} from './engine.js?v=0.8.2';
-import {esc,tileCard} from './tile-ui.js?v=0.9.16';
+import {icon} from './icons.js?v=0.9.18';
+import {classArt} from './show-art.js?v=0.9.18';
+import {TILES,ROLES} from './engine.js?v=0.9.18';
+import {esc,tileCard} from './tile-ui.js?v=0.9.18';
 export const number=n=>new Intl.NumberFormat('fr-CA',{maximumFractionDigits:1}).format(n||0);
 const sum=(a,k)=>a.reduce((n,r)=>n+(r[k]||0),0);
 const metric=(n,label,cls='')=>`<div class="stat-sticker ${cls}"><b>${/FANS/.test(label)?icon('choir'):label==='QUALITÉ'?icon('star'):label==='ÉNERGIE'?icon('bolt'):''}${number(n)}</b><span>${label}</span></div>`;
@@ -15,7 +15,7 @@ function chart(rows,key,label,mode){
  const line=values.map((v,i)=>v===null?'':`${x(i)},${y(v)}`).filter(Boolean).join(' '),latest=valid.at(-1);
  return `<section class="chart-panel metric-${key}"><h3>${icon(key==='q'?'star':key==='e'?'bolt':'choir')}${label}<b>${mode==='velocity'&&latest>0?'+':''}${number(latest)}</b></h3><svg class="song-chart" viewBox="0 0 430 173" role="img" aria-label="${label} : ${esc(values.map((v,i)=>rows[i].label+' '+(v===null?'non disponible':number(v))).join(', '))}">${[low,(low+high)/2,high].map(v=>`<line x1="40" x2="405" y1="${y(v)}" y2="${y(v)}" class="chart-guide"/><text x="34" y="${y(v)+4}" text-anchor="end">${number(v)}</text>`).join('')}<polyline points="${line}"/>${values.map((v,i)=>v===null?'':`<circle cx="${x(i)}" cy="${y(v)}" r="${values.length>60?2:4}"><title>${esc(rows[i].label)} : ${number(v)}</title></circle>`).join('')}<text x="40" y="165">${esc(rows[0].label)}</text><text x="404" y="165" text-anchor="end">${esc(rows.at(-1).label)}</text></svg></section>`;
 }
-export function statsMarkup(game,{playerId='band',range='all',chartMode='production'}={}){
+export function statsMarkup(game,{playerId='band',range='all',chartMode='production',returnLabel='RETOUR SUR SCÈNE'}={}){
  const selected=game.players.find(p=>p.id===playerId),people=selected?[selected]:game.players,rows=songRows(game,playerId,range),careers=people.map(p=>p.career).filter(Boolean),all=range==='all';
  const source=all?careers:rows,total=k=>sum(source,k),songs=all?Math.max(0,...careers.map(c=>c.songs)):rows.length;
  const fans=all?sum(people,'fans'):sum(rows,'f')+sum(rows,'bonusFans'),q=total('q'),e=total('e'),heat=Array.from({length:9},(_,i)=>source.reduce((n,r)=>n+(r.heat?.[i]||0),0)),maxHeat=Math.max(1,...heat),peak=Math.max(1,...source.map(r=>r.maxMultiplier||1));
@@ -39,5 +39,5 @@ export function statsMarkup(game,{playerId='band',range='all',chartMode='product
  ${best?`<div class="encore-award">LA TOUNE QUI A DÉVISSÉ LE PLAFOND<b>${number(best.q+best.e)} POINTS</b><span>${esc(best.label)} · parmi les tounes affichées</span></div>`:''}
  <details class="song-ledger"><summary>TOUTES LES TOUNES · ${rows.length} TOUNES</summary><div class="ledger-scroll"><table><thead><tr><th>Toune</th><th>${icon('star')}Qualité</th><th>${icon('bolt')}Énergie</th><th>${icon('choir')}Fans +</th><th>${icon('choir')}Fans ∑</th><th>Liens</th><th>× max</th><th>Vides</th><th>Inactives</th><th>Inventaire</th></tr></thead><tbody>${rows.map(r=>`<tr><th>${esc(r.label)}</th>${[r.q,r.e,r.f+r.bonusFans,r.fans,r.links,r.maxMultiplier,r.empty,r.inactive,r.inventory].map(v=>`<td>${number(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>`}
  <details class="song-ledger"><summary>LES SALLES CONQUISES · ${history.filter(h=>h.won).length}/${history.length}</summary>${history.map(h=>`<div class="show-stamp"><b>${h.won?'ÇA A BRASSÉ !':'ON REVIENDRA !'}</b><span>Niveau ${h.show+1} · Essai ${(h.attempt||0)+1}</span><span>Qualité ${number(h.q)} / ${number(h.target?.q)} · Énergie ${number(h.e)} / ${number(h.target?.e)}</span></div>`).join('')||'<p>Termine un show pour accrocher ton premier souvenir.</p>'}</details>
- <p class="stats-note">${game.songs?.length===250?'Graphiques : 250 dernières tounes. Les compteurs de carrière conservent tout. ':''}Les statistiques détaillées des anciennes tounes ne sont pas disponibles. Les fans cumulés restent conservés.</p><button class="action-button primary" data-action="back">RETOUR SUR SCÈNE</button><button class="action-button secondary" data-action="quit">RETOUR À L’ACCUEIL</button></div></section>`;
+ <p class="stats-note">${game.songs?.length===250?'Graphiques : 250 dernières tounes. Les compteurs de carrière conservent tout. ':''}Les statistiques détaillées des anciennes tounes ne sont pas disponibles. Les fans cumulés restent conservés.</p><button class="action-button primary" data-action="back">${esc(returnLabel)}</button><button class="action-button secondary" data-action="quit">RETOUR À L’ACCUEIL</button></div></section>`;
 }

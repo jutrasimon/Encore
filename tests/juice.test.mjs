@@ -1,3 +1,4 @@
+import {completeVisit} from './helpers/studio.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RewardAdvance} from '../dist/autoplay.js';
@@ -42,7 +43,7 @@ test('successful studio choice or skip queues first song of the next show',()=>{
  for(const action of ['skip','add','upgrade','remove']){
   let g=setup();g.players[0].inventory.forEach(t=>t.level=30);for(let i=0;i<5;i++){g=act(g,'a','ready');if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});}
   assert.equal(g.phase,'reward');const advance=new RewardAdvance(),p=g.players[0];
-  const next=act(g,'a','reward',{action,kind:p.offers[0],tileId:p.inventory[0].id});advance.observe(g,next,'a');
+  const next=completeVisit(g,'a',{action,kind:p.offers[0],tileId:p.inventory[0].id});advance.observe(g,next,'a');
   assert.equal(next.round,0);assert.equal(advance.take(next,'a'),true);assert.equal(act(next,'a','ready').round,1);
  }
 });

@@ -1,3 +1,4 @@
+import {completeVisit} from './helpers/studio.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {TILES,adjacent,tile,resolve,draw,random,newGame,player,command,targets,ROLES,normalizeGame,grantTemporaryFocus,focusCapacity,songOffers} from '../dist/engine.js';
@@ -14,15 +15,15 @@ test('draw has no duplicated instances, empty cells shuffle and exhausted never 
 test('charges persist in same show but value recalculates each draw',()=>{const a=board([[4,'refrain']]);assert.equal(result(a).totals.e,1);assert.equal(result(a).totals.e,2);assert.equal(a[4].charges,2);});
 test('inactive Voice produces no points or normal synergy',()=>{const a=board([[3,'voice'],[4,'guitar']]);a[3].inactive=true;const r=result(a);assert.equal(r.totals.q,1);assert.equal(r.totals.e,0);});
 test('both players ready causes exactly one shared round; stale actions cannot mutate',()=>{let g=newGame();g.players=[player('a','A'),player('b','B')];g=act(g,'a','start');const rev=g.revision;g=act(g,'a','ready');assert.equal(g.round,0);assert.throws(()=>command(g,'b',{type:'ready',revision:rev}));assert.equal(g.round,0);g=act(g,'b','ready');assert.equal(g.round,1);assert.equal(g.q,g.players.reduce((n,p)=>n+p.q,0));assert(g.players.every(p=>!p.ready));assert.equal(targets(g).q,68);});
-test('reward validation, one choice per player, next show resets temporary state only',()=>{let g=newGame();g.phase='reward';g.players=[player('a','A'),player('b','B')];for(const p of g.players){p.offers=['solo'];p.inventory[0].charges=9;p.inventory[0].inactive=true;p.inventory[1].exhausted=true;}g.players[0].fans=20;assert.throws(()=>act(g,'a','reward',{action:'add',kind:'note'}));g=act(g,'a','reward',{action:'upgrade',tileId:'a-0'});assert.throws(()=>act(g,'a','reward',{action:'add',kind:'solo'}));g=act(g,'b','reward',{action:'remove',tileId:'b-1'});assert.equal(g.show,1);assert.equal(g.players[0].inventory[0].level,1);assert.equal(g.players[0].fans,20);assert(g.players.every(p=>p.inventory.every(t=>!t.inactive&&!t.exhausted&&!t.charges)));assert.equal(g.players[1].inventory.length,4);});
+test('reward validation, one action per category and explicit departure, next show resets temporary state only',()=>{let g=newGame();g.phase='reward';g.players=[player('a','A'),player('b','B')];for(const p of g.players){p.offers=['solo'];p.inventory[0].charges=9;p.inventory[0].inactive=true;p.inventory[1].exhausted=true;}g.players[0].fans=20;assert.throws(()=>act(g,'a','reward',{action:'add',kind:'note'}));g=completeVisit(g,'a',{action:'upgrade',tileId:'a-0'});assert.throws(()=>act(g,'a','reward',{action:'add',kind:'solo'}));g=completeVisit(g,'b',{action:'remove',tileId:'b-1'});assert.equal(g.show,1);assert.equal(g.players[0].inventory[0].level,1);assert.equal(g.players[0].fans,20);assert(g.players.every(p=>p.inventory.every(t=>!t.inactive&&!t.exhausted&&!t.charges)));assert.equal(g.players[1].inventory.length,4);});
 test('both goals are required; failure ends the tour and successful tours continue past three venues',()=>{
  let g=newGame();g.players=[player('a','A')];g=act(g,'a','start');g.players[0].inventory=Array.from({length:9},(_,i)=>tile('solo','s'+i));
  for(let i=0;i<5;i++){g=act(g,'a','ready');if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});}
  assert.equal(g.phase,'lost');assert.equal(g.retry,false);assert.equal(g.history[0].won,false);assert.equal(g.e,0);
  g=newGame();g.players=[player('a','A')];g=act(g,'a','start');
- while(g.history.length<4){if(g.phase==='reward')g=act(g,'a','reward',{action:'skip'});else if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});else{g.players[0].inventory=Array.from({length:9},(_,i)=>tile(i%2?'voice':'guitar','s'+i,30));g=act(g,'a','ready');}}
+ while(g.history.length<4){if(g.phase==='reward')g=completeVisit(g,'a');else if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});else{g.players[0].inventory=Array.from({length:9},(_,i)=>tile(i%2?'voice':'guitar','s'+i,30));g=act(g,'a','ready');}}
  assert.equal(g.phase,'reward');assert.equal(g.retry,false);assert.equal(g.history.length,4);assert.equal(g.show,3);
- g=act(g,'a','reward',{action:'skip'});assert.equal(g.show,4);assert.equal(g.phase,'show');
+ g=completeVisit(g,'a');assert.equal(g.show,4);assert.equal(g.phase,'show');
 });
 test('all initial tile kinds resolve with finite output',()=>{for(const kind of Object.keys(TILES)){const r=result(board([[1,'voice'],[3,'guitar'],[4,kind],[5,'refrain'],[7,'amp']]));assert(Object.values(r.totals).every(Number.isFinite),kind);}});
 test('role owns five-tile starter and focus defaults; old saves retain their inventory',()=>{
@@ -74,7 +75,7 @@ test('shows last five songs despite exceeded goals, with four drafts and untouch
   if(i<5){assert.equal(g.phase,'draft');g=act(g,'a','draft',{kind:g.players[0].songOffers[0]});}
  }
  assert.equal(g.phase,'reward');assert.equal(g.players[0].inventory.length,9);assert.equal(g.players[0].offers.length,3);
- g=act(g,'a','reward',{action:'upgrade',tileId:'a-0'});assert.equal(g.show,1);assert.equal(g.round,0);assert.equal(g.players[0].inventory[0].level,1);assert.equal(g.players[0].last,null);
+ g=completeVisit(g,'a',{action:'upgrade',tileId:'a-0'});assert.equal(g.show,1);assert.equal(g.round,0);assert.equal(g.players[0].inventory[0].level,1);assert.equal(g.players[0].last,null);
 });
 test('temporary focus lasts through songs then expires at show end, preserving permanent selection',()=>{
  let g=newGame();g.players=[player('a','A')];g=act(g,'a','start');grantTemporaryFocus(g.players[0],3);

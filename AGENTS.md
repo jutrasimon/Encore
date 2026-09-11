@@ -2,7 +2,7 @@
 
 - Source de vérité : dépôt `jutrasimon/Encore`. Commencer par `git fetch`, lire les SHA distants et `docs/current-state.md`. Ne jamais reconstruire le projet depuis une ancienne copie temporaire ou un résumé de chat.
 - Avant modification, identifier branche, SHA de base et URL testée. Ne pas écraser les modifications distantes; utiliser une avance rapide, jamais un push forcé.
-- Le design attendu est documenté dans la section « Boucle de jeu validée » du README. Un show échoué termine la tournée. Un show réussi exige une action Studio par joueur avant le suivant. Les niveaux restent sans fin. Une amélioration audio ou visuelle ne change pas ces règles.
+- Le design attendu est documenté dans la section « Boucle de jeu validée » du README. Un show échoué termine la tournée. Un show réussi exige trois catégories Studio complétées (Ajouter, Améliorer, Retirer, chacune avec possibilité de passer), puis Partir en show par joueur avant le suivant. Les niveaux restent sans fin. Une amélioration audio ou visuelle ne change pas ces règles.
 - Distinguer un choix entre chansons (`draft`) du Studio entre shows (`reward`). L’auto-ready ne doit jamais contourner ces choix ni redémarrer une défaite (`lost`).
 - Tester cinq chansons complètes, la réussite vers le Studio, l’échec terminal, le nouveau départ et les sauvegardes, en solo et en coop. Les tests ne remplacent pas un essai des écrans dans le navigateur.
 - `dist/engine.js` est exécuté localement en solo et dans la fonction Supabase en coop. Tout changement de règles exige leur publication cohérente et la vérification de la copie serveur. Conserver l’authentification existante.

@@ -1,6 +1,18 @@
-# État courant : preview ENCORE 0.9.17 / principal 0.9.9
+# État courant : preview ENCORE 0.9.18 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Studio à trois catégories 0.9.18
+
+Base `f40bae901e68ef3f1cdaff896b7be2640c075e21`. Studio reconstruit avec les PNG fournis : panorama, fond crème, titres HTML sur bandeaux, billet et planches alpha en sprites CSS (décorations 724 × 724 ; splats/BD 512 × 512). La maquette reste une référence, jamais une interface. Aucun détourage. Trois onglets, sélection rose, détail à hauteur naturelle, confirmation explicite, catégorie passée/complétée, Bilan avec retour et sélection conservée. Aucun compteur de chanson ni jauges dans le Studio. Défilement dans le cadre du téléphone, galerie sur deux colonnes à 320 px et textes lisibles. Tampon de 250 ms et éclat de 350 ms, désactivés en mouvement réduit.
+
+Moteur : `player.studio` contient la visite (show/attempt), les trois confirmations et le départ. Chaque catégorie n’agit qu’une fois ; les propositions restent fixes, les options d’inventaire sont recalculées. Passer compte comme complété sans effet. Les anciennes récompenses déjà confirmées sont migrées comme complétées pour ne pas redonner de choix. À 3/3, Partir en show est explicite pour chaque joueur. Les conditions d’accès, cinq chansons, drafts, défaite terminale, calculs et double confirmation Monter sur scène restent inchangés.
+
+Serveur de preview isolé : fonction `encore-preview` version 1, health protocol 2 / rules 5 / build 0.9.18 ; table `encore_preview_rooms` et RPC correspondante via migration `20260911215619_studio_preview_rooms.sql`. Authentification de membre 256 bits conservée ; RLS et absence de droits anon/authenticated vérifiées. Les anciens bands sont lus dans `encore_rooms` puis copiés lors d’une transaction authentifiée vers la table preview, sans écriture sur la table principale. Ne pas déployer `encore` pendant cette preview : il reste en rules 4 / build 0.9.9. Les quatre fichiers du bundle serveur ont été relus et comparés à la copie locale, moteur compris.
+
+Validation : 114 tests réussis (cinq chansons solo/coop, succès, échec terminal, nouveau départ, sauvegardes ; trois actions, options réévaluées, catégorie passée/vide, doublons et reconnexion HTTP). Navigateur local : ajouter puis améliorer puis retirer la même tuile, Bilan sans perte de sélection, 3/3 persistant après rechargement ; format 320 × 700 sans débordement, bouton Bilan dans le cadre. Coop réelle sur la nouvelle fonction : cinq chansons/quatre drafts via API dans une partie QA dédiée avec niveaux de tuiles renforcés pour garantir le succès ; Studio testé avec deux clients navigateur, choix indépendants, catégorie passée, attente du premier départ et reconnexion conservant les confirmations, second départ vers Le petit pub. Pas de nouveau parcours d’échec complet en navigateur. La création d’un ancien band QA sur le serveur principal a été refusée par la revue automatique ; le chemin de copie d’un ancien band n’a donc pas été vérifié en production.
+
+Preview cible : https://jutrasimon.github.io/Encore/audio-test/. Principal inchangé en 0.9.9 ; aucune promotion sans validation utilisateur.
 
 ## Distribution et duo sur scène 0.9.17
 

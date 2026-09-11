@@ -1,3 +1,4 @@
+import {completeVisit} from './helpers/studio.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,player,command,normalizeGame,tile} from '../dist/engine.js';
@@ -10,7 +11,7 @@ test('per-song and career totals reconcile with authoritative production and fan
  assert.equal(g.songs.length,5);const rows=songRows(g);assert.equal(rows.reduce((n,r)=>n+r.q,0),g.q);assert.equal(rows.reduce((n,r)=>n+r.e,0),g.e);
  assert.equal(rows.reduce((n,r)=>n+r.f+r.bonusFans,0),g.players.reduce((n,p)=>n+p.fans,0));
  for(const p of g.players){assert.equal(p.career.songs,5);assert.equal(p.career.q,p.q);assert.equal(p.career.f+p.career.bonusFans,p.fans);assert.equal(Object.values(p.career.byTile).reduce((n,t)=>n+t.q+t.e,0),p.q+p.e);assert.equal(p.career.heat.reduce((a,b)=>a+b,0),p.q+p.e);}
- const c=structuredClone(g.players[0].career);g=act(g,'a','reward',{action:'skip'});g=act(g,'b','reward',{action:'skip'});assert.deepEqual(g.players[0].career,c);assert.equal(songRows(g,'band','show').length,0);
+ const c=structuredClone(g.players[0].career);g=completeVisit(g,'a');g=completeVisit(g,'b');assert.deepEqual(g.players[0].career,c);assert.equal(songRows(g,'band','show').length,0);
 });
 test('readiness and rejected stale requests never double count recorded songs',()=>{
  let g=band();g=act(g,'a','ready');assert.equal(g.songs,undefined);g=act(g,'b','ready');const saved=structuredClone(g);assert.throws(()=>act(g,'b','ready'));assert.deepEqual(g,saved);assert.equal(g.songs.length,1);

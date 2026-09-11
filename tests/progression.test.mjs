@@ -30,6 +30,8 @@ for(const count of [1,2])for(const win of [false,true])test(`${count} player(s):
  if(win){
   for(let i=0;i<count;i++){
    act('p'+i,'reward',{action:'upgrade',tileId:'p'+i+'-0'});
+   for(const category of ['add','remove'])act('p'+i,'reward',{action:'skip',category});
+   assert.equal(g.phase,'reward');act('p'+i,'studio-depart');
    if(i<count-1){assert.equal(g.phase,'reward');assert.equal(g.show,0);assert.equal(advances[i].take(g,'p'+i),false);}
   }
   assert.equal(g.phase,'show');assert.equal(g.show,1);assert.equal(g.round,0);

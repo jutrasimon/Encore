@@ -29,6 +29,14 @@ export const ROLES={
  'guitarist-singer':{name:'Guitariste-chanteur',startingCount:5,starter:['guitar','guitar','voice','voice','pick'],focus:1,pool:Object.keys(TILES)}
 };
 export const STARTER=ROLES['guitarist-singer'].starter;
+export const STUDIO_CATEGORIES=['add','upgrade','remove'];
+export const studioComplete=p=>STUDIO_CATEGORIES.every(k=>!!p.studio?.[k]);
+export function studioChoices(p,category){return category==='add'?(p.offers||[]).map(kind=>({kind,level:0})):category==='upgrade'?p.inventory.filter(t=>Number.isSafeInteger(t.level+1)):category==='remove'?p.inventory:[];}
+function normalizeStudio(g,p){
+ const visit=g.show+':'+g.attempt;
+ if(!p.studio||p.studio.visit!==visit)p.studio={visit,departed:false,...Object.fromEntries(STUDIO_CATEGORIES.map(k=>[k,p.rewarded?{status:'legacy'}:null]))};
+ p.rewarded=studioComplete(p);
+}
 export const focusCapacity=p=>(p.focusBase??1)+(p.focusTemporary??0);
 export function normalizeGame(input){
  const g=structuredClone(input);g.version=2;g.attempt??=0;
@@ -40,7 +48,7 @@ export function normalizeGame(input){
  if(g.phase==='reward'&&g.retry)g.phase='lost';
  if(g.phase==='lost')g.retry=false;
 
- for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=Object.keys(TILES).slice(0,3);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
+ for(const p of g.players){p.role??='guitarist-singer';p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=Object.keys(TILES).slice(0,3);if(g.phase==='reward')normalizeStudio(g,p);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
  return g;
 }
 function pruneFocus(p){p.focusedIds=p.focusedIds.filter(id=>p.inventory.some(t=>t.id===id&&!t.exhausted)).slice(0,focusCapacity(p));}
@@ -128,7 +136,7 @@ export function resolve(inventory,drawn,round=1,rounds=5){
 export function targets(g){const n=g.players.length,s=showInfo(g.show);return g.stageTarget?{...g.stageTarget}:{q:s.q*n,e:s.e*n};}
 function resetShow(g){
  g.round=0;g.q=0;g.e=0;g.retry=false;const stage=showInfo(g.show);g.stageTarget={q:stage.q*g.players.length,e:stage.e*g.players.length};
- for(const p of g.players){p.q=0;p.e=0;p.last=null;p.ready=false;p.board=[];p.rewarded=false;p.songOffers=[];p.drafted=false;p.focusTemporary=0;pruneFocus(p);for(const t of p.inventory){t.charges=0;t.inactive=false;t.exhausted=false;}}
+ for(const p of g.players){p.q=0;p.e=0;p.last=null;p.ready=false;p.board=[];p.rewarded=false;p.studio=null;p.songOffers=[];p.drafted=false;p.focusTemporary=0;pruneFocus(p);for(const t of p.inventory){t.charges=0;t.inactive=false;t.exhausted=false;}}
 }
 function playRound(g,rng){
  g.round++;
@@ -148,7 +156,7 @@ function playRound(g,rng){
  if(g.round===showInfo(g.show).rounds){
   const target=targets(g),won=g.q>=target.q&&g.e>=target.e;
   for(const p of g.players){const gain=Math.floor((p.q+p.e)/10);p.fans+=gain;p.showFans=gain;p.career.bonusFans+=gain;const row=song.players.find(r=>r.id===p.id);row.bonusFans=gain;row.fans=p.fans;p.offers=shuffle(Object.keys(TILES),rng).slice(0,3);p.focusTemporary=0;pruneFocus(p);p.songOffers=[];}
-  g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=false;g.phase=won?'reward':'lost';
+  g.history.push({show:g.show,attempt:g.attempt,q:g.q,e:g.e,won,target});g.retry=false;g.phase=won?'reward':'lost';if(won)for(const p of g.players)normalizeStudio(g,p);
  }else{
   g.phase='draft';for(const p of g.players){p.songOffers=songOffers(p,rng);p.drafted=false;}
  }
@@ -159,7 +167,7 @@ export function command(input,id,msg,seed=1){
  const g=normalizeGame(input),p=g.players.find(p=>p.id===id);
  if(!p)throw Error('Musicien introuvable.');
  const sameRoundReady=msg.type==='ready'&&g.phase==='show'&&msg.show===g.show&&msg.round===g.round&&!p.ready;
- const independentChoice=msg.show===g.show&&msg.round===g.round&&((msg.type==='draft'&&g.phase==='draft'&&!p.drafted)||(msg.type==='reward'&&g.phase==='reward'&&!p.rewarded));
+ const independentChoice=msg.show===g.show&&msg.round===g.round&&((msg.type==='draft'&&g.phase==='draft'&&!p.drafted)||(msg.type==='reward'&&g.phase==='reward'&&!p.studio?.[msg.category||msg.action])||(msg.type==='studio-depart'&&g.phase==='reward'&&!p.studio?.departed));
  if(msg.revision!==g.revision&&!sameRoundReady&&!independentChoice)throw Error('La partie a avancé. Réessaie.');
  const rng=random(seed);
  if(msg.type==='start'){
@@ -180,16 +188,22 @@ export function command(input,id,msg,seed=1){
   p.inventory.push(tile(msg.kind,`${id}-song-${g.show}-${g.attempt}-${g.round}`));}p.drafted=true;p.songOffers=[];
   if(g.players.every(p=>p.drafted))g.phase='show';
  }else if(msg.type==='reward'){
-  if(g.phase!=='reward'||p.rewarded)throw Error('Récompense indisponible.');
+  const category=msg.category||msg.action;
+  if(g.phase!=='reward'||!STUDIO_CATEGORIES.includes(category)||p.studio?.[category]||p.studio?.departed)throw Error('Catégorie du Studio déjà complétée ou indisponible.');
+  if(msg.action!==category&&msg.action!=='skip')throw Error('Action de catégorie invalide.');
   if(msg.action==='add'){
-   if(!p.offers.includes(msg.kind))throw Error('Tuile non proposée.');
+   if(!p.offers.includes(msg.kind)||!ROLES[p.role].pool.includes(msg.kind))throw Error('Tuile non proposée.');
    p.inventory.push(tile(msg.kind,`${id}-reward-${g.show}-${g.attempt}`));
   }else if(msg.action==='upgrade'){
-   const t=p.inventory.find(t=>t.id===msg.tileId);if(!t||!Number.isSafeInteger(t.level+1))throw Error('Amélioration impossible.');t.level++;
+   const t=studioChoices(p,'upgrade').find(t=>t.id===msg.tileId);if(!t)throw Error('Amélioration impossible.');t.level++;
   }else if(msg.action==='remove'){
-   if(!p.inventory.some(t=>t.id===msg.tileId))throw Error('Tuile introuvable.');p.inventory=p.inventory.filter(t=>t.id!==msg.tileId);pruneFocus(p);
-  }else if(msg.action!=='skip')throw Error('Choix inconnu.');
-  p.rewarded=true;if(g.players.every(p=>p.rewarded)){g.show++;g.attempt++;g.phase='show';resetShow(g);}
+   if(!studioChoices(p,'remove').some(t=>t.id===msg.tileId))throw Error('Tuile introuvable.');p.inventory=p.inventory.filter(t=>t.id!==msg.tileId);pruneFocus(p);
+  }
+  p.studio[category]={status:msg.action==='skip'?'skipped':'applied',...(msg.kind?{kind:msg.kind}:{}),...(msg.tileId?{tileId:msg.tileId}:{})};p.rewarded=studioComplete(p);
+ }else if(msg.type==='studio-depart'){
+  if(g.phase!=='reward'||!studioComplete(p)||p.studio.departed)throw Error('Complète les trois catégories avant de partir.');
+  p.studio.departed=true;
+  if(g.players.every(p=>studioComplete(p)&&p.studio.departed)){g.show++;g.attempt++;g.phase='show';resetShow(g);}
  }else throw Error('Action inconnue.');
  g.revision++;return g;
 }
