@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.11 / principal 0.9.9
+# État courant : preview ENCORE 0.9.12 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Illustrations 0.9.12
+
+Base preview `5d8d9d3`, URL de test : https://jutrasimon.github.io/Encore/audio-test/. Intros et scènes superposées des trois shows intégrées depuis le lot de l’artiste. Portrait et poses connectés au rôle `guitarist-singer` via un registre de présentation séparé du moteur. Foule et actions suivent la résolution existante ; poses de fin conservées, mouvement réduit, détourage magenta mis en cache et protection des chargements tardifs. Voir `docs/art-integration.md` et l’atelier `art-preview.html`.
+
+Validation : syntaxe et 96 tests, dont les parcours de cinq chansons solo/coop, Studio obligatoire, défaite, nouveau départ, sauvegardes, mapping des illustrations et priorité des poses. Navigateur : trois lieux dans l’atelier, formats 320/390/460, états Content/Triste et mouvement réduit ; intro du petit pub, portrait, reprise de sauvegarde, chansons 4 et 5 puis défaite 69/32, rechargement terminal avec pose triste, nouveau départ avec cinq tuiles et intro sous-sol. Aucun moteur ni serveur modifié. Pas de nouveau parcours complet de coop réelle pour ce changement visuel ; les essais de coop réelle de la passe précédente restent décrits plus bas. Les PNG originaux sont chargés à la demande, leur poids peut retarder la première apparition du décor sur réseau lent.
 
 ## Survol adouci (0.9.11.1)
 

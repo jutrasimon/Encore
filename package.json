@@ -1,12 +1,12 @@
 {
   "name": "encore-band-roguelite",
-  "version": "0.9.11",
+  "version": "0.9.12",
   "private": true,
   "type": "module",
   "scripts": {
     "precheck": "node scripts/music-playlist.mjs",
     "test": "node --test tests/*.test.mjs",
     "dev": "python3 -m http.server 8000 --directory dist",
-    "check": "node --check dist/engine.js && node --check dist/screen-ui.js && node --check dist/app.js && node --check dist/network.js && node --check dist/resolution.js && node --check dist/resolution-audio.js && node --check dist/stage-audio.js && node --check dist/juice.js && node --check dist/autoplay.js && node --check server/room.js && node --check server/http.js"
+    "check": "node --check dist/engine.js && node --check dist/screen-ui.js && node --check dist/app.js && node --check dist/network.js && node --check dist/resolution.js && node --check dist/resolution-audio.js && node --check dist/stage-audio.js && node --check dist/show-art.js && node --check dist/juice.js && node --check dist/autoplay.js && node --check server/room.js && node --check server/http.js"
   }
 }

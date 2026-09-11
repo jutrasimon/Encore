@@ -1,3 +1,4 @@
+import {classArt} from './show-art.js?v=0.9.12';
 import {TILES,ROLES} from './engine.js?v=0.8.2';
 import {esc,tileCard} from './tile-ui.js?v=0.8.2';
 export const number=n=>new Intl.NumberFormat('fr-CA',{maximumFractionDigits:1}).format(n||0);
@@ -24,7 +25,7 @@ export function statsMarkup(game,{playerId='band',range='all',chartMode='product
  return `<section class="stats-screen"><span class="tape">${game.phase==='reward'?'LE RAPPORT APRÈS LE VACARME':'SUR SCÈNE · TOURNÉE EN COURS'}</span><h1>${selected?esc(selected.name):'LE BAND.<br>LE BRUIT.<br>LES CHIFFRES.'}</h1>
  <div class="stats-tabs" aria-label="Profil"><button data-action="stats-player" data-id="band" class="${!selected?'active':''}">LE BAND</button>${game.players.map(p=>`<button data-action="stats-player" data-id="${esc(p.id)}" class="${selected?.id===p.id?'active':''}">${esc(p.name)}</button>`).join('')}</div>
  <div class="stats-content content-box" data-scroll="stats" role="region" aria-label="Statistiques détaillées" tabindex="0">
- ${selected?`<div class="profile-hero"><img src="./art/guitarist-singer.png" alt="Portrait de classe"><div><span>CLASSE</span><h2>${esc(ROLES[selected.role]?.name||selected.role)}</h2><p>${selected.inventory.length} tuiles · ${selected.focusBase||1} focus de base</p><strong>${number(selected.fans)} FANS</strong></div></div>`:''}
+ ${selected?`<div class="profile-hero"><img src="${classArt(selected.role).portrait}" alt="Portrait de classe"><div><span>CLASSE</span><h2>${esc(ROLES[selected.role]?.name||selected.role)}</h2><p>${selected.inventory.length} tuiles · ${selected.focusBase||1} focus de base</p><strong>${number(selected.fans)} FANS</strong></div></div>`:''}
  <div class="stats-tabs"><button data-action="stats-range" data-range="all" class="${all?'active':''}">TOUTE LA TOURNÉE</button><button data-action="stats-range" data-range="show" class="${!all?'active':''}">CE SHOW</button></div>
  <div class="stats-headliners">${metric(fans,all?'FANS CUMULÉS':'NOUVEAUX FANS','pink')}${metric(songs,'TOUNES JOUÉES')}${metric(q,'QUALITÉ','cyan')}${metric(e,'ÉNERGIE','orange')}</div>
  ${!songs?'<p class="stats-empty">La foule attend. Joue une toune pour faire péter les compteurs !</p>':`<div class="stats-awards"><span>BRISEUR D’AMPLI <b>×${peak}</b><small>Meilleur multiplicateur</small></span><span>MACHINE À BRUIT <b>${number((q+e)/songs)}</b><small>Qualité + énergie / toune</small></span><span>COLLE À BAND <b>${number(total('links'))}</b><small>Liens d’effets activés</small></span></div>
