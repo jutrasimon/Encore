@@ -8,6 +8,8 @@ export function scoreCallout(event){
  return null;
 }
 const SPRITES=['hit-spark','critical-star','big-boom','shockwave','overload'];
+// Intensité des boutons : 0 = aucune distorsion, 0.5 = douce, 1 = forte.
+const BUTTON_WARP_INTENSITY = 0.5;
 export class Juice{
  constructor(root,enabled=()=>true){
   this.root=root;this.enabled=enabled;this.particles=[];this.bursts=[];this.assets=new Map();this.raf=0;this.last=0;this.pointer=null;this.hovered=null;this.warp=0;
@@ -32,7 +34,8 @@ export class Juice{
   const r=el.getBoundingClientRect(),speed=this.pointer?Math.min(24,Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)):3;
   el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*5+'deg');el.classList.add('pointer-warp');
   const action=el.classList.contains('action-button');
-  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(action?19:9,this.warp+speed*(action?.65:.3));
+  const intensity=action?BUTTON_WARP_INTENSITY:1;
+  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min((action?19:9)*intensity,this.warp+speed*(action?0.65:0.3)*intensity);
   if(speed>3)this.particles.push({x:e.clientX,y:e.clientY,vx:(Math.random()-.5)*100,vy:(Math.random()-.5)*100,life:0,ttl:250,size:2+Math.random()*3,color:Math.random()>.5?'#ff5aae':'#baff42'});
   this.particles=this.particles.slice(-80);this.wake();
  }

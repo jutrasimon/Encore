@@ -2,6 +2,10 @@
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
 
+## Survol adouci (0.9.11.1)
+
+Base preview a37717a. Intensité de distorsion des boutons réduite de moitié, réglable via BUTTON_WARP_INTENSITY dans dist/juice.js (0 désactive, 0.5 doux, 1 intensité précédente). Particules conservées. URL de test : https://jutrasimon.github.io/Encore/audio-test/. Aucun changement de règles.
+
 ## Ajustements 0.9.11
 
 Base preview `fb4ded0`. L’ADN sonore affiche la stat dominante au centre (35 qualité / 65 énergie → 65 % ÉNERGIE), avec un état équilibré et un état sans points. Tous les boutons principaux et secondaires utilisent la classe commune `action-button`, y compris Continuer, les choix, le Studio, les bilans et les dialogues. Les effets utilisent cette classe unique. Le filtre déforme le bouton entier (fond, contour et texte), sans simple inclinaison, avec une amplitude adaptée à sa taille. Vérification syntaxique et 93 tests réussis, dont les pourcentages dominants et la couverture des modèles de boutons de chaque écran.
