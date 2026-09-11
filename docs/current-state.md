@@ -13,9 +13,10 @@ Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb
 
 ## Vérifications de cette passe
 
-- `npm run check` et 89 tests passent (Node avec `--experimental-test-isolation=none` dans cette session Windows).
-- Essais navigateur en cours sur localhost : résolution solo, choix intermédiaires, écran 390 × 844.
-- Publication preview et validation complète solo/coop à vérifier avant livraison.
+- `npm run check` et 90 tests passent; la commande standard `npm test` a également été exécutée avec les sous-processus autorisés.
+- Essais navigateur : cinq chansons solo avec défaite et reprise, nouveau départ, puis cinq chansons avec réussite et Studio. Coop réelle à deux : cinq chansons, réussite, attente au Studio et choix ajouter/améliorer/retirer inspectés. Tailles 390 × 844 et bureau.
+- Correction de la reprise de l’auto-ready après reconnexion d’un joueur ayant déjà choisi, en attente de son partenaire. Les choix non faits restent obligatoires.
+- Première publication preview `8c69347` : workflow GitHub Actions 34561170232 réussi; six fichiers servis comparés aux sources. Ajustements complémentaires et fin de tournée coop en cours de contrôle.
 
 
 ## Règles

@@ -4,7 +4,13 @@ export class RewardAdvance{
  observe(previous,next,id){
   if(['lost','won'].includes(next?.phase)){this.clear();return;}
   const before=previous?.players.find(p=>p.id===id),after=next?.players.find(p=>p.id===id);
-  if(!before||!after)return;
+  if(!after)return;
+  if(!before){
+   // Reconnecting while a partner is still choosing must retain our committed choice.
+   if(next.phase==='draft'&&after.drafted||next.phase==='reward'&&after.rewarded)
+    this.pending={show:next.show,round:next.round,attempt:next.attempt||0,rewarded:next.phase==='reward'};
+   return;
+  }
   const started=previous.phase==='lobby'&&next.phase==='show';
   const drafted=previous.phase==='draft'&&!before.drafted&&(after.drafted||next.phase==='show');
   const rewarded=previous.phase==='reward'&&!before.rewarded&&(after.rewarded||next.phase==='show');

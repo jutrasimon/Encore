@@ -50,6 +50,17 @@ test('merely inspecting or opening a reward never starts a song',()=>{
  const advance=new RewardAdvance(),g=setup();advance.observe(g,structuredClone(g),'a');assert.equal(advance.take(g,'a'),false);
  advance.clear();assert.equal(advance.take(g,'a'),false);
 });
+
+test('reconnecting after a committed choice waits for the partner, then auto-readies once',()=>{
+ for(const phase of ['draft','reward']){
+  const flag=phase==='draft'?'drafted':'rewarded',advance=new RewardAdvance();
+  const waiting={phase,show:0,round:phase==='draft'?2:5,players:[{id:'a',[flag]:true},{id:'b',[flag]:false}]};
+  advance.observe(null,waiting,'a');assert.equal(advance.take(waiting,'a'),false);
+  const next={...waiting,phase:'show',show:phase==='reward'?1:0,round:phase==='reward'?0:2,players:waiting.players.map(p=>({...p,[flag]:true}))};
+  advance.observe(waiting,next,'a');assert.equal(advance.take(next,'a'),true);assert.equal(advance.take(next,'a'),false);
+  const unchosen=new RewardAdvance();unchosen.observe(null,waiting,'b');assert.equal(unchosen.pending,null);
+ }
+});
 test('resolution accelerates gently from 1.5x to a hard 2.25x ceiling and conserves totals',()=>{
  assert.equal(resolutionSpeed(0),1.5);assert.equal(resolutionSpeed(4500),1.6875);assert.equal(resolutionSpeed(9000),2.25);assert.equal(resolutionSpeed(999999),2.25);
  let g=setup(['a','b']);g=act(act(g,'a','ready'),'b','ready');const p=resolutionPlan(g.players,{q:0,e:0});

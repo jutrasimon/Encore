@@ -38,10 +38,10 @@ function syncAudio(){resolutionAudio.setScene(audioScene(game,view,animating));}
 let motion=read('encore.motion',true);
 const juice=new Juice(app,()=>motion),advance=new RewardAdvance();
 const screenMotion=new ScreenMotion(app,()=>motion);
-function mount(content){
+function mount(content,preserveDialog=false){
  const key=!game?'home':`${view}:${animating?'performance-'+cinematic.group.index:game.phase==='lobby'?'lobby':'board'}`;
  const before=screenMotion.capture(key);
- juice.release();mountScreen(app,shell(content));fitBoard();screenMotion.settle(before);
+ juice.release();mountScreen(app,shell(content),preserveDialog);fitBoard();screenMotion.settle(before);
 }
 let autoReadyScheduled=false;
 function maybeAutoReady(){
@@ -49,7 +49,7 @@ function maybeAutoReady(){
  autoReadyScheduled=true;queueMicrotask(async()=>{
   autoReadyScheduled=false;if(busy||animating||document.hidden||!game||mode==='multi'&&!connected||!advance.take(game,myId))return;
   intro=false;view='game';$('#details')?.close();
-  if(!await send('ready'))advance.clear();
+  const gen=generation;if(!await send('ready')&&gen===generation)advance.clear();
  });
 }
 let healthTimer=null,checkingServer=false,networkState='checking';
@@ -148,7 +148,7 @@ function render(){
  const oldDialog=$('#details');const modal=oldDialog?.open?{html:oldDialog.innerHTML,kind:oldDialog.dataset.kind,tileId:oldDialog.dataset.tileId,classes:oldDialog.className}:null;
  const collection=$('.collection');if(collection)inventoryScroll=collection.scrollTop;
  const focusedTile=document.activeElement?.dataset.action==='focus'?document.activeElement.dataset.id:null;
- mount(view==='settings'?settingsView():!game?home():view==='stats'?statsView():view==='inventory'?inventoryView():view==='rewards'?rewardsView():view==='draft'?draftView():gameView());
+ mount(view==='settings'?settingsView():!game?home():view==='stats'?statsView():view==='inventory'?inventoryView():view==='rewards'?rewardsView():view==='draft'?draftView():gameView(),!!modal&&!animating&&['rules','inspect','focus','show'].includes(modal.kind));
  for(const [key,top] of scrolls){const el=app.querySelector(`[data-scroll="${key}"]`);if(el)el.scrollTop=top;}fitBoard();updateActivity();
  if(view==='inventory'){const list=$('.collection');if(list)list.scrollTop=inventoryScroll;if(focusedTile){const target=[...document.querySelectorAll('.collection .focus-toggle')].find(b=>b.dataset.id===focusedTile);target?.focus({preventScroll:true});}}
  if(modal&&!animating){const dlg=$('#details');if(modal.kind==='inspect'){const t=me()?.inventory.find(t=>t.id===modal.tileId)||me()?.board.find(t=>t?.id===modal.tileId);if(t){inspect(t);return;}}else if(['rules','focus','show'].includes(modal.kind)){dlg.innerHTML=modal.html;dlg.className=modal.classes;dlg.dataset.kind=modal.kind;dlg.showModal();return;}}
