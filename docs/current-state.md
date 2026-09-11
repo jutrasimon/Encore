@@ -1,6 +1,10 @@
-# État courant : preview ENCORE 0.9.10 / principal 0.9.9
+# État courant : preview ENCORE 0.9.11 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Ajustements 0.9.11
+
+Base preview `fb4ded0`. L’ADN sonore affiche la stat dominante au centre (35 qualité / 65 énergie → 65 % ÉNERGIE), avec un état équilibré et un état sans points. Tous les boutons principaux et secondaires utilisent la classe commune `action-button`, y compris Continuer, les choix, le Studio, les bilans et les dialogues. Les effets utilisent cette classe unique. Le filtre déforme le bouton entier (fond, contour et texte), sans simple inclinaison, avec une amplitude adaptée à sa taille. Vérification syntaxique et 93 tests réussis, dont les pourcentages dominants et la couverture des modèles de boutons de chaque écran.
 
 ## Ajustement du survol des actions
 

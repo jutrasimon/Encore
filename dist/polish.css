@@ -11,7 +11,7 @@ button:disabled{cursor:default}
 .tile>.sticker{animation:none;transition:transform 180ms var(--ease-settle),filter 180ms}
 .tile.chosen{border-color:var(--tile-color);box-shadow:inset 0 0 18px color-mix(in srgb,var(--tile-color) 18%,transparent),0 0 0 1px var(--tile-color)}
 .tile.chosen>.sticker{transform:scale(1.05)}
-.primary.pointer-warp,.skip-reward.pointer-warp,.home .secondary.pointer-warp{filter:url(#grunge-warp);transform:translateY(-1px) skewX(var(--lean,0deg))}
+.action-button.pointer-warp{filter:url(#grunge-warp)!important;transform:none}
 .pointer-warp>.sticker{transform:rotate(var(--lean,0deg)) scale(1.05)}
 .resolution-mode .grid .tile.scoring{animation:tile-detonate var(--hit-time,400ms) var(--ease-settle) both!important;transform-origin:50% 60%}
 .resolution-mode .grid .tile.scoring>.sticker{animation:sticker-thrash var(--hit-time,400ms) var(--ease-settle) both!important}

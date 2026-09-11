@@ -25,3 +25,14 @@ test('chart acceleration uses actual deltas including performance fans; filters 
 test('bounded song history retains lifetime counters and renders escaped names',()=>{
  let g=band();g.songs=Array.from({length:250},()=>({show:0,attempt:0,round:1,players:[]}));g=round(g);assert.equal(g.songs.length,250);assert.equal(g.players[0].career.songs,1);const html=statsMarkup(g,{playerId:'a'});assert(html.includes('&lt;A&gt;'));assert(!html.includes('<A>'));assert(html.includes('250 dernières'));
 });
+
+
+test('sound DNA centers the dominant resource, including ties and silence',()=>{
+ for(const [q,e,value,label] of [[35,65,'65%','ÉNERGIE'],[80,20,'80%','QUALITÉ'],[50,50,'50%','ÉQUILIBRÉ'],[0,0,'—','AUCUN POINT']]){
+  const g=newGame();g.players=[player('a','A')];g.players[0].career={songs:1,q,e};
+  const html=statsMarkup(g);
+  assert.ok(html.includes(`<b>${value}<small>${label}</small></b>`));
+  if(q===35)assert.ok(html.includes('35% qualité · 65% énergie'));
+  if(!q&&!e)assert.ok(html.includes('0% qualité · 0% énergie'));
+ }
+});

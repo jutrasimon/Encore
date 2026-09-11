@@ -25,13 +25,14 @@ export class Juice{
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}
  move(e){
   if(this.reduced()||e.pointerType==='touch'||this.root.querySelector('.resolution-mode'))return;
-  const target=e.target.closest('.tile,.home h1,.primary,.skip-reward,.home .secondary');
+  const target=e.target.closest('.tile,.home h1,.action-button');
   const el=target&&!target.matches(':disabled')&&!target.closest('[inert]')?target:null;
   if(this.hovered!==el){this.release();this.hovered=el;}
   if(!el)return;
   const r=el.getBoundingClientRect(),speed=this.pointer?Math.min(24,Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)):3;
   el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*5+'deg');el.classList.add('pointer-warp');
-  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(9,this.warp+speed*.3);
+  const action=el.classList.contains('action-button');
+  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(action?19:9,this.warp+speed*(action?.65:.3));
   if(speed>3)this.particles.push({x:e.clientX,y:e.clientY,vx:(Math.random()-.5)*100,vy:(Math.random()-.5)*100,life:0,ttl:250,size:2+Math.random()*3,color:Math.random()>.5?'#ff5aae':'#baff42'});
   this.particles=this.particles.slice(-80);this.wake();
  }
