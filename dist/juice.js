@@ -1,4 +1,4 @@
-import {announcement} from './i18n.js?v=0.9.23';
+import {announcement} from './i18n.js?v=0.10.0';
 // Effects stay outside the game state. One bounded canvas, paused when idle/hidden.
 export function scoreCallout(event){
  const total=(event?.q||0)+(event?.e||0)+(event?.f||0);

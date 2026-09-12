@@ -1,7 +1,7 @@
-import {getLanguage,translate} from './i18n.js?v=0.9.23';
-import {TILES} from './engine.js?v=0.9.18';
-import {sticker,FAMILY_ART} from './art.js?v=0.8.2';
-import {icon} from './icons.js?v=0.9.18';
+import {getLanguage,translate} from './i18n.js?v=0.10.0';
+import {TILES,upgradeStat} from './engine.js?v=0.10.0';
+import {sticker,FAMILY_ART} from './art.js?v=0.10.0';
+import {icon} from './icons.js?v=0.10.0';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
@@ -16,22 +16,24 @@ export function tileSummary(t){
  const d=TILES[t.kind],l=t.level||0;
  if(t.inactive)return 'INACTIVE';
  if(d.charge)return t.charges?`${t.charges} CHARGES`:'+1 CHARGE';
+ if(d.summary)return `<span class="percussion-summary">${translate(d.summary).replace(/\bQ\b/g,icon('star')).replace(/\bE\b|É/g,icon('bolt'))}</span>`;
  if(t.kind==='solo')return `${icon('star')} ${2+l} / ${6+l}`;
  if(t.kind==='last')return `${icon('bolt')} ${1+l} / ${6+l}`;
  if(t.kind==='lighter')return `${icon('bolt')} ${1+l}+`;
  if(d.q)return `${icon('star')} ${d.q+l}`;
  if(d.e)return `${icon('bolt')} ${d.e+l}`;
- return ({pick:'GUITARES +1',boot:'+1 / VOISIN',duck:'+1 / SORTE',smoke:'VIDES +2',cup:'CHARGES +2',choir:'+1 / VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'+3 / INACTIF'})[t.kind]||'EFFET';
+ return ({pick:'GUITARES +1',boot:'+1 / VOISIN',duck:'+1 / SORTE',smoke:'VIDES +2',cup:'CHARGES +2',choir:'+1 / VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'ESPACES +3'})[t.kind]||'EFFET';
 }
+export const tileMultiplier=t=>t.mq||t.me?[['mq','star'],['me','bolt']].filter(([key])=>t[key]>1).map(([key,stat])=>icon(stat)+'×'+t[key]).join(' '):'×'+t.m;
 export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false}={}){
  const empty=!t||t.kind==='empty',d=empty?null:TILES[t.kind],f=empty?null:tileFamily(t);
  const production=resolved&&!empty?[['q','star'],['e','bolt'],['f','choir']].filter(([k])=>t[k]).map(([k,i])=>`<span>${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join(''):'';
  return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${empty?'':`data-tile="${esc(JSON.stringify(t))}"`} ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
- ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(shortNames[t.kind]||d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">×${t.m}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
+ ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(shortNames[t.kind]||d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">${tileMultiplier(t)}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
  </button>`;
 }
 export function tileDetails(t,{upgrade=false}={}){
- const d=TILES[t.kind],f=tileFamily(t),level=t.level||0,stat=d.family==='guitar'?'qualité':t.kind==='duck'?'fan':'énergie';
+ const d=TILES[t.kind],f=tileFamily(t),level=t.level||0,stat={q:'qualité',e:'énergie',f:'fan'}[upgradeStat(d)];
  const rule=t.kind==='lighter'?'1 énergie de base. '+d.text:d.text;
  const related=d.family==='guitar'?'voice':d.family==='voice'?'guitar':null;
  return `<section class="tile-explanation type-${tileColor(t)}"><div class="explanation-heading"><strong>${esc(d.name)}</strong><span>${f.label}${level?' · NIVEAU +'+level:''}</span></div>
@@ -42,5 +44,5 @@ export function tileDetails(t,{upgrade=false}={}){
  ${d.charge?`<p class="tile-rule"><strong>${t.charges||0} charge${t.charges===1?'':'s'}</strong> actuellement. Les charges restent jusqu’à la fin du show.</p>`:''}
  ${upgrade?`<p class="upgrade-preview">NIVEAU +${level} → <strong>+${level+1}</strong><br><strong>${icon(stat==='qualité'?'star':stat==='fan'?'choir':'bolt')}+1 ${stat}</strong> par apparition, avant les multiplicateurs.</p>`:''}
  ${t.exhausted?'<p class="state-explainer">Épuisée : revient au prochain show. Aucun focus possible.</p>':t.inactive?'<p class="state-explainer">Inactive : peut encore être pigée, mais ne produit rien.</p>':''}
- <small class="adjacency-help">Voisine = en haut, en bas, à gauche ou à droite. Jamais en diagonale.</small></section>`;
+ <small class="adjacency-help">${d.scope?'Rangée = horizontale. Colonne = verticale. Alignée = même rangée ou colonne, sans diagonale. Les espaces ne bloquent pas la portée.':'Voisine = en haut, en bas, à gauche ou à droite. Jamais en diagonale.'}</small></section>`;
 }

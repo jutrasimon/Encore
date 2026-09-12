@@ -6,7 +6,7 @@ import {tileCard,tileDetails,familyReference} from '../dist/tile-ui.js';
 
 test('every tile has one registered atlas asset and the same square renderer for all screens',()=>{
  for(const [kind,d] of Object.entries(TILES)){
-  assert(hasTileArt(kind),kind);const html=tileCard({kind,level:0});assert(html.includes('square-tile'));assert(html.includes('punk-stickers-v1.png'));assert(html.includes(d.name));assert(html.includes(d.family==='voice'?'VOIX':d.family==='guitar'?'GUITARE':'EFFET'));
+  assert(hasTileArt(kind),kind);const html=tileCard({kind,level:0});assert(html.includes('square-tile'));assert(html.includes(kind.startsWith('perc_')?'data-art-kind':'punk-stickers-v1.png'));assert(html.includes(d.name));assert(html.includes(d.family==='voice'?'VOIX':d.family==='guitar'?'GUITARE':d.family==='percussion'?'PERCUSSION':'EFFET'));
   const details=tileDetails({kind,level:2});assert(details.includes('tile-rule'));assert(details.includes('avant les multiplicateurs'));assert(!details.includes('undefined'));
  }
 });

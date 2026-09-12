@@ -1,4 +1,4 @@
-import {StatIcon} from './stat-icon.js?v=0.9.18';
+import {StatIcon} from './stat-icon.js?v=0.10.0';
 // Compact, code-native functional symbols; all names remain visible alongside them.
 const paths={
  charge:'M8 3V1h8v2M6 3h12v19H6zM9 8h6m-3-3v6M9 16h6',

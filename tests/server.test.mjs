@@ -21,7 +21,7 @@ function client(fetcher,token){return async(path,body)=>{
  const response=await fetcher(new Request('https://example.test/functions/v1/encore/'+path,{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json',Origin:'https://jutrasimon.github.io'},body:JSON.stringify(body)}));
  return {status:response.status,...await response.json()};
 };}
-async function setup(){const store=new MemoryStore(),fetcher=handler(store),a=client(fetcher,tokens[0]),b=client(fetcher,tokens[1]),c=client(fetcher,tokens[2]);const room=await a('create',{name:'Simon'});const joined=await b('room',{code:room.code,type:'hello',name:'Alex'});return{store,fetcher,a,b,c,code:room.code,game:joined.game};}
+async function setup(){const store=new MemoryStore(),fetcher=handler(store),a=client(fetcher,tokens[0]),b=client(fetcher,tokens[1]),c=client(fetcher,tokens[2]);const room=await a('create',{name:'Simon'});const joined=await b('room',{code:room.code,type:'hello',name:'Alex'});let g=joined.game;for(const call of [a,b]){g=(await call('room',action(room.code,g,'select-class',{classId:'guitarist-singer'}))).game;resetRate(store,room.code);g=(await call('room',action(room.code,g,'lobby-ready'))).game;resetRate(store,room.code);}return{store,fetcher,a,b,c,code:room.code,game:g};}
 const action=(code,g,type,extra={})=>({code,type,revision:g.revision,show:g.show,round:g.round,requestId:crypto.randomUUID(),...extra});
 function resetRate(store,code){for(const member of Object.values(store.rooms.get(code).members))member.lastAction=0;}
 
@@ -115,4 +115,19 @@ test('Studio HTTP confirmations persist across reconnect and action ID retries',
  const reconnected=await client(handler(store),tokens[0])('room',{code,type:'hello',name:'Simon'});assert.deepEqual(reconnected.game,first.game);
  resetRate(store,code);assert.equal((await a('room',action(code,reconnected.game,'reward',{category:'add',action:'add',kind:'voice'}))).status,400);
  assert.equal(store.rooms.get(code).game.players[0].inventory.length,count+1);
+});
+
+test('class selection tolerates partner revisions, locks start, restores choices and creates unique kits once',async()=>{
+ const store=new MemoryStore(),fetcher=handler(store),a=client(fetcher,tokens[0]),b=client(fetcher,tokens[1]);
+ const created=await a('create',{name:'Guitar'}),code=created.code;let g=(await b('room',{code,type:'hello',name:'Drummer'})).game;
+ assert.equal((await a('room',action(code,g,'start'))).status,400);
+ const chooseA=action(code,created.game,'select-class',{classId:'guitarist-singer',previousClassId:null});
+ let r=await a('room',chooseA);assert.equal(r.status,200);g=r.game;resetRate(store,code);
+ const chooseB=action(code,g,'select-class',{classId:'drummer-percussionist',previousClassId:null});r=await b('room',chooseB);assert.equal(r.status,200);g=r.game;resetRate(store,code);
+ const readyA=action(code,g,'lobby-ready',{classId:'guitarist-singer'}),readyB=action(code,g,'lobby-ready',{classId:'drummer-percussionist'});
+ const ready=await Promise.all([a('room',readyA),b('room',readyB)]);assert(ready.every(r=>r.status===200));resetRate(store,code);g=(await a('room',{code,type:'sync'})).game;
+ assert(g.players.every(p=>p.inventory.length===0));const restored=await client(handler(store),tokens[1])('room',{code,type:'hello',name:'Ignored'});assert.equal(restored.game.players[1].classId,'drummer-percussionist');
+ const start=action(code,g,'start');r=await a('room',start);assert.equal(r.status,200);assert.equal(r.game.players[1].inventory[0].kind,'perc_kick');const inventory=r.game.players.map(p=>p.inventory);assert.equal(new Set(inventory.flat().map(t=>t.id)).size,10);
+ assert.deepEqual((await a('room',start)).game.players.map(p=>p.inventory),inventory);resetRate(store,code);
+ assert.equal((await b('room',action(code,r.game,'select-class',{classId:'guitarist-singer'}))).status,400);
 });

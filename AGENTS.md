@@ -15,3 +15,5 @@
 - Icônes de statistiques : utiliser `StatIcon` (`dist/stat-icon.js`) et les trois masques PNG communs ; ne pas réintroduire étoiles ou caractères éclair pour les valeurs.
 
 - Localisation : tout nouveau texte visible ou accessible doit avoir sa traduction dans `dist/locales/en.tsv`. Conserver les noms de joueurs sous `translate="no"`, les valeurs des champs et les identifiants du moteur ; aucune règle de jeu ne dépend de la langue. Reconstruire le catalogue avec `npm run check`.
+
+- Classes et packs : `TILE_PACKS` sépare les 18 tuiles guitariste des 18 tuiles batteur. Le pack `neutral` est vide jusqu’au choix utilisateur explicite d’un nombre égal de tuiles de chaque pack. Ne pas confondre pack de disponibilité et famille de calcul. Ne pas recréer le starter à la reconnexion.

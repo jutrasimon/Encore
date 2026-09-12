@@ -1,6 +1,24 @@
-# État courant : preview ENCORE 0.9.24 / principal 0.9.9
+# État courant : preview ENCORE 0.10.0 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Batteur V1 et packs séparés 0.10.0
+
+Base `dba8ed1`, branche `preview/audio-0.9.0`, URL de validation publique : https://jutrasimon.github.io/Encore/audio-test/ . Intégration depuis le pack utilisateur Batteur V1, sans repartir de son ancienne référence de dépôt.
+
+Deux classes sélectionnables avant la tournée. Classe confirmée et état prêt individuels ; changement de classe remet uniquement son propriétaire à non prêt. En coop, doublons autorisés et lancement par l'hôte après les deux confirmations. Les kits sont créés une fois au start autoritaire. Le solo passe du choix à l'introduction puis Monter sur scène. Les anciennes sauvegardes conservent leurs instances, charges et niveaux ; classe guitariste par défaut, ancien lobby avec inventaire conservé et classe verrouillée.
+
+36 types : 18 guitariste, 18 batteur. La dernière instruction utilisateur remplace le pool partagé du guide : draft et Ajouter au Studio utilisent le pack de la classe. `TILE_PACKS.neutral` existe mais reste vide ; le choix ultérieur d'un nombre égal de tuiles provenant des deux packs n'a pas été fait. Aucune nouvelle catégorie Studio. Les ponts Guitare/Voix du batteur conservent leur définition, avec leur intérêt à revoir lors de cette sélection neutre.
+
+Moteur : portées rangée/colonne/croix, instantané des états actifs, gains de charges avant seuils, bonus avant multiplicateurs propres Q/É, rejoués additifs sans relancer les effets, charges réinitialisées seulement au prochain show. Patch suit la définition (rangée Q, colonne É), pas l'exemple inversé. Larsen inclut les cases vides ; Botte garde le calcul existant (production propre), contrairement à l'annexe du guide. Objectifs, draft, trois catégories Studio et défaite terminale conservés.
+
+Portrait et six poses selon la classe, ancres au sol, cadence du batteur sur le clock du reveal, poses de résultat prioritaires, partenaire inactif immobile, repli portrait si la planche échoue. PNG individuels : clé magenta ciblée au chargement, thumbnail canvas en cache ; Patch à alpha natif et portrait opaque non détourés. Rendu de tuiles commun, noms/types/valeurs en HTML, famille Percussion distincte. Textes français/anglais dans le catalogue.
+
+Validation : 139 tests réussis et npm run check. Tests moteur solo et coop sur cinq chansons, succès/Studio et échec terminal, sauvegardes anciennes/nouvelles, packs exclusifs, charges, seuils, multiplicateurs, rejoués, migration et concurrence HTTP. Navigateurs locaux dans des profils temporaires sur un serveur en mémoire : cinq chansons solo batteur avec rechargement, victoire 44/52 et Studio ; cinq chansons coop mixte, victoire 85/86, changement de classe individuel, reconnexion, confirmation des deux joueurs et départ Studio des deux joueurs. Parcours négatifs de cinq chansons avec inventaires vides contrôlés en solo et coop : verdicts de défaite, absence de Studio ; détail, bilan et nouveau départ solo. Aucune erreur JavaScript relevée. Écrans mobiles 320×700, galerie des 18 illustrations sur panneaux clairs/sombres, portraits et deux personnages de résultat inspectés. Ces fixtures ne modifient aucune sauvegarde utilisateur ni room distante existante.
+
+Équilibrage indicatif dans `docs/drummer/balance-v1.json`, script de reproduction adjacent : 100 graines identiques et même stratégie de sélection. Premiers shows gagnés : guitariste 72/100, batteur 100/100 ; deuxième 36/72 et 90/100 ; troisième 2/36 et 5/90 parmi les survivants. Ce n'est pas une mesure humaine ni une preuve d'équilibre ; chiffres V1 conservés pour essai utilisateur.
+
+Serveur preview `encore-preview` version 2 publié : protocol 2, rules 6, build 0.10.0. Quatre fichiers relus et identiques au bundle local, table/RPC de preview et authentification de membre existantes conservées. Principal `encore` vérifié inchangé : rules 4 / build 0.9.9. Aucun déploiement main.
 
 ## Anglais par défaut 0.9.24
 

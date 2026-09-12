@@ -11,7 +11,7 @@ export function handler(store) {
   if(origin&&!allowedOrigins.has(origin))return respond({error:'Origine non autorisée.'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   const path=new URL(request.url).pathname.split('/').at(-1);
-  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:5,build:'0.9.18'});
+  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:6,build:'0.10.0'});
   if(request.method!=='POST')return respond({error:'Méthode non autorisée.'},405);
   try {
     const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');
@@ -33,7 +33,7 @@ export function handler(store) {
       return respond({code:inserted.code,...snapshot(inserted,credential)},201);
     }
     if(path!=='room'||!/^[A-F0-9]{12}$/.test(msg.code||''))throw new GameError('Code de band invalide.');
-    if(!['hello','sync','start','ready','reward','studio-depart','draft','focus'].includes(msg.type))throw new GameError('Action inconnue.');
+    if(!['hello','sync','select-class','lobby-ready','start','ready','reward','studio-depart','draft','focus'].includes(msg.type))throw new GameError('Action inconnue.');
     if(!['hello','sync'].includes(msg.type)&&!/^[a-f0-9-]{36}$/.test(msg.requestId||''))throw new GameError('Identifiant d’action invalide.');
     return respond(await transact(store,msg.code,credential,msg));
   }catch(error){

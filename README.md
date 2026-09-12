@@ -62,11 +62,22 @@ Le solo est sauvegardé localement, indépendamment du serveur.
 - La progression reste sans dernier niveau tant que les shows sont réussis.
 - Les anciennes sauvegardes en attente de retry passent en fin de tournée sans effacer leur bilan. Les reprises déjà commencées ne sont pas annulées rétroactivement.
 
+## Batteur V1 — preview 0.10.0
+
+- Choix individuel de classe avant le départ : Guitariste-chanteur ou Batteur-percussionniste. En coop, doublons permis, chacun confirme sa classe puis son état prêt. Le créateur lance ensuite le show ; chacun confirme Monter sur scène.
+- Batteur : 2 Grosses caisses, 2 Caisses claires, 1 Charleston et 1 focus. Les cinq instances sont créées une seule fois au lancement autoritaire.
+- 36 types de tuiles : 18 dans le pack guitariste, 18 dans le pack batteur. Draft et Ajouter au Studio respectent le pack du joueur. `TILE_PACKS.neutral` est préparé mais vide : le futur transfert d'un nombre égal de tuiles des deux packs est différé. Pack et famille de calcul sont deux notions distinctes.
+- Les ponts vers Guitare/Voix restent définis dans le pack batteur ; leur intérêt sera à revoir avec la sélection des tuiles neutres. Aucun transfert d'inventaire entre joueurs.
+- Rangée, colonne et alignement traversent les trous ; espaces = cases vides ou déjà désactivées au début du reveal. Patch donne qualité dans sa rangée, énergie dans sa colonne. Deux rejoués font ×3, sans nouveau gain/dépense de charges. Les améliorations augmentent uniquement la production propre indiquée par `upgradeStat`.
+- Larsen compte désormais aussi les cases vides adjacentes. Botte conserve son comportement réel antérieur. Autres règles et objectifs inchangés.
+- Compatibilité : classe guitariste pour les sauvegardes sans classe, inventaire et charges conservés. Un ancien lobby ayant déjà un inventaire garde sa classe ; lancer une nouvelle tournée permet de choisir.
+- Les chiffres V1 ne sont pas déclarés équilibrés : voir `docs/drummer/balance-v1.json` pour une simulation comparative documentée.
+
 ## Règles du prototype
 
 - Guitariste-chanteur : 5 tuiles (2 guitares, 2 voix, 1 médiator) et 1 focus. Le rôle configure le nombre de départ et son pool.
 - Focus : sélection de copies précises, poids de pige ×2, sans duplication. Modifiable librement entre les chansons avant de se déclarer prêt. Avec 9 tuiles disponibles ou moins, elles sont toutes pigées.
-- Focus temporaire : capacité distincte, expirant dès la fin du show. Le modèle et l’affichage sont prêts; aucune des 18 tuiles actuelles ne donne encore ce bonus.
+- Focus temporaire : capacité distincte, expirant dès la fin du show. Le modèle et l’affichage sont prêts; aucune des 36 tuiles actuelles ne donne encore ce bonus.
 - Grille 3 × 3. Neuf instances pigées sans remise à l'intérieur d'une chanson;
   toutes les tuiles admissibles redeviennent disponibles à la chanson suivante.
 - Inventaire insuffisant : cases vides ajoutées puis mélangées avec les tuiles.

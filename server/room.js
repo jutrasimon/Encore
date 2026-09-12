@@ -1,4 +1,4 @@
-import {newGame, player, command} from '../dist/engine.js';
+import {newGame, lobbyPlayer, command} from '../dist/engine.js';
 
 export class GameError extends Error {
   constructor(message, status=400) { super(message); this.status=status; }
@@ -8,7 +8,7 @@ export const hash = async token => [...new Uint8Array(await crypto.subtle.digest
 const randomSeed=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 export function makeRoom(code, credential, name, now=Date.now()) {
   const id=crypto.randomUUID(), game=newGame();
-  game.players.push(player(id,name)); game.revision++;
+  game.players.push(lobbyPlayer(id,name)); game.revision++;
   return {code, version:0, game, members:{[credential]:{id,seen:now,requests:[]}}, expires_at:new Date(now+86400000).toISOString()};
 }
 export function snapshot(room, credential, knownRevision, now=Date.now()) {
@@ -31,7 +31,7 @@ export async function transact(store, code, credential, msg, now=Date.now()) {
       if(msg.type!=='hello') throw new GameError('Connexion requise.',401);
       if(room.game.phase!=='lobby'||room.game.players.length>=2) throw new GameError('Band complet ou tournée déjà commencée.',409);
       const id=crypto.randomUUID(); member={id,seen:now,requests:[]};
-      room.members[credential]=member; room.game.players.push(player(id,msg.name));room.game.revision++;
+      room.members[credential]=member; room.game.players.push(lobbyPlayer(id,msg.name));room.game.revision++;
     } else if(msg.type==='sync'&&now-member.seen<20000&&(!activities.has(msg.activity)||msg.activity===member.activity)) {
       return snapshot(room,credential,msg.knownRevision,now);
     } else if(!['hello','sync'].includes(msg.type)) {

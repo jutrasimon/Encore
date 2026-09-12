@@ -420,3 +420,79 @@ Le band est là.	The band is here.
 Rejouée	Replayed
 fois	times
 fans de performance, en plus des fans gagnés par tes tuiles.	performance fans, in addition to fans earned by your tiles.
+
+Grosse caisse	Kick Drum
+Produit 1 énergie par tuile active de sa rangée, elle-même comprise.	Produces 1 energy per active tile in its row, including itself.
+RANGÉE : +1 É / ACTIVE	ROW: +1 E / ACTIVE
+Caisse claire	Snare Drum
+Produit 1 qualité par tuile active de sa colonne, elle-même comprise.	Produces 1 quality per active tile in its column, including itself.
+COLONNE : +1 Q / ACTIVE	COLUMN: +1 Q / ACTIVE
+Charleston	Hi-hat
+Les autres Percussions actives de sa rangée ou de sa colonne gagnent +1 qualité et +1 énergie avant les multiplicateurs.	Other active Percussion tiles in its row or column gain +1 quality and +1 energy before multipliers.
+ALIGNÉES : +1 Q / +1 É	ALIGNED: +1 Q / +1 E
+Tom de plancher	Floor Tom
+Produit 2 qualité, puis +1 qualité par autre Percussion active de sa rangée.	Produces 2 quality, plus 1 quality per other active Percussion tile in its row.
+2 Q + PERC. EN RANGÉE	2 Q + PERC. IN ROW
+Ride de traverse	Crosswise Ride
+Produit 2 énergie, puis +1 énergie par autre Percussion active de sa colonne.	Produces 2 energy, plus 1 energy per other active Percussion tile in its column.
+2 É + PERC. EN COLONNE	2 E + PERC. IN COLUMN
+Crash final	Final Crash
+Produit 2 qualité et 2 énergie. Si toutes les cases de sa rangée OU de sa colonne sont actives, gagne +2 qualité et +2 énergie, une seule fois.	Produces 2 quality and 2 energy. If every slot in its row OR column is active, gains +2 quality and +2 energy, once only.
+2 Q / 2 É · BONUS AXE PLEIN	2 Q / 2 E · FULL AXIS BONUS
+Roulement tenace	Relentless Roll
+Gagne 1 charge à chaque apparition active. Produit autant d’énergie que son nombre de charges après tous les gains. Ne dépense pas ses charges.	Gains 1 charge each active appearance. Produces energy equal to its charges after all gains. Does not spend charges.
++1 CHARGE · É = CHARGES	+1 CHARGE · E = CHARGES
+Mesure explosive	Explosive Measure
+Gagne 1 charge à chaque apparition active. Après les gains, si elle possède au moins 3 charges, en dépense 3 et produit 12 qualité. Sinon, produit 0 qualité de base. Une seule dépense par apparition.	Gains 1 charge each active appearance. After gains, spends 3 charges to produce 12 quality if available. Otherwise produces 0 base quality. Only one spend per appearance.
++1 CHARGE · 3 → 12 Q	+1 CHARGE · 3 → 12 Q
+Métronome trafiqué	Rigged Metronome
+Donne +1 charge aux autres tuiles actives à charge de sa rangée ou de sa colonne, avant leur production et leurs dépenses. Toutes familles admissibles.	Gives +1 charge to other active charge tiles in its row or column before production and spending. All families eligible.
+ALIGNÉES : +1 CHARGE	ALIGNED: +1 CHARGE
+Double pédale	Double Pedal
+Double l’énergie produite par les autres Percussions actives de sa rangée, après les bonus additifs.	Doubles energy produced by other active Percussion tiles in its row, after additive bonuses.
+RANGÉE : PERC. É ×2	ROW: PERC. E ×2
+Rimshot précis	Precise Rimshot
+Double la qualité produite par les autres Percussions actives de sa colonne, après les bonus additifs.	Doubles quality produced by other active Percussion tiles in its column, after additive bonuses.
+COLONNE : PERC. Q ×2	COLUMN: PERC. Q ×2
+Fill de panique	Panic Fill
+Fait rejouer une fois la production finale des autres Percussions actives de sa rangée ou de sa colonne. S’épuise après la chanson.	Replays the final production of other active Percussion tiles in its row or column once. Exhausts after the song.
+ALIGNÉES : PERC. REJOUE ×1	ALIGNED: PERC. REPLAY ×1
+Riff en cadence	Rhythmic Riff
+Produit 1 qualité, puis +2 qualité par Guitare active de sa rangée ou de sa colonne.	Produces 1 quality, plus 2 quality per active Guitar in its row or column.
+1 Q +2 / GUITARE ALIGNÉE	1 Q +2 / ALIGNED GUITAR
+Chant scandé	Chanted Vocals
+Produit 1 énergie, puis +2 énergie par Voix active de sa rangée ou de sa colonne.	Produces 1 energy, plus 2 energy per active Vocal in its row or column.
+1 É +2 / VOIX ALIGNÉE	1 E +2 / ALIGNED VOCAL
+Balais de garage	Garage Brushes
+Produit 1 qualité, puis +2 qualité par case vide ou désactivée de sa rangée.	Produces 1 quality, plus 2 quality per empty or inactive slot in its row.
+RANGÉE : 1 Q +2 / ESPACE	ROW: 1 Q +2 / SPACE
+Silence qui cogne	Hard-hitting Silence
+Produit 1 énergie, puis +2 énergie par case vide ou désactivée de sa colonne.	Produces 1 energy, plus 2 energy per empty or inactive slot in its column.
+COLONNE : 1 É +2 / ESPACE	COLUMN: 1 E +2 / SPACE
+Patch de répétition	Rehearsal Patch
+Les autres tuiles actives de sa rangée gagnent +1 qualité. Celles de sa colonne gagnent +1 énergie. Toutes familles admissibles; bonus avant multiplicateurs.	Other active tiles in its row gain +1 quality. Those in its column gain +1 energy. All families eligible; bonuses before multipliers.
+RANGÉE +1 Q · COLONNE +1 É	ROW +1 Q · COLUMN +1 E
+Bracelet des loges	Backstage Wristband
+Produit 1 fan par famille différente parmi les autres tuiles actives de sa rangée ou de sa colonne.	Produces 1 fan per different family among other active tiles in its row or column.
++1 FAN / FAMILLE ALIGNÉE	+1 FAN / ALIGNED FAMILY
+Batteur-percussionniste	Drummer-percussionist
+Fais circuler le rythme dans tes rangées et tes colonnes. Même les trous travaillent pour toi.	Send rhythm through your rows and columns. Even the gaps work for you.
+Relie les Guitares et les Voix pour amplifier ton son.	Connect Guitars and Vocals to amplify your sound.
+Choisir sa classe	Choose your class
+CHOISIS TON SON	CHOOSE YOUR SOUND
+Un pack de tuiles propre à chaque classe.	Each class has its own tile pack.
+Les cinq tuiles de départ	Five starting tiles
+CLASSE CHOISIE	CLASS SELECTED
+CHOISIR CETTE CLASSE	CHOOSE THIS CLASS
+CLASSE À CHOISIR	CHOOSE A CLASS
+JE SUIS PRÊT	I AM READY
+TOURNÉE SOLO	SOLO TOUR
+Choix de classe indisponible.	Class selection unavailable.
+Choisis ta classe avant de te déclarer prêt.	Choose your class before getting ready.
+Chaque musicien doit choisir sa classe et être prêt.	Every musician must choose a class and be ready.
+Rangée = horizontale. Colonne = verticale. Alignée = même rangée ou colonne, sans diagonale. Les espaces ne bloquent pas la portée.	Row = horizontal. Column = vertical. Aligned = same row or column, without diagonals. Gaps do not block range.
++3 énergie par case vide ou tuile désactivée adjacente.	+3 energy per adjacent empty or inactive slot.
+ESPACES +3	SPACES +3
+Fondations	Foundations
+Montée	Build-up
+Maillage	Connections

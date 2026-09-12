@@ -1,22 +1,24 @@
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.9.23';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.9.23';
-import {paintDeal} from './deal-ui.js?v=0.9.21';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.9.23';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.18';
-import {Juice,scoreCallout} from './juice.js?v=0.9.23';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.18';
-import {RewardAdvance} from './autoplay.js?v=0.9.18';
-import {statsMarkup} from './stats-ui.js?v=0.9.23';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.23';
-import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.18';
-import {tileCard,tileDetails} from './tile-ui.js?v=0.9.23';
-import {inventoryMarkup} from './inventory-ui.js?v=0.9.23';
+import {classChoices} from './class-ui.js?v=0.10.0';
+import {installTileArt} from './art.js?v=0.10.0';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.0';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.0';
+import {paintDeal} from './deal-ui.js?v=0.10.0';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.0';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.0';
+import {Juice,scoreCallout} from './juice.js?v=0.10.0';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.0';
+import {RewardAdvance} from './autoplay.js?v=0.10.0';
+import {statsMarkup} from './stats-ui.js?v=0.10.0';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.0';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.0';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.0';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.0';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.22';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.23';
-import {icon} from './icons.js?v=0.9.18';
-import {SERVER_URL} from './config.js?v=0.9.18';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.9.18';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.0';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.0';
+import {icon} from './icons.js?v=0.10.0';
+import {SERVER_URL} from './config.js?v=0.10.0';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.0';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -26,13 +28,14 @@ let game=null,myId=null,mode=null,view='game',selected=null,rewardAction='add',c
 let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session');
 setLanguage(read('encore.language','en'));
 const localization=installLocalization();
+installTileArt();
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
 const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.24 · ENCORE ∞';
+const VERSION='0.10.0 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -53,6 +56,7 @@ function syncShowVisual(frame){
  const p=animationPlayer||me(),score=displayScore||game;
  const ending=!animating||frame&&['impact','outro'].includes(frame.phase)&&frame.group.index===cinematic.plan.groups.length-1;
  showVisual.update($('.show-visual canvas'),{show:game?.show||0,role:p?.role,players:game?.players,activePlayerId:p?.id,performanceLayout:!showingVerdict(),resultLayout:showingVerdict(),
+  strongEvent:frame?.event?.kind==='perc_fill',
   performance:frame?.phase==='charge'?TILES[frame.event?.kind]?.family:null,
   result:ending?(game?.phase==='lost'?'sad':game?.phase==='reward'||game?.phase==='won'?'happy':null):null,
   overdrive:!!game&&overdriveLevel(score,targets(game))>0,intensity:frame?Math.min(1,(frame.local.q+frame.local.e)/40):0,
@@ -82,7 +86,7 @@ const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
 function header(){return '';}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Stats'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''} ${view==='rewards'?'studio-mode':''} ${lastSong(game)&&!showingVerdict()&&view==='game'?'last-song':''}">${game&&!showingVerdict()&&view==='game'?songDecor():''}<div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!showingVerdict()&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v${VERSION.split(' ')[0]}</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''} ${view==='rewards'?'studio-mode':''} ${lastSong(game)&&!showingVerdict()&&view==='game'?'last-song':''}">${game&&!showingVerdict()&&view==='game'?songDecor():''}<div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!showingVerdict()&&game.phase!=='lobby'?playAction():''}${game?nav():''}<span class="case-version">v${VERSION.split(' ')[0]}</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1 translate="no">ENCORE!</h1><button class="action-button home-settings" data-action="settings">Réglages</button><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="action-button secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="action-button text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="action-button primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="action-button secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="action-button secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="action-button secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';
@@ -102,11 +106,10 @@ function musicianStatus(p){
  const activity=p.id===myId?currentActivity():activities[p.id];
  return {resolving:'JOUE SA CHANSON','studio-add':'STUDIO · CHOISIT UNE TUILE','studio-upgrade':'STUDIO · AMÉLIORE UNE TUILE','studio-remove':'STUDIO · RETIRE UNE TUILE',choice:'CHOISIT SA RÉCOMPENSE',inventory:'AJUSTE SON INVENTAIRE',board:'OBSERVE LE PLATEAU'}[activity]||'SE PRÉPARE';
 }
-function classPortrait(p){return `<img class="class-photo" src="${classArt(p?.role).portrait}" alt="Portrait du ${esc(ROLES[p?.role]?.name||'Guitariste-chanteur')}">`;}
+function classPortrait(p){return `<img class="class-photo" title="${esc(ROLES[p?.role]?.name||'Guitariste-chanteur')}" src="${classArt(p?.role).portrait}" alt="Portrait du ${esc(ROLES[p?.role]?.name||'Guitariste-chanteur')}">`;}
 function lobbyView(){
- const full=game.players.length===2,host=game.players[0].id===myId,allOnline=full&&game.players.every(p=>online.includes(p.id));
- const code=session.code.match(/.{1,4}/g).join(' ');
- return `<section class="band-lobby"><div class="lobby-heading"><span class="tape">TOURNÉE EN COOP</span><h1>TON BAND<span>${game.players.length}<small>/2</small></span></h1></div><div class="lobby-content content-box" data-scroll="lobby" role="region" aria-label="Musiciens et invitation" tabindex="0"><div class="band-seats">${game.players.map(p=>`<div class="band-seat ${online.includes(p.id)?'joined':''}"><span class="seat-avatar">${classPortrait(p)}</span><div><strong><span translate="no">${esc(p.name)}</span> ${p.id===myId?'<small>TOI</small>':''}</strong><span>${musicianStatus(p)}</span></div></div>`).join('')}${!full?'<div class="band-seat empty-seat"><span class="seat-avatar">+</span><div><strong>UNE PLACE LIBRE</strong><span>Invite ton deuxième musicien.</span></div></div>':''}</div><div class="band-invite"><span>CODE DU BAND</span><button class="band-code" data-action="copy-code" aria-label="Copier le code du band">${esc(code)}</button><button class="action-button primary" data-action="invite">COPIER L’INVITATION</button></div><p class="lobby-message" role="status">${!connected?'Reconnexion en cours…':!full?'Partage le lien. Ton band arrive ici.':!allOnline?'Ton partenaire se reconnecte…':host?'Le band est là. À toi de lancer !':'Le créateur lance la tournée.'}</p></div><button class="action-button primary start-band" data-action="start" ${!host||!allOnline||!connected||busy?'disabled':''}>${!full?'EN ATTENTE DU 2e':!host?'LE CRÉATEUR LANCE…':'PRÉPARER LE SHOW'}</button></section>`;
+ const coop=mode==='multi',full=game.players.length===2,host=game.players[0].id===myId,p=me(),allOnline=!coop||full&&game.players.every(p=>online.includes(p.id)),allReady=game.players.every(p=>p.classConfirmed&&p.lobbyReady),locked=busy||coop&&!connected;
+ return `<section class="band-lobby class-lobby"><div class="lobby-heading"><span class="tape">${coop?'TOURNÉE EN COOP':'TOURNÉE SOLO'}</span><h1>TON BAND</h1></div><div class="lobby-content content-box" data-scroll="lobby" role="region" aria-label="Musiciens et invitation" tabindex="0">${coop?`<div class="band-seats">${game.players.map(member=>`<div class="band-seat"><span class="seat-avatar">${member.classConfirmed?classPortrait(member):'?'}</span><div><strong translate="no">${esc(member.name)}</strong><span>${member.classConfirmed?ROLES[member.role].name:'CLASSE À CHOISIR'}</span><small>${member.lobbyReady?'PRÊT':'EN ATTENTE'}</small></div></div>`).join('')}</div><div class="band-invite"><span>CODE DU BAND</span><button class="band-code" data-action="copy-code">${esc(session.code.match(/.{1,4}/g).join(' '))}</button><button class="action-button secondary" data-action="invite">COPIER L’INVITATION</button></div>`:''}${classChoices(p,locked)}</div><div class="class-lobby-actions">${coop?`<button class="action-button secondary" data-action="lobby-ready" ${locked||!p.classConfirmed||p.lobbyReady?'disabled':''}>${p.lobbyReady?'PRÊT · EN ATTENTE':'JE SUIS PRÊT'}</button>${host?`<button class="action-button primary" data-action="start" ${locked||!allOnline||!allReady?'disabled':''}>${!full?'EN ATTENTE DU 2e':'PRÉPARER LE SHOW'}</button>`:''}`:p.classConfirmed?'<button class="action-button primary" data-action="solo-class-start">PRÉPARER LE SHOW</button>':''}</div></section>`;
 }
 function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><label class="language-setting">Langue <select id="language" aria-label="Langue"><option value="fr" translate="no" ${getLanguage()==='fr'?'selected':''}>Français</option><option value="en" translate="no" ${getLanguage()==='en'?'selected':''}>English</option></select></label><div class="settings-content content-box" data-scroll="settings" role="region" aria-label="Options du jeu" tabindex="0"><button class="action-button secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><div class="audio-mix">${[['music','MUSIQUE'],['effects','EFFETS'],['voice','ANNONCES']].map(([key,label])=>`<label>${label}<input type="range" min="0" max="100" value="${Math.round(resolutionAudio.levels[key]*100)}" data-mix="${key}" aria-label="${label}"></label>`).join('')}</div><button class="action-button secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="action-button secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="action-button secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="action-button secondary" data-action="${game?'finish-tour':'back'}">${game?'BILAN AVANT DE QUITTER':'RETOUR'}</button><p class="version">${VERSION}</p><p class="audio-credits">Musique : DJARTMUSIC · Sons : JDSherbert</p></div></section>`;}
 function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>=t[key]?'ATTEINT':'OBJECTIF DU SHOW'}</small>${!animating&&me()?.last?`<small class="last-song-stat">Dernière chanson ${icon(ic)} <b>${me().last[key]||0}</b></small>`:''}</div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
@@ -130,13 +133,13 @@ function statsView(){return statsMarkup(game,{playerId:statsPlayer,range:statsRa
 function profile(id){statsPlayer=id;statsRange='all';view='stats';render();}
 
 function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button>${songCounter(game)}</div>`;}
-function gameView(){if(animating&&cinematic)return resolutionView();if(showingVerdict())return verdictMarkup(game,me());if(mode==='multi'&&game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}<div class="readout connection-readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':!p.last?'Prêt pour la première chanson':''}</div>`;}
+function gameView(){if(animating&&cinematic)return resolutionView();if(showingVerdict())return verdictMarkup(game,me());if(game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}<div class="readout connection-readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':!p.last?'Prêt pour la première chanson':''}</div>`;}
 function playAction(){if(finishedShow(game))return '<div class="action-slot"><button class="action-button primary" data-action="result">RETOUR AU VERDICT</button></div>';return `<div class="action-slot">${animating?'<button class="action-button primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="action-button primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="action-button primary" data-action="rewards">PASSER AU STUDIO</button>':'<button class="action-button primary" data-action="result">VOIR LE BILAN</button>'}</div>`;}
 function showIntro(){
  if(animating)return;const dlg=$('#details'),show=showInfo(game.show),goal=targets(game);preloadShowCover(game.show);
  dlg.className='';dlg.dataset.kind='show';dlg.setAttribute('aria-label','Présentation du show '+show.name);
- const entry=mode==='multi'&&game.phase==='show'&&game.round===0;
- const action=entry?`<p class="entry-status" role="status">${game.players.map(p=>'<span translate="no">'+esc(p.name)+'</span>'+(p.ready?' : PRÊT':' : EN ATTENTE')).join(' · ')}</p><button class="action-button primary" data-action="ready" ${me().ready||busy||!connected?'disabled':''}>${me().ready?'EN ATTENTE DU PARTENAIRE…':'MONTER SUR SCÈNE'} ${icon('arrow')}</button>`:game.phase==='lobby'?phaseAction().replace('LANCER LA TOURNÉE','MONTER SUR SCÈNE'):'<button class="action-button primary" data-action="close">MONTER SUR SCÈNE '+icon('arrow')+'</button>';
+ const entry=game.phase==='show'&&game.round===0;
+ const action=entry?`<p class="entry-status" role="status">${game.players.map(p=>'<span translate="no">'+esc(p.name)+'</span>'+(p.ready?' : PRÊT':' : EN ATTENTE')).join(' · ')}</p><button class="action-button primary" data-action="ready" ${me().ready||busy||mode==='multi'&&!connected?'disabled':''}>${me().ready?'EN ATTENTE DU PARTENAIRE…':'MONTER SUR SCÈNE'} ${icon('arrow')}</button>`:game.phase==='lobby'?phaseAction().replace('LANCER LA TOURNÉE','MONTER SUR SCÈNE'):'<button class="action-button primary" data-action="close">MONTER SUR SCÈNE '+icon('arrow')+'</button>';
  dlg.innerHTML=`<header class="show-intro-header"><span class="intro-brand">ENCORE!<small>PUNK MUSIC ROGUELITE</small></span><button class="dialog-close" data-action="close" aria-label="Fermer la présentation">${icon('close')}</button></header><div class="show-intro-heading"><span class="tape">SHOW ${String(game.show+1).padStart(2,'0')}</span><h2>${esc(show.name)}</h2><p>${esc(show.crowd)}</p></div><div class="show-intro-art"><img src="${showAsset(game.show,'cover')}" alt="${esc(show.name)} — salle avant le concert" fetchpriority="high" decoding="async" width="1536" height="1024"></div><section class="show-goals" aria-label="Objectifs du show"><h3>OBJECTIFS DU SHOW</h3><div class="show-goal-grid">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="show-goal goal-${key}">${icon(ic)}<span>${label}<b>${goal[key]}</b></span></div>`).join('')}</div></section><p class="show-entry-note">${show.rounds} CHANSONS</p><div class="show-entry">${action}</div>`;dlg.showModal();
 }
 function showResult(){if(animating)return;resultDismissed=false;view='game';render();}
@@ -180,13 +183,13 @@ function render(){
  if(view==='inventory'){const list=$('.collection');if(list)list.scrollTop=inventoryScroll;if(focusedTile){const target=[...document.querySelectorAll('.collection .focus-toggle')].find(b=>b.dataset.id===focusedTile);target?.focus({preventScroll:true});}}
  if(modal&&!animating){const dlg=$('#details');if(modal.kind==='show'){if(game?.phase==='show'&&game.round===0||game?.phase==='lobby'){showIntro();return;}if(!animating){showIntro();return;}}if(modal.kind==='inspect'){const t=me()?.inventory.find(t=>t.id===modal.tileId)||me()?.board.find(t=>t?.id===modal.tileId);if(t){inspect(t);return;}}else if(['rules','focus','show'].includes(modal.kind)){dlg.innerHTML=modal.html;dlg.className=modal.classes;dlg.dataset.kind=modal.kind;dlg.showModal();return;}}
  if(game&&view==='game'&&!animating){
-  if(mode==='multi'&&game.phase==='lobby'){intro=false;return;}
-  if(intro){intro=false;if(game.phase==='lobby'||mode==='multi'&&game.phase==='show'&&game.round===0)showIntro();}
+  if(game.phase==='lobby'){intro=false;return;}
+  if(intro){intro=false;if(game.phase==='show'&&game.round===0)showIntro();}
  }
 }
 function inspect(t){
  const empty=!t||t.kind==='empty',dlg=$('#details');dlg.dataset.kind='inspect';dlg.dataset.tileId=t?.id||'';dlg.className='tile-dialog';
- mountScreen(dlg,`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><div class="inspect-preview">${tileCard(t,{action:'noop',resolved:!!t?.m})}</div>${empty?'<h2>Case vide</h2><p>Complète la grille quand moins de 9 tuiles sont disponibles.</p>':tileDetails(t)}${t?.m?`<div class="detail-score"><strong>CETTE CHANSON</strong><span>${points(t)||'Effet de soutien'}</span>${t.m>1?`<b>×${t.m}</b>`:''}${t.repeats?'<b>Rejouée '+t.repeats+' fois</b>':''}</div>`:''}${!empty&&me()?.inventory.some(x=>x.id===t.id)?focusButton(t):''}<button class="action-button secondary" data-action="close">FERMER</button>`);
+ mountScreen(dlg,`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><div class="inspect-preview">${tileCard(t,{action:'noop',resolved:!!t?.m})}</div>${empty?'<h2>Case vide</h2><p>Complète la grille quand moins de 9 tuiles sont disponibles.</p>':tileDetails(t)}${t?.m?`<div class="detail-score"><strong>CETTE CHANSON</strong><span>${points(t)||'Effet de soutien'}</span>${t.m>1?`<b>${tileMultiplier(t)}</b>`:''}${t.repeats?'<b>Rejouée '+t.repeats+' fois</b>':''}</div>`:''}${!empty&&me()?.inventory.some(x=>x.id===t.id)?focusButton(t):''}<button class="action-button secondary" data-action="close">FERMER</button>`);
  dlg.showModal();
 }
 function rules(){const dlg=$('#details');dlg.dataset.kind='rules';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>Comment jouer</h2><ol><li>Le guitariste-chanteur commence avec 5 tuiles et 1 focus.</li><li>Chaque chanson pige jusqu’à 9 tuiles distinctes. Les cases restantes sont vides.</li><li>Les synergies touchent les quatre côtés, sauf les effets qui concernent toute la grille. Une guitare entre deux voix vaut ×4; les voix valent ×2.</li><li>Entre les chansons, observe le plateau, puis appuie sur Continuer pour choisir parmi 3 tuiles différentes. Tu peux obtenir une sorte déjà présente dans ton inventaire.</li><li>Dans l’inventaire, affecte ton focus à une copie pour doubler son poids de pige. Déplace-le librement avant de te déclarer prêt. Le focus temporaire expire à la fin du show.</li><li>Joue les 5 chansons et atteins les deux objectifs. Dépasse-les pour entrer en overdrive; le surplus contribue aux fans de performance.</li><li>Entre les shows, fais un choix dans chacune des catégories Ajouter, Améliorer et Retirer, ou passe la catégorie. Après les trois confirmations, pars en show. Les améliorations sont permanentes, sans plafond. Un objectif manqué termine la tournée. Une nouvelle tournée repart avec les cinq tuiles de départ. La tournée continue sans dernier niveau. En coop, les points s’additionnent; chacun choisit sa tuile et son focus.</li></ol><p>Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.</p><button class="action-button primary" data-action="close">FERMER</button>`;dlg.showModal();}
@@ -296,7 +299,7 @@ function animate(previous){
  }
  tick(started);
 }
-function accept(g){const previous=game;game=normalizeGame(g);const oldStudio=previous?.players.find(p=>p.id===myId)?.studio,newStudio=me()?.studio,confirmed=['add','upgrade','remove'].some(k=>!oldStudio?.[k]&&newStudio?.[k]);if(confirmed){rewardAction=['add','upgrade','remove'].find(k=>!newStudio[k])||rewardAction;rewardSelection=studioSelections[rewardAction]||null;}advance.observe(previous,game,myId);if(mode==='multi'&&game.phase==='show'&&game.round===0)advance.clear();busy=false;if(mode==='solo')save('encore.solo',{game,myId});if(previous&&(g.show!==previous.show||previous.phase==='lobby'&&g.phase==='show')){intro=true;resultDismissed=false;}if(previous&&g.round>previous.round&&g.show===previous.show){resultDismissed=false;animate(previous);}else render();if(confirmed&&view==='rewards')studioConfirmation(app,!motion||matchMedia('(prefers-reduced-motion: reduce)').matches);maybeAutoReady();}
+function accept(g){const previous=game;game=normalizeGame(g);const oldStudio=previous?.players.find(p=>p.id===myId)?.studio,newStudio=me()?.studio,confirmed=['add','upgrade','remove'].some(k=>!oldStudio?.[k]&&newStudio?.[k]);if(confirmed){rewardAction=['add','upgrade','remove'].find(k=>!newStudio[k])||rewardAction;rewardSelection=studioSelections[rewardAction]||null;}advance.observe(previous,game,myId);if(game.phase==='show'&&game.round===0&&(mode==='multi'||previous?.phase==='lobby'))advance.clear();busy=false;if(mode==='solo')save('encore.solo',{game,myId});if(previous&&(g.show!==previous.show||previous.phase==='lobby'&&g.phase==='show')){intro=true;resultDismissed=false;}if(previous&&g.round>previous.round&&g.show===previous.show){resultDismissed=false;animate(previous);}else render();if(confirmed&&view==='rewards')studioConfirmation(app,!motion||matchMedia('(prefers-reduced-motion: reduce)').matches);maybeAutoReady();}
 function receive(data){
  if(mode!=='multi')return;
  const changed=JSON.stringify(online)!==JSON.stringify(data.online)||JSON.stringify(activities)!==JSON.stringify(data.activities||{})||!connected;activities=data.activities||{};
@@ -316,7 +319,7 @@ async function send(type,extra={}){
 }
 function getName(){name=$('#name')?.value.trim()||name||translate('Sans nom');save('encore.name',name);return name;}
 function clearNetwork(){advance.clear();lastActivity=null;activities={};stopResolution();generation++;connection?.close();connection=null;connected=false;busy=false;}
-function solo(){inventoryScroll=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[player(myId,name)];view='game';save('encore.solo',{game,myId});render();}
+function solo(){inventoryScroll=0;intro=true;resultDismissed=false;getName();clearNetwork();mode='solo';myId='solo';game=newGame();game.players=[lobbyPlayer(myId,name)];view='game';save('encore.solo',{game,myId});render();}
 async function connect(code,newSession=false){
  getName();clearNetwork();game=null;myId=null;online=[];inventoryScroll=0;intro=true;resultDismissed=false;mode='multi';view='game';
  if(newSession||!session||session.code!==code){session={code,token:credential(),name};save('encore.session',session);}
@@ -338,6 +341,9 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  resolutionAudio.unlock();
  if(animating)return;
  resolutionAudio.ui(a);
+ if(a==='select-class'){if(await send('select-class',{classId:b.dataset.class,previousClassId:me().classId})&&mode==='solo'){if(await send('lobby-ready',{classId:me().classId}))await send('start');}return;}
+ if(a==='lobby-ready'){await send('lobby-ready',{classId:me().classId});return;}
+ if(a==='solo-class-start'){if(await send('lobby-ready',{classId:me().classId}))await send('start');return;}
  if(a==='profile'){profile(b.dataset.id);return;}
  if(a==='stats'){$('#details')?.close();statsPlayer='band';view='stats';render();return;}
  if(a==='stats-player'){statsPlayer=b.dataset.id;render();return;}
@@ -384,7 +390,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
 render();
 async function checkServer(){
  if(checkingServer)return;checkingServer=true;clearTimeout(healthTimer);networkState='checking';if(!game)render();
- try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===5);}
+ try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===6);}
  catch{networkReady=false;}
  finally{checkingServer=false;networkState=networkReady?'online':'offline';if(!game)render();}
  if(!networkReady)healthTimer=setTimeout(checkServer,15000);

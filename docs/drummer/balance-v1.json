@@ -1,0 +1,62 @@
+[
+  {
+    "role": "guitarist-singer",
+    "seeds": 100,
+    "policy": "12-draw lookahead for draft; first offered Studio addition; upgrade first instance; skip removal",
+    "shows": [
+      {
+        "level": 1,
+        "reached": 100,
+        "won": 72,
+        "medianQ": 56,
+        "medianE": 38
+      },
+      {
+        "level": 2,
+        "reached": 72,
+        "won": 36,
+        "medianQ": 106,
+        "medianE": 67
+      },
+      {
+        "level": 3,
+        "reached": 36,
+        "won": 2,
+        "medianQ": 133,
+        "medianE": 80
+      }
+    ],
+    "peakMultiplier": 16,
+    "replays": 44
+  },
+  {
+    "role": "drummer-percussionist",
+    "seeds": 100,
+    "policy": "12-draw lookahead for draft; first offered Studio addition; upgrade first instance; skip removal",
+    "shows": [
+      {
+        "level": 1,
+        "reached": 100,
+        "won": 100,
+        "medianQ": 60,
+        "medianE": 58
+      },
+      {
+        "level": 2,
+        "reached": 100,
+        "won": 90,
+        "medianQ": 95,
+        "medianE": 97
+      },
+      {
+        "level": 3,
+        "reached": 90,
+        "won": 5,
+        "medianQ": 98,
+        "medianE": 102
+      }
+    ],
+    "peakMultiplier": 4,
+    "replays": 1007
+  }
+]

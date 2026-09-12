@@ -1,6 +1,8 @@
+import {keyDrummerPixels} from './art.js?v=0.10.0';
 // Presentation assets keyed by the engine's role ID; no game rules live here.
 const ROOT='./art/stage/';
 export const CLASS_ART={
+ 'drummer-percussionist':{portrait:'./art/drummer/character/portrait.png',poses:'./art/drummer/character/poses-sheet.png'},
  'guitarist-singer':{portrait:ROOT+'characters/guitariste-chanteur/portrait.png',poses:ROOT+'characters/guitariste-chanteur/poses-sheet.png'}
 };
 export const classArt=role=>CLASS_ART[role]||CLASS_ART['guitarist-singer'];
@@ -16,14 +18,15 @@ export function preloadShowCover(index){
  const path=showAsset(index,'cover');if(coverCache.has(path))return;
  const image=new Image();image.src=new URL(path,import.meta.url).href;coverCache.set(path,image);
 }
-export function performancePose({result,overdrive,performance:action,reduced,paused}){
+export function performancePose({result,overdrive,performance:action,reduced,paused,role,strongEvent,time=0}){
  if(result)return {happy:3,neutral:4,sad:5}[result]??4;
  if(reduced||paused)return 0;
+ if(role==='drummer-percussionist')return overdrive||strongEvent?2:action==='percussion'?Math.floor(time/240)%2:0;
  return overdrive?2:action==='voice'?1:action==='guitar'?2:0;
 }
-export function stageCast(state){
+export function stageCast(state,time=0){
  const players=state.players?.length?state.players:[{id:state.activePlayerId,role:state.role}];
- return players.map((p,index)=>({id:p.id,role:p.role,index,active:players.length===1||p.id===state.activePlayerId,pose:state.result?performancePose(state):players.length===1||p.id===state.activePlayerId?performancePose(state):0,x:players.length===1?768:508+index*520}));
+ return players.map((p,index)=>({id:p.id,role:p.role,index,active:players.length===1||p.id===state.activePlayerId,pose:state.result?performancePose({...state,role:p.role,time}):players.length===1||p.id===state.activePlayerId?performancePose({...state,role:p.role,time}):0,x:players.length===1?768:508+index*520}));
 }
 export function removeMagenta(pixels){
  for(let i=0;i<pixels.length;i+=4){
@@ -40,7 +43,7 @@ function texture(path,keyed=true){
    try{
     const canvas=document.createElement('canvas');canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
     const ctx=canvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
-    const data=ctx.getImageData(0,0,canvas.width,canvas.height);removeMagenta(data.data);ctx.putImageData(data,0,0);resolve(canvas);
+    const data=ctx.getImageData(0,0,canvas.width,canvas.height);(path.includes('/drummer/')?keyDrummerPixels:removeMagenta)(data.data);ctx.putImageData(data,0,0);resolve(canvas);
    }catch{resolve(null);}
   };image.onerror=()=>resolve(null);image.src=new URL(path,import.meta.url).href;
  }));
@@ -62,7 +65,7 @@ export class ShowVisual{
   if(key!==this.key){
    this.key=key;this.assets=null;this.lastFrame='';this.lastBurst=-Infinity;this.burstUntil=0;
    const generation=++this.generation;
-   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),Promise.all(cast.map(p=>texture(classArt(p.role).poses))),texture(ROOT+'shared/crowd-expression-sheet.png')]).then(assets=>{
+   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),Promise.all(cast.map(p=>texture(classArt(p.role).poses).then(async sheet=>{if(sheet)return sheet;const portrait=await texture(classArt(p.role).portrait,false);if(!portrait)return null;const fallback=document.createElement('canvas');fallback.width=1536;fallback.height=1024;const ctx=fallback.getContext('2d');for(let i=0;i<6;i++)ctx.drawImage(portrait,i%3*512,Math.floor(i/3)*512,512,512);return fallback;}))),texture(ROOT+'shared/crowd-expression-sheet.png')]).then(assets=>{
     if(generation!==this.generation)return;
     this.assets=assets;this.draw(performance.now(),true);
    });
@@ -74,9 +77,9 @@ export class ShowVisual{
  draw(now,force=false){
   const canvas=this.canvas;if(!canvas?.isConnected)return;
   const s=this.state,still=s.reduced||s.paused||document.hidden||!!s.result;
-  const pose=performancePose(s),crowd=still?0:[0,1,2,1][Math.floor(now/(s.overdrive?135:s.intensity>.6?190:310))%4];
-  const cast=stageCast(s),crossfade=s.reduced||s.paused||this.previousId===undefined?1:Math.min(1,(now-this.switchAt)/300);
-  const burst=!still&&now<this.burstUntil,signature=[this.key,pose,crowd,burst,s.overdrive,!!s.result,s.activePlayerId,Math.round(crossfade*20)].join(':');
+  const pose=performancePose({...s,time:now}),crowd=still?0:[0,1,2,1][Math.floor(now/(s.overdrive?135:s.intensity>.6?190:310))%4];
+  const cast=stageCast(s,now),crossfade=s.reduced||s.paused||this.previousId===undefined?1:Math.min(1,(now-this.switchAt)/300);
+  const burst=!still&&now<this.burstUntil,signature=[this.key,cast.map(p=>p.pose).join(),pose,crowd,burst,s.overdrive,!!s.result,s.activePlayerId,Math.round(crossfade*20)].join(':');
   if(!force&&signature===this.lastFrame)return;this.lastFrame=signature;
   canvas.dataset.pose=String(pose);canvas.dataset.crowd=String(crowd);canvas.dataset.cast=JSON.stringify(cast.map(p=>({id:p.id,active:p.active,pose:p.pose})));
   const c=canvas.getContext('2d');const scale=canvas.width/1536,viewHeight=canvas.height/scale,top=1024-viewHeight;
@@ -93,7 +96,7 @@ export class ShowVisual{
    const previous=member.id===this.previousId?1:0,current=member.active?1:0,light=s.result?1:previous+(current-previous)*crossfade;
    const memberSize=size*(cast.length>1?.88:1);
    c.save();c.filter=`brightness(${.55+.45*light})`;c.globalAlpha=.9+.1*light;
-   c.drawImage(character,member.pose%3*512,Math.floor(member.pose/3)*512,512,512,member.x-memberSize/2,feet-494*memberSize/512,memberSize,memberSize);c.restore();
+   c.drawImage(character,member.pose%3*512,Math.floor(member.pose/3)*512,512,512,member.x-memberSize/2,feet-(member.role==='drummer-percussionist'?[508,508,508,496,497,498]:[494,493,494,496,496,496])[member.pose]*memberSize/512,memberSize,memberSize);c.restore();
   }
   if(foreground)c.drawImage(foreground,0,100,1536,1024);
   if(audience){const r=showArt(s.show).crowd[crowd],scale=.72;c.drawImage(audience,...r,(1536-r[2]*scale)/2,1045-r[3]*scale,r[2]*scale,r[3]*scale);}

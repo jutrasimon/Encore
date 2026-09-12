@@ -1,4 +1,4 @@
-import {locale} from './i18n.js?v=0.9.23';
+import {locale} from './i18n.js?v=0.10.0';
 // Speech gets ordinary word casing; the displayed stage name remains untouched.
 export function spokenStageName(name){
  return String(name??'').normalize('NFC').trim().replace(/\s+/g,' ').replace(/[\p{L}\p{M}]+/gu,word=>word.charAt(0).toLocaleUpperCase('fr-CA')+word.slice(1).toLocaleLowerCase('fr-CA'))||'Sans nom';

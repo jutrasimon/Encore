@@ -1,0 +1,21 @@
+/* Class selection is contained by the same phone and scrolls at readable sizes. */
+.class-lobby .lobby-content{padding:10px;overflow:auto;flex:1}
+.class-lobby .lobby-heading h1{font-size:30px;margin:4px 0}
+.class-choices>h2{margin:6px 0;font-size:26px}.class-choices>p{margin:0 0 12px;font-size:16px}
+.class-choice{background:#1b2716;color:#fff3d3;border:2px solid #70825b;border-radius:8px;margin:12px 0;padding:12px}
+.class-choice.selected{border-color:#ff48a5}.class-choice header{display:flex;gap:12px;align-items:center}
+.class-choice header>img{width:82px;height:82px;object-fit:cover;border:1px solid #8e9d72;border-radius:4px;flex-shrink:0}
+.class-choice h3{font-size:23px;line-height:1.1;margin:0 0 6px}.class-choice p{font-size:16px;line-height:1.25;margin:0}
+.starter-preview{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:12px 0}
+.starter-preview>span{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.starter-preview .sticker{height:46px;width:100%;object-fit:contain}.starter-preview small{font-size:13px;line-height:1.15}
+.class-choice .action-button{width:100%;min-height:44px;font-size:18px}
+.class-lobby-actions{display:flex;gap:8px;flex-shrink:0}.class-lobby-actions>button{flex:1;font-size:16px;min-width:0}
+.class-lobby .band-invite{margin:8px 0}.class-lobby .band-seat small{display:block;color:#baff42}.class-lobby .band-seat span{font-size:14px}
+.type-percussion{--tile-color:#c8a0ff;--accent:#c8a0ff}.type-percussion .tile-family{color:#c8a0ff}
+canvas.sticker{object-fit:contain}.tile-points{overflow-wrap:anywhere}
+@media(max-width:360px){.class-choice{padding:9px}.class-choice header>img{width:64px;height:64px}.class-choice h3{font-size:21px}.starter-preview{gap:3px}.starter-preview small{font-size:12px}}
+
+.mult .stat-icon{--stat-size:13px!important;vertical-align:middle}
+
+.tile-points>.percussion-summary{display:block!important;line-height:1.2;text-align:center;font-size:13px}.percussion-summary .stat-icon{--stat-size:20px!important;display:inline-block;vertical-align:middle;margin:0 2px}
