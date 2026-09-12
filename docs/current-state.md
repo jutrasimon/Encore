@@ -1,6 +1,10 @@
-# État courant : preview ENCORE 0.9.19 / principal 0.9.9
+# État courant : preview ENCORE 0.9.20 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Titre d’accueil statique 0.9.20
+
+Base `909b2e6`. ENCORE sur l’accueil est retiré des cibles de distorsion/particules au pointeur ; règle CSS de déformation du titre supprimée. L’étiquette de version du cadre lit désormais la constante de version commune. Aucun moteur ni serveur modifié. Syntaxe et 115 tests validés ; accueil inspecté dans le navigateur local. Pas de nouveau parcours complet de tournée pour ce retrait visuel. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Distribution des cases vides 0.9.19
 

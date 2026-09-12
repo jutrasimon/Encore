@@ -2,7 +2,7 @@ import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.9.18';
 import {paintDeal} from './deal-ui.js?v=0.9.19';
 import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.9.18';
 import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.18';
-import {Juice,scoreCallout} from './juice.js?v=0.9.18';
+import {Juice,scoreCallout} from './juice.js?v=0.9.20';
 import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.18';
 import {RewardAdvance} from './autoplay.js?v=0.9.18';
 import {statsMarkup} from './stats-ui.js?v=0.9.18';
@@ -29,7 +29,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.19 · ENCORE ∞';
+const VERSION='0.9.20 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -79,7 +79,7 @@ const type=t=>TILES[t?.kind]?.family==='guitar'?'quality':TILES[t?.kind]?.family
 const points=(t)=>[['q','star','Qualité'],['e','bolt','Énergie'],['f','choir','Fans']].filter(([k])=>t?.[k]).map(([k,i,label])=>`<span aria-label="${label}">${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join('');
 function header(){return '';}
 function nav(){return `<nav class="navigation" aria-label="Navigation" ${animating?'inert':''}>${[['game','amp','Show'],['inventory','bag','Inventaire'],['stats','star','Stats'],['settings','settings','Réglages']].map(([v,i,l])=>`<button data-action="nav" data-view="${v}" class="${view===v?'active':''}">${icon(i)}<span>${l}${v==='inventory'?' · '+me().inventory.length:''}</span></button>`).join('')}</nav>`;}
-function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''} ${view==='rewards'?'studio-mode':''} ${lastSong(game)&&!showingVerdict()&&view!=='rewards'?'last-song':''}">${game&&!showingVerdict()&&view!=='rewards'?songDecor():''}<div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!showingVerdict()&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v0.9.18</span></section><dialog id="details"></dialog>`;}
+function shell(content){document.body.classList.toggle('reduced-motion',!motion);return `${header()}<section class="console ${game?'in-game':'at-home'} ${animating?'resolution-mode':''} ${view==='rewards'?'studio-mode':''} ${lastSong(game)&&!showingVerdict()&&view!=='rewards'?'last-song':''}">${game&&!showingVerdict()&&view!=='rewards'?songDecor():''}<div class="screen-body" data-screen="${view}">${content}</div>${game&&view==='game'&&!animating&&!showingVerdict()&&!(mode==='multi'&&game.phase==='lobby')?playAction():''}${game?nav():''}<span class="case-version">v${VERSION.split(' ')[0]}</span></section><dialog id="details"></dialog>`;}
 function home(){return `<section class="home"><h1>ENCORE!</h1><div class="home-content content-box" data-scroll="home" role="region" aria-label="Accès au jeu" tabindex="0"><label class="field">TON NOM DE SCÈNE<input id="name" maxlength="20" value="${esc(name)}" placeholder="Simon" autocomplete="nickname"></label><button class="action-button secondary" data-action="solo">JOUER EN SOLO</button>${read('encore.solo')?'<button class="action-button text-button" data-action="resume">REPRENDRE MON SOLO</button>':''}<section class="multiplayer-home"><h2>MONTE TON <strong>BAND</strong><span>2 JOUEURS</span></h2><button class="action-button primary" data-action="create" ${!networkReady||busy?'disabled':''}>${busy?'CONNEXION…':'CRÉER UN BAND'}</button><div class="join-band"><label class="field">TU AS UNE INVITATION ?<input id="code" maxlength="180" value="${esc(invite)}" placeholder="Code ou lien d’invitation" autocomplete="off" autocapitalize="characters" spellcheck="false"></label><button class="action-button secondary" data-action="join" ${!networkReady||busy?'disabled':''}>REJOINDRE LE BAND</button></div>${!networkReady?`<p class="network-note" role="status">${networkState==='checking'?'Connexion au multi…':'Le multi ne répond pas.'}</p>${networkState==='offline'?'<button class="action-button secondary" data-action="check-server">RÉESSAYER</button>':''}`:'<p class="network-note online-note">● MULTI DISPONIBLE</p>'}${session&&networkReady?'<button class="action-button secondary" data-action="reconnect">REPRENDRE MON BAND</button>':''}</section></div></section>`;}
 function currentActivity(){
  if(animating)return 'resolving';

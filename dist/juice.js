@@ -27,7 +27,7 @@ export class Juice{
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}
  move(e){
   if(this.reduced()||e.pointerType==='touch'||this.root.querySelector('.resolution-mode'))return;
-  const target=e.target.closest('.tile,.home h1,.action-button');
+  const target=e.target.closest('.tile,.action-button');
   const el=target&&!target.matches(':disabled')&&!target.closest('[inert]')?target:null;
   if(this.hovered!==el){this.release();this.hovered=el;}
   if(!el)return;
