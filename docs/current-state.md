@@ -1,6 +1,20 @@
-# État courant : preview ENCORE 0.10.0 / principal 0.9.9
+# État courant : preview ENCORE 0.10.1 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Finition visuelle batteur et reveal 0.10.1
+
+Base `135fbda`, branche `preview/audio-0.9.0`, validation locale sur http://127.0.0.1:8002/ avec profils temporaires et rooms en mémoire ; cible de test publique https://jutrasimon.github.io/Encore/audio-test/ . Les captures acceptées en 0.10.0 ne constituaient pas une validation suffisante : textes superposés et scène comprimée étaient encore visibles.
+
+Survol et focus du choix de classe lime. Les cinq tuiles de départ de chaque classe sont des boutons de consultation : infobulle commune au survol, au focus ou au toucher, sans sélection de classe ni explosion décorative. Infobulles contenues dans le téléphone, avec défilement si nécessaire.
+
+Les originaux batteur sont des PNG de 1254 px, détaillés. Suppression de la miniature intermédiaire 256 px ; conservation des pixels originaux détourés, recadrage des marges transparentes et affichage par image native. Les fichiers originaux restent inchangés. Les cartes batteur réservent des zones séparées pour illustration, nom et résumé compact sur deux lignes ; portée courte et valeurs avec StatIcon, règle complète dans les détails. Pas de modification du moteur ou des valeurs.
+
+Reveal : fond sombre, navigation masquée, footer de scène réservé. Sa hauteur est calculée depuis le bas du corps de l'écran, qui contient le décor, au lieu du bas de la console ; la scène ne commence plus derrière les compteurs. La pige, les explosions, points flottants, chronologie et alternance des joueurs sont conservés.
+
+Validation : npm run check et 139 tests réussis. Navigateurs 320×700 et 500×920 : survol lime, infobulle de départ, limites du téléphone, 18 illustrations chargées à plus de 256 px, absence de chevauchement art/nom/valeurs, captures françaises et anglaises inspectées. Reveal en mouvement normal vérifié en solo et coop mixte : deux personnages, joueur actif alterné, partenaire au repos. Cinq chansons solo et coop, reconnexion/sauvegarde, succès vers Studio et départ ; cinq chansons de défaite contrôlée dans les deux modes, détail/bilan et nouveau départ solo. Aucun état utilisateur utilisé. Les effets audio n'ont pas fait l'objet d'une nouvelle écoute humaine ; leur chronologie n'a pas changé.
+
+Client uniquement : serveur preview reste rules 6 / build 0.10.0 ; moteur et authentification inchangés. Principal reste 0.9.9. Publication réservée à la preview pour validation utilisateur.
 
 ## Batteur V1 et packs séparés 0.10.0
 

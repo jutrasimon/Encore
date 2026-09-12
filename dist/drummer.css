@@ -7,15 +7,31 @@
 .class-choice header>img{width:82px;height:82px;object-fit:cover;border:1px solid #8e9d72;border-radius:4px;flex-shrink:0}
 .class-choice h3{font-size:23px;line-height:1.1;margin:0 0 6px}.class-choice p{font-size:16px;line-height:1.25;margin:0}
 .starter-preview{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:12px 0}
-.starter-preview>span{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
+.starter-preview>.starter-tile{display:flex;flex-direction:column;align-items:center;text-align:center;min-width:0}
 .starter-preview .sticker{height:46px;width:100%;object-fit:contain}.starter-preview small{font-size:13px;line-height:1.15}
 .class-choice .action-button{width:100%;min-height:44px;font-size:18px}
 .class-lobby-actions{display:flex;gap:8px;flex-shrink:0}.class-lobby-actions>button{flex:1;font-size:16px;min-width:0}
 .class-lobby .band-invite{margin:8px 0}.class-lobby .band-seat small{display:block;color:#baff42}.class-lobby .band-seat span{font-size:14px}
 .type-percussion{--tile-color:#c8a0ff;--accent:#c8a0ff}.type-percussion .tile-family{color:#c8a0ff}
-canvas.sticker{object-fit:contain}.tile-points{overflow-wrap:anywhere}
+.percussion-art{object-fit:contain;image-rendering:auto}
 @media(max-width:360px){.class-choice{padding:9px}.class-choice header>img{width:64px;height:64px}.class-choice h3{font-size:21px}.starter-preview{gap:3px}.starter-preview small{font-size:12px}}
 
 .mult .stat-icon{--stat-size:13px!important;vertical-align:middle}
 
-.tile-points>.percussion-summary{display:block!important;line-height:1.2;text-align:center;font-size:13px}.percussion-summary .stat-icon{--stat-size:20px!important;display:inline-block;vertical-align:middle;margin:0 2px}
+
+.class-choice .action-button:not(:disabled):is(:hover,:focus-visible){background:#baff42;color:#10190f;border-color:#baff42}
+.starter-tile{background:transparent;border:0;color:inherit;padding:3px;border-radius:4px;cursor:help;font:inherit}
+.starter-tile:is(:hover,:focus-visible){background:#ffffff12;outline:2px solid #baff42;outline-offset:0}
+.square-tile.drummer-tile>.sticker{top:15%;left:22%;width:56%;height:33%}
+.square-tile.drummer-tile .tile-name{top:49%;bottom:auto;height:25%;font-size:clamp(11px,12cqw,18px);line-height:1.03}
+.square-tile.drummer-tile .tile-points{top:76%;bottom:2%;height:22%;min-height:0;font-size:clamp(12px,13cqw,19px);overflow:visible}
+.square-tile.drummer-tile .tile-points>.percussion-summary{display:flex;flex-direction:column;justify-content:center;gap:1px;line-height:1;white-space:nowrap}
+.percussion-summary>span{display:flex;align-items:center;justify-content:center;gap:4px}
+.percussion-summary small{font-size:clamp(9px,9cqw,12px);line-height:1.1;letter-spacing:.02em}
+.square-tile.drummer-tile .tile-points .stat-icon{--icon-context:1em;--stat-size:1em!important}
+/* The reveal owns the phone: controls and paper belong to the between-song screen. */
+.console.resolution-mode{background:#10190f;border-color:#838876}
+.console.resolution-mode .navigation{display:none}
+.console.resolution-mode .screen-body{background:repeating-linear-gradient(0deg,transparent 0 3px,#baff4207 3px 5px)}
+.console.resolution-mode .resolution-caption{min-height:clamp(100px,19dvh,170px)}
+.console.resolution-mode .show-visual{bottom:0}

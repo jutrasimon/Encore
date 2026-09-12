@@ -1,24 +1,24 @@
-import {classChoices} from './class-ui.js?v=0.10.0';
-import {installTileArt} from './art.js?v=0.10.0';
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.0';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.0';
-import {paintDeal} from './deal-ui.js?v=0.10.0';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.0';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.0';
-import {Juice,scoreCallout} from './juice.js?v=0.10.0';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.0';
-import {RewardAdvance} from './autoplay.js?v=0.10.0';
-import {statsMarkup} from './stats-ui.js?v=0.10.0';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.0';
-import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.0';
-import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.0';
-import {inventoryMarkup} from './inventory-ui.js?v=0.10.0';
+import {classChoices} from './class-ui.js?v=0.10.1';
+import {installTileArt} from './art.js?v=0.10.1';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.1';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.1';
+import {paintDeal} from './deal-ui.js?v=0.10.1';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.1';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.1';
+import {Juice,scoreCallout} from './juice.js?v=0.10.1';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.1';
+import {RewardAdvance} from './autoplay.js?v=0.10.1';
+import {statsMarkup} from './stats-ui.js?v=0.10.1';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.1';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.1';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.1';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.1';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.0';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.0';
-import {icon} from './icons.js?v=0.10.0';
-import {SERVER_URL} from './config.js?v=0.10.0';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.0';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.1';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.1';
+import {icon} from './icons.js?v=0.10.1';
+import {SERVER_URL} from './config.js?v=0.10.1';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.1';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -35,7 +35,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.0 · ENCORE ∞';
+const VERSION='0.10.1 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -164,7 +164,7 @@ function fitBoard(){
  const used=children.reduce((n,el)=>{const c=getComputedStyle(el);return n+el.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0);},0)+children.length*gap;
  const size=Math.max(0,Math.min(body.clientWidth-6,body.clientHeight-used-6));body.style.setProperty('--board-size',size+'px');
  const stage=body.querySelector('.show-visual'),tally=body.querySelector('.resolution-tally');
- if(stage&&tally){const bottom=body.closest('.console').getBoundingClientRect().bottom;stage.style.setProperty('--scene-height',Math.max(0,bottom-tally.getBoundingClientRect().bottom-6)+'px');body.closest('.console').style.setProperty('--deal-name-top',(tally.getBoundingClientRect().bottom-body.closest('.console').getBoundingClientRect().top+6)+'px');}
+ if(stage&&tally){const bottom=body.getBoundingClientRect().bottom;stage.style.setProperty('--scene-height',Math.max(0,bottom-tally.getBoundingClientRect().bottom-6)+'px');body.closest('.console').style.setProperty('--deal-name-top',(tally.getBoundingClientRect().bottom-body.closest('.console').getBoundingClientRect().top+6)+'px');}
 }
 new ResizeObserver(()=>fitBoard()).observe(app);
 window.addEventListener('resize',fitBoard);

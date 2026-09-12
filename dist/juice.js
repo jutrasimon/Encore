@@ -1,4 +1,4 @@
-import {announcement} from './i18n.js?v=0.10.0';
+import {announcement} from './i18n.js?v=0.10.1';
 // Effects stay outside the game state. One bounded canvas, paused when idle/hidden.
 export function scoreCallout(event){
  const total=(event?.q||0)+(event?.e||0)+(event?.f||0);
@@ -22,7 +22,7 @@ export class Juice{
   this.resize=()=>{this.dpr=Math.min(devicePixelRatio||1,1.5);this.w=innerWidth;this.h=innerHeight;this.canvas.width=this.w*this.dpr;this.canvas.height=this.h*this.dpr;};
   this.resize();window.addEventListener('resize',this.resize);
   root.addEventListener('pointermove',e=>this.move(e));root.addEventListener('pointerleave',()=>this.release());
-  root.addEventListener('pointerdown',e=>{if(e.target.closest('button')&&!e.target.closest('button:disabled'))this.burst('hit-spark',e.clientX,e.clientY,65,'#baff42',260);});
+  root.addEventListener('pointerdown',e=>{if(e.target.closest('button')&&!e.target.closest('button:disabled,[data-action=starter-tooltip]'))this.burst('hit-spark',e.clientX,e.clientY,65,'#baff42',260);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)this.clear();});
  }
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}

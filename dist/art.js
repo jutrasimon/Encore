@@ -1,4 +1,4 @@
-import {TILES} from './engine.js?v=0.10.0';
+import {TILES} from './engine.js?v=0.10.1';
 import {stickerMasks} from './art-masks.js';
 // Clip atlas pixels explicitly; a wide SVG viewport otherwise reveals adjacent stickers.
 const boxes={
@@ -11,7 +11,7 @@ const boxes={
 };
 let stickerId=0;
 export function sticker(kind){
- if(kind.startsWith('perc_')&&TILES[kind])return `<canvas class="sticker percussion-art" width="256" height="256" data-art-kind="${kind}" aria-hidden="true"></canvas>`;
+ if(kind.startsWith('perc_')&&TILES[kind])return `<img class="sticker percussion-art" data-art-kind="${kind}" alt="" aria-hidden="true">`;
  const box=boxes[kind];if(!box)return '';
  const id=`sticker-crop-${++stickerId}`;
  return `<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><defs><clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${stickerMasks[kind]}"/></clipPath></defs><g clip-path="url(#${id})"><image href="./art/punk-stickers-v1.png" width="887" height="1774"/></g></svg>`;
@@ -29,15 +29,24 @@ export function loadTileTexture(kind){
    const source=document.createElement('canvas');source.width=image.naturalWidth;source.height=image.naturalHeight;
    const ctx=source.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
    if(kind!=='perc_patch'){const pixels=ctx.getImageData(0,0,source.width,source.height);keyDrummerPixels(pixels.data);ctx.putImageData(pixels,0,0);}
-   const thumbnail=document.createElement('canvas');thumbnail.width=thumbnail.height=256;thumbnail.getContext('2d').drawImage(source,0,0,256,256);resolve(thumbnail);
+   // Trim only transparent margins, retaining all original artwork pixels.
+   const rgba=ctx.getImageData(0,0,source.width,source.height).data;
+   let left=source.width,top=source.height,right=0,bottom=0;
+   for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(rgba[(y*source.width+x)*4+3]>16){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+   const cropped=document.createElement('canvas');cropped.width=right-left+1;cropped.height=bottom-top+1;
+   cropped.getContext('2d').drawImage(source,left,top,cropped.width,cropped.height,0,0,cropped.width,cropped.height);resolve(cropped);
   }catch{resolve(null);}};image.onerror=()=>resolve(null);image.src=new URL('./art/drummer/tiles/'+TILES[kind].icon+'.png',import.meta.url).href;
  }));return tileTextures.get(kind);
 }
 export function installTileArt(root=document.body){
- const seen=new WeakMap();const paint=()=>{for(const canvas of root.querySelectorAll('canvas[data-art-kind]')){
-  const kind=canvas.dataset.artKind;if(seen.get(canvas)===kind)continue;seen.set(canvas,kind);loadTileTexture(kind).then(image=>{
-   if(!canvas.isConnected||canvas.dataset.artKind!==kind)return;const c=canvas.getContext('2d');c.clearRect(0,0,256,256);if(image)c.drawImage(image,0,0,256,256);
-   else {c.fillStyle='#fff4d0';c.font='bold 100px sans-serif';c.textAlign='center';c.fillText('♪',128,165);}canvas.dataset.loaded=image?'true':'fallback';
+ const seen=new WeakMap(),urls=new Map();
+ const paint=()=>{for(const element of root.querySelectorAll('img[data-art-kind]')){
+  const kind=element.dataset.artKind;if(seen.get(element)===kind&&element.hasAttribute('src'))continue;seen.set(element,kind);
+  loadTileTexture(kind).then(texture=>{
+   if(!element.isConnected||element.dataset.artKind!==kind)return;
+   if(texture){if(!urls.has(kind))urls.set(kind,texture.toDataURL('image/png'));element.src=urls.get(kind);}
+   element.dataset.loaded=texture?'true':'fallback';
   });
- }};const observer=new MutationObserver(paint);observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['data-art-kind']});paint();return ()=>observer.disconnect();
+ }};
+ const observer=new MutationObserver(paint);observer.observe(root,{childList:true,subtree:true,attributes:true,attributeFilter:['data-art-kind','src']});paint();return ()=>observer.disconnect();
 }

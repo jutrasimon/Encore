@@ -494,5 +494,8 @@ export default {
   "ESPACES +3": "SPACES +3",
   "Fondations": "Foundations",
   "Montée": "Build-up",
-  "Maillage": "Connections"
+  "Maillage": "Connections",
+  "RANGÉE": "ROW",
+  "COLONNE": "COLUMN",
+  "ALIGNÉES": "ALIGNED"
 };

@@ -1,7 +1,7 @@
-import {getLanguage,translate} from './i18n.js?v=0.10.0';
-import {TILES,upgradeStat} from './engine.js?v=0.10.0';
-import {sticker,FAMILY_ART} from './art.js?v=0.10.0';
-import {icon} from './icons.js?v=0.10.0';
+import {getLanguage,translate} from './i18n.js?v=0.10.1';
+import {TILES,upgradeStat} from './engine.js?v=0.10.1';
+import {sticker,FAMILY_ART} from './art.js?v=0.10.1';
+import {icon} from './icons.js?v=0.10.1';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
@@ -16,7 +16,11 @@ export function tileSummary(t){
  const d=TILES[t.kind],l=t.level||0;
  if(t.inactive)return 'INACTIVE';
  if(d.charge)return t.charges?`${t.charges} CHARGES`:'+1 CHARGE';
- if(d.summary)return `<span class="percussion-summary">${translate(d.summary).replace(/\bQ\b/g,icon('star')).replace(/\bE\b|É/g,icon('bolt'))}</span>`;
+ if(d.summary){
+  const values={perc_kick:icon('bolt')+'+1',perc_snare:icon('star')+'+1',perc_hihat:icon('star')+'+1 '+icon('bolt')+'+1',perc_floor_tom:icon('star')+'2+',perc_ride:icon('bolt')+'2+',perc_crash:icon('star')+'2 '+icon('bolt')+'2+',perc_metronome:'+1 CHARGE',perc_double_pedal:icon('bolt')+'×2',perc_rimshot:icon('star')+'×2',perc_fill:'REJOUE ×1',perc_riff_bridge:icon('star')+'1+',perc_voice_bridge:icon('bolt')+'1+',perc_brushes:icon('star')+'1+',perc_silence:icon('bolt')+'1+',perc_patch:icon('star')+'+1 '+icon('bolt')+'+1',perc_backstage:icon('choir')+'+1'};
+  const scope={row:'RANGÉE',column:'COLONNE',cross:'ALIGNÉES'}[d.scope]||'';
+  return `<span class="percussion-summary"><span>${values[t.kind]||'EFFET'}</span><small>${translate(scope)}</small></span>`;
+ }
  if(t.kind==='solo')return `${icon('star')} ${2+l} / ${6+l}`;
  if(t.kind==='last')return `${icon('bolt')} ${1+l} / ${6+l}`;
  if(t.kind==='lighter')return `${icon('bolt')} ${1+l}+`;
@@ -28,7 +32,7 @@ export const tileMultiplier=t=>t.mq||t.me?[['mq','star'],['me','bolt']].filter((
 export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false}={}){
  const empty=!t||t.kind==='empty',d=empty?null:TILES[t.kind],f=empty?null:tileFamily(t);
  const production=resolved&&!empty?[['q','star'],['e','bolt'],['f','choir']].filter(([k])=>t[k]).map(([k,i])=>`<span>${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join(''):'';
- return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${empty?'':`data-tile="${esc(JSON.stringify(t))}"`} ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
+ return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.kind?.startsWith('perc_')?'drummer-tile':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${empty?'':`data-tile="${esc(JSON.stringify(t))}"`} ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
  ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(shortNames[t.kind]||d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">${tileMultiplier(t)}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
  </button>`;
 }
