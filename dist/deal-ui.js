@@ -1,6 +1,9 @@
 // Visual distribution of the already drawn board; never draws or changes a game tile.
+const orders=new WeakMap();
+export function shuffleSlots(length,random=Math.random){const slots=Array.from({length},(_,i)=>i);for(let i=slots.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]];}return slots;}
+function orderFor(board){if(!orders.has(board))orders.set(board,shuffleSlots(board.length));return orders.get(board);}
 export function dealFrame(board,elapsed,intro,reduced=false){
- const slots=Array.from({length:board.length},(_,index)=>index);
+ const slots=orderFor(board);
  const duration=Math.min(180,intro*.23),step=Math.min(55,(intro-duration-80)/Math.max(1,slots.length));
  return slots.map((index,rank)=>({index,progress:reduced?1:Math.max(0,Math.min(1,(elapsed-60-rank*step)/duration))}));
 }

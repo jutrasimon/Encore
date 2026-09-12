@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.20 / principal 0.9.9
+# État courant : preview ENCORE 0.9.21 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Distribution mélangée et cadre borné 0.9.21
+
+Base `4e381b1`. Ordre d’arrivée visuel des neuf cases mélangé par Fisher-Yates une fois par plateau, puis conservé pendant toutes les frames. Les emplacements et calculs du reveal ne changent pas. Cadre centré avec hauteur limitée par la largeur (environ 1:2) et 1040 px maximum, pour éviter un téléphone excessivement long dans une grande fenêtre ou avec dézoom. Aucun moteur ni serveur modifié.
+
+Validation : 116 tests, ordre stable et permutation complète inclus. Navigateur local : coop dans une fenêtre 1100 × 1800, cadre 496 × 1028 centré ; mobile 320 × 700, cadre 308 × 628 sans débordement horizontal, grille et navigation visibles. Pas de nouveau parcours complet de tournée navigateur pour cette correction visuelle. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Titre d’accueil statique 0.9.20
 
