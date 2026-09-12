@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.9.23 / principal 0.9.9
+# État courant : preview ENCORE 0.9.24 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Anglais par défaut 0.9.24
+
+Base `db73938`, branche `preview/audio-0.9.0`. Sans préférence enregistrée, l'application démarre en anglais. Un choix existant Français / English reste prioritaire ; les sauvegardes de partie et les règles ne changent pas. Document initial en anglais, puis langue enregistrée appliquée au démarrage. Les trois salles continuent de boucler à difficulté croissante après le niveau 3, sans limite de niveau.
+
+Validation : npm run check et 123 tests réussis. Accueil local vérifié dans le navigateur : anglais, titre anglais et version 0.9.24. Aucun nouveau parcours complet de tournée dans le navigateur pour ce changement de préférence initiale.
 
 ## Localisation français/anglais et couches Stats 0.9.23
 

@@ -24,7 +24,7 @@ const read=(k,d=null)=>{try{return JSON.parse(localStorage.getItem(STORAGE_PREFI
 const save=(k,v)=>{try{localStorage.setItem(STORAGE_PREFIX+k,JSON.stringify(v));}catch{}};
 let game=null,myId=null,mode=null,view='game',selected=null,rewardAction='add',connection=null,online=[],activities={},connected=false,busy=false,networkReady=false,animating=false,frames=[],generation=0;
 let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session');
-setLanguage(read('encore.language','fr'));
+setLanguage(read('encore.language','en'));
 const localization=installLocalization();
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
@@ -32,7 +32,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.23 · ENCORE ∞';
+const VERSION='0.9.24 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
