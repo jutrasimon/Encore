@@ -62,3 +62,5 @@ test('stage names are spoken alone as words with French pronunciation, preservin
  const host={speechSynthesis:{speak:u=>calls.push(u),cancel(){},getVoices:()=>[voice]},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
  new ResolutionAudio(()=>true,host).announce(name);assert.equal(name,'SIMON');assert.equal(calls[0].text,'Simon');assert.equal(calls[0].lang,'fr-CA');assert.equal(calls[0].voice,voice);
 });
+
+test('each player restarts the same acceleration independently',()=>{const a=musician('a','Same'),b=musician('b','Same');for(const reduced of [false,true]){const p=resolutionPlan([a,b],{q:0,e:0},reduced);assert.deepEqual(p.groups[0].timings.map(t=>t.duration),p.groups[1].timings.map(t=>t.duration));}});

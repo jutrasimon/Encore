@@ -1,6 +1,14 @@
-# État courant : preview ENCORE 0.9.21 / principal 0.9.9
+# État courant : preview ENCORE 0.9.22 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Lisibilité et reveal individuel 0.9.22
+
+Base `c7b8200`. Titre Stats du band sur une ligne, même hauteur réservée que les profils individuels. Bordure, bandeau et halo d’infobulle suivent la couleur du type. Stickers miniatures retirés des onglets Studio. Accélération du reveal calculée sur le temps local de chaque joueur, jamais sur le temps cumulé des deux prestations.
+
+À la fin de l’effet de chaque tuile, son total qualité + énergie + fans (redéclenchements inclus) apparaît au centre de sa case avec un éclat de particules, dans la police des annonces GREAT/AWESOME. Il reste suspendu et rétrécit progressivement jusqu’à la fin de la prestation ; nettoyage au changement de joueur et à l’arrêt du reveal. En mouvement réduit, chiffre fixe sans explosion ni déplacement. Aucune modification des règles, de l’état sauvegardé ou du serveur.
+
+Validation : syntaxe et 117 tests, dont mêmes durées pour deux prestations identiques et conservation des scores. Page de composants locale sans sauvegarde : titre sur une ligne, aucun sticker Studio, contour/bandeau d’infobulle Effet cyan (120,211,223), total 20 suspendu puis réduit à 45 %, disparition au nettoyage, aucune erreur console. Le chargement d’une fixture dans la sauvegarde solo locale a été refusé par la revue automatique pour risque d’écrasement ; validation remplacée par une page isolée sans accès aux sauvegardes. Pas de nouveau parcours complet solo/coop en navigateur pour cette passe. Preview : https://jutrasimon.github.io/Encore/audio-test/.
 
 ## Distribution mélangée et cadre borné 0.9.21
 

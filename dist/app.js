@@ -1,17 +1,17 @@
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.9.18';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.9.22';
 import {paintDeal} from './deal-ui.js?v=0.9.21';
 import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.9.18';
 import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.9.18';
-import {Juice,scoreCallout} from './juice.js?v=0.9.20';
+import {Juice,scoreCallout} from './juice.js?v=0.9.22';
 import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.9.18';
 import {RewardAdvance} from './autoplay.js?v=0.9.18';
-import {statsMarkup} from './stats-ui.js?v=0.9.18';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.18';
+import {statsMarkup} from './stats-ui.js?v=0.9.22';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.9.22';
 import {TILES,showInfo,newGame,player,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.9.18';
 import {tileCard,tileDetails} from './tile-ui.js?v=0.9.18';
 import {inventoryMarkup} from './inventory-ui.js?v=0.9.18';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.18';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.9.22';
 import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.9.18';
 import {icon} from './icons.js?v=0.9.18';
 import {SERVER_URL} from './config.js?v=0.9.18';
@@ -29,7 +29,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.9.21 · ENCORE ∞';
+const VERSION='0.9.22 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -235,7 +235,7 @@ function transferPackets(g){
 function paintCinematic(frame,elapsed){
  const c=cinematic,g=frame.group,changed=c.mounted!==g.index;
  if(changed){
-  c.group=g;c.mounted=g.index;c.overdriveAnnounced=false;animationPlayer=g.player;activeEvent=null;scoredIds=new Set();
+  juice.clearTileScores();c.scoreTotals=new Set();c.group=g;c.mounted=g.index;c.overdriveAnnounced=false;animationPlayer=g.player;activeEvent=null;scoredIds=new Set();
   mount(gameView());
   const consoleEl=$('.console');consoleEl.style.setProperty('--stage-color',['#baff42','#ff5aae','#60e9ff','#ffba42'][g.index%4]);
  }
@@ -250,6 +250,7 @@ function paintCinematic(frame,elapsed){
   if(frame.phase==='impact'){resolutionAudio.boom();juice.impact(g.total);const verdict=scoreCallout(g.total);if(verdict&&!c.overdriveAnnounced)resolutionAudio.verdict(verdict.text);$('.resolution-caption strong').textContent='POINTS AJOUTÉS AU SHOW';}
  }
  if(eventKey!==c.eventKey){c.eventKey=eventKey;if(frame.event){resolutionAudio.hit(frame.event.index);juice.hit(frame.event,frame.beat);const praise=scoreCallout(frame.event);if(praise){resolutionAudio.critical(praise.rank);songEffects.burst();}$('.resolution-caption strong').textContent=TILES[frame.event.kind].name;}}
+ for(const event of g.events.slice(0,frame.completed)){if(!c.scoreTotals.has(event.index)){c.scoreTotals.add(event.index);juice.tileTotal(event,g.end-elapsed);}}
  const dealt=paintDeal(app,g.player.board,elapsed-g.start,g.intro,cinematic.plan.reduced);
  if(frame.phase==='intro'&&dealt>(c.dealtCount||0)&&!cinematic.plan.reduced)resolutionAudio.deal();
  c.dealtCount=dealt;

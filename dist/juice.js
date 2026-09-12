@@ -63,6 +63,14 @@ export class Juice{
   else if(this.layer.querySelector('.rank-5'))return;
   this.layer.append(el);setTimeout(()=>el.remove(),this.reduced()?1100:1000);
  }
+ clearTileScores(){this.layer.querySelectorAll('.tile-score-total').forEach(el=>el.remove());}
+ tileTotal(event,remaining){
+  const tile=this.root.querySelectorAll('.grid .tile')[event.index];if(!tile)return;
+  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height*.43,total=(event.q||0)+(event.e||0)+(event.f||0),color=event.q>event.e?'#baff42':event.f>event.e?'#ff89c9':'#ffb441';
+  const el=document.createElement('strong');el.className='tile-score-total';el.textContent=String(total);el.setAttribute('aria-hidden','true');el.style.cssText=`left:${x}px;top:${y}px;--score-size:${Math.min(64,r.width*.5)}px;color:${color}`;this.layer.append(el);
+  this.spray(x,y,color,18);this.burst('hit-spark',x,y,r.width,color,250);
+  if(!this.reduced())el.animate([{transform:'translate(-50%,-50%) scale(1.35)'},{transform:'translate(-50%,-50%) scale(1)',offset:Math.min(.12,160/Math.max(200,remaining))},{transform:'translate(-50%,-50%) scale(.45)'}],{duration:Math.max(200,remaining),fill:'forwards',easing:'linear'});
+ }
  hit(event,beat=400){
   const tile=this.root.querySelectorAll('.grid .tile')[event.index];if(!tile)return;
   const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,call=scoreCallout(event),color=event.q>event.e?'#baff42':event.f>event.e?'#ff89c9':'#ffb441';
@@ -107,5 +115,5 @@ export class Juice{
   for(const p of this.particles){p.x+=p.vx*dt/1000;p.y+=p.vy*dt/1000;p.vy+=dt*.22;c.globalAlpha=1-p.life/p.ttl;c.fillStyle=p.color;c.fillRect(p.x,p.y,p.size,p.size);}
   c.restore();c.globalAlpha=1;if(this.bursts.length||this.particles.length||this.lines||this.warp)this.raf=requestAnimationFrame(t=>this.draw(t));
  }
- clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.lastPraise=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
+ clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.lastPraise=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.clearTileScores();this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
 }

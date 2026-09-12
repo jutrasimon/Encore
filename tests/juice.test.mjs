@@ -72,7 +72,7 @@ test('reconnecting after the partner completed the choices resumes only an open 
 test('resolution accelerates gently from 1.5x to a hard 2.25x ceiling and conserves totals',()=>{
  assert.equal(resolutionSpeed(0),1.5);assert.equal(resolutionSpeed(4500),1.6875);assert.equal(resolutionSpeed(9000),2.25);assert.equal(resolutionSpeed(999999),2.25);
  let g=setup(['a','b']);g=act(act(g,'a','ready'),'b','ready');const p=resolutionPlan(g.players,{q:0,e:0});
- const timings=p.groups.flatMap(g=>g.timings);for(let i=1;i<timings.length;i++)assert.ok(timings[i].duration<=timings[i-1].duration);
+ for(const group of p.groups){const timings=group.timings;for(let i=1;i<timings.length;i++)assert.ok(timings[i].duration<=timings[i-1].duration);}
  for(const g of p.groups)for(const t of g.timings)assert.ok(t.duration<=620/1.5&&t.duration>=620/2.25);
  assert.deepEqual(resolutionFrame(p,p.duration).score,{q:g.q,e:g.e});
 });

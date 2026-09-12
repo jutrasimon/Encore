@@ -10,12 +10,12 @@ export function resolutionPlan(players,previous,reduced=false){
  let at=0,score={q:previous.q,e:previous.e};
  for(const [index,p] of cast.entries()){
   const notes=events.filter(e=>e.playerId===p.id),total={q:0,e:0,f:0};
-  const speed=resolutionSpeed(at),intro=(reduced?700:Math.min(2100,1200+p.name.length*30))/BASE_RESOLUTION_SPEED,beat=(reduced?140:620)/speed;
+  const speed=resolutionSpeed(0),intro=(reduced?700:Math.min(2100,1200+p.name.length*30))/BASE_RESOLUTION_SPEED,beat=(reduced?140:620)/speed;
   const group={player:p,index,events:notes,start:at,base:{...score},intro,beat};
   group.timings=[];let cursor=at+intro;
-  for(const event of notes){const duration=(reduced?140:620)/resolutionSpeed(cursor);group.timings.push({start:cursor,duration});cursor+=duration;}
+  for(const event of notes){const duration=(reduced?140:620)/resolutionSpeed(cursor-at);group.timings.push({start:cursor,duration});cursor+=duration;}
   group.charge=at+intro;group.hold=cursor;
-  group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer);
+  group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold-at);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer-at);
   group.outro=group.impact+(reduced?500:1800);
   group.end=group.outro+(reduced?100:240);
   for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;

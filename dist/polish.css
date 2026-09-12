@@ -158,3 +158,7 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 
 .studio-hero { width:100%; min-width:0; box-sizing:border-box; aspect-ratio:auto; height:150px; }
 @media(max-width:380px){.studio-hero{height:115px;}}
+
+.stats-screen>h1{height:38px;min-height:38px;line-height:38px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stats-screen>h1.band-stats-title{font-size:clamp(18px,4.5vw,26px)}
+.punk-tooltip{border-color:var(--tile-color);box-shadow:5px 6px 0 #0a100be0,0 0 25px color-mix(in srgb,var(--tile-color) 25%,transparent)}.punk-tooltip .tooltip-tape{background:var(--tile-color)}
+.tile-score-total{position:absolute;pointer-events:none;font:1000 italic var(--score-size)/1 var(--font);letter-spacing:-1px;text-shadow:3px 4px #0a0a09,-2px -2px #0a0a09;transform:translate(-50%,-50%);z-index:3}
