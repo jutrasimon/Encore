@@ -13,3 +13,5 @@
 - Cadre visuel invariant : tous les écrans, présentations et popups restent dans le rectangle exact du téléphone (`.console`). Une présentation modale remplace visuellement tout cet écran, jamais une fenêtre plus large que le jeu. Vérifier les limites après redimensionnement mobile.
 - En coop, chaque joueur confirme « Monter sur scène » avant la première chanson de chaque show, via `ready`. Aucun auto-ready à `round === 0` ne doit contourner cette confirmation ; les choix draft/Studio restent obligatoires.
 - Icônes de statistiques : utiliser `StatIcon` (`dist/stat-icon.js`) et les trois masques PNG communs ; ne pas réintroduire étoiles ou caractères éclair pour les valeurs.
+
+- Localisation : tout nouveau texte visible ou accessible doit avoir sa traduction dans `dist/locales/en.tsv`. Conserver les noms de joueurs sous `translate="no"`, les valeurs des champs et les identifiants du moteur ; aucune règle de jeu ne dépend de la langue. Reconstruire le catalogue avec `npm run check`.

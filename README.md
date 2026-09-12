@@ -171,3 +171,7 @@ simultanés maximum, pause quand l’onglet est masqué.
 Crédits et provenance : [dist/vfx/CREDITS.md](dist/vfx/CREDITS.md).
 Licence musique : [Abstraction-LICENSE.txt](dist/audio/Abstraction-LICENSE.txt).
 Sons : JDSherbert, [licence fournie](dist/audio/JDSherbert-LICENSE.pdf).
+
+### Langue du jeu
+
+Dans Réglages (également accessible depuis l’accueil), choisir Français ou English. La langue est conservée localement et chaque joueur coop peut avoir sa propre langue. Les noms de scène ne sont jamais traduits. Les traductions de présentation sont dans `dist/locales/en.tsv` ; lancer `npm run check` pour reconstruire le catalogue. Les règles et sauvegardes restent indépendantes de la langue.

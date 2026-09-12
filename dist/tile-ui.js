@@ -1,3 +1,4 @@
+import {getLanguage,translate} from './i18n.js?v=0.9.23';
 import {TILES} from './engine.js?v=0.9.18';
 import {sticker,FAMILY_ART} from './art.js?v=0.8.2';
 import {icon} from './icons.js?v=0.9.18';
@@ -7,8 +8,8 @@ export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
 export const tileColor=t=>t?.kind==='duck'?'fans':tileFamily(t).color;
 export function familyReference(family,label){const f=FAMILY_ART[family];return `<span class="tile-reference type-${f.color}">${sticker(f.kind)}<strong>${label||f.label}</strong></span>`;}
 function richText(text){
- return esc(text).replace(/\b(Guitares?|Voix)\b/g,m=>familyReference(m.startsWith('Guitare')?'guitar':'voice',m.toUpperCase()))
-  .replace(/(\d+ (qualité|énergie|fans?))/g,(m,all,stat)=>icon(stat==='qualité'?'star':stat==='énergie'?'bolt':'choir')+all)
+ return esc(translate(text)).replace(/\b(Guitares?|Voix|Guitars?|Vocals?)\b/g,m=>familyReference(m.startsWith('Guitar')?'guitar':'voice',m.toUpperCase()))
+  .replace(/(\d+ (qualité|énergie|quality|energy|fans?))/g,(m,all,stat)=>icon(['qualité','quality'].includes(stat)?'star':['énergie','energy'].includes(stat)?'bolt':'choir')+all)
   .replace(/(×2|\+\d+|\b\d+ (?:qualité|énergie|charges?|fans?)\b)/g,'<strong>$1</strong>');
 }
 export function tileSummary(t){
@@ -36,7 +37,7 @@ export function tileDetails(t,{upgrade=false}={}){
  return `<section class="tile-explanation type-${tileColor(t)}"><div class="explanation-heading"><strong>${esc(d.name)}</strong><span>${f.label}${level?' · NIVEAU +'+level:''}</span></div>
  ${d.family==='voice'?'<p class="family-explainer">Cette tuile est une <strong>VOIX</strong>. Les micros comptent comme des voix.</p>':d.family==='guitar'?'<p class="family-explainer">Cette tuile est une <strong>GUITARE</strong>.</p>':''}
  <p class="tile-rule">${richText(related?rule.replace(', ×2','. ×2').replace(/(?:Voix : )?×2 par (Voix|Guitare) adjacente[.,]?/,'').replace(/,\s*\./g,'.'):rule)}</p>
- ${related?`<p class="tile-rule family-rule">${familyReference(d.family)} <strong>×2</strong> par ${familyReference(related)} <strong>voisine</strong>.</p>`:''}
+ ${related?`<p class="tile-rule family-rule">${familyReference(d.family)} <strong>×2</strong> ${getLanguage()==='en'?'per adjacent':'par'} ${familyReference(related)} ${getLanguage()==='en'?'':'<strong>voisine</strong>'}.</p>`:''}
  ${level?`<p class="tile-rule upgrade-current"><strong>${icon(stat==='qualité'?'star':stat==='fan'?'choir':'bolt')}+${level} ${stat}</strong> de niveau, avant les multiplicateurs.</p>`:''}
  ${d.charge?`<p class="tile-rule"><strong>${t.charges||0} charge${t.charges===1?'':'s'}</strong> actuellement. Les charges restent jusqu’à la fin du show.</p>`:''}
  ${upgrade?`<p class="upgrade-preview">NIVEAU +${level} → <strong>+${level+1}</strong><br><strong>${icon(stat==='qualité'?'star':stat==='fan'?'choir':'bolt')}+1 ${stat}</strong> par apparition, avant les multiplicateurs.</p>`:''}

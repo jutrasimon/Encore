@@ -1,3 +1,4 @@
+import {announcement} from './i18n.js?v=0.9.23';
 // Effects stay outside the game state. One bounded canvas, paused when idle/hidden.
 export function scoreCallout(event){
  const total=(event?.q||0)+(event?.e||0)+(event?.f||0);
@@ -55,7 +56,7 @@ export class Juice{
   const now=performance.now();
   if(rank!==5&&this.lastPraise&&now-this.lastPraise.time<650&&rank<=this.lastPraise.rank)return;
   this.lastPraise={time:now,rank};
-  const r=board.getBoundingClientRect(),el=document.createElement('strong');el.className=`hype-callout rank-${rank}`;el.textContent=text;
+  const r=board.getBoundingClientRect(),el=document.createElement('strong');el.className=`hype-callout rank-${rank}`;el.textContent=announcement(text);
   el.style.cssText=`left:${r.x+r.width/2}px;top:${Math.max(95,r.y+r.height*.32)}px;--hype:${color}`;
   // At most one praise and one overdrive message; bursts can overlap without text piling up.
   this.layer.querySelectorAll(rank===5?'.rank-5':'.hype-callout:not(.rank-5)').forEach(n=>n.remove());

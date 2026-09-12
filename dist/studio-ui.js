@@ -1,5 +1,5 @@
 import {STUDIO_CATEGORIES,studioChoices,studioComplete,showInfo} from './engine.js?v=0.9.18';
-import {tileCard,tileDetails,esc} from './tile-ui.js?v=0.9.18';
+import {tileCard,tileDetails,esc} from './tile-ui.js?v=0.9.23';
 import {icon} from './icons.js?v=0.9.18';
 const labels={add:'Ajouter',upgrade:'Améliorer',remove:'Retirer'};
 export function studioMarkup(game,p,{category='add',selection=null,locked=false}={}){

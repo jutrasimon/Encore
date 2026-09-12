@@ -162,3 +162,7 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .stats-screen>h1{height:38px;min-height:38px;line-height:38px;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.stats-screen>h1.band-stats-title{font-size:clamp(18px,4.5vw,26px)}
 .punk-tooltip{border-color:var(--tile-color);box-shadow:5px 6px 0 #0a100be0,0 0 25px color-mix(in srgb,var(--tile-color) 25%,transparent)}.punk-tooltip .tooltip-tape{background:var(--tile-color)}
 .tile-score-total{position:absolute;pointer-events:none;font:1000 italic var(--score-size)/1 var(--font);letter-spacing:-1px;text-shadow:3px 4px #0a0a09,-2px -2px #0a0a09;transform:translate(-50%,-50%);z-index:3}
+
+.console{isolation:isolate}.console>.screen-body{position:relative;z-index:1}.console>.action-slot,.console>.navigation{z-index:2}
+
+.language-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:20px;font-weight:800}.language-setting select{font:inherit;color:#fff3d3;background:#1c2915;border:2px solid #718159;border-radius:4px;padding:8px;min-width:140px}.home-settings{align-self:flex-end;font-size:18px;padding:5px 12px}.settings-screen>.language-setting{flex-shrink:0}

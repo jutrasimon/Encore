@@ -1,3 +1,4 @@
+import {setLanguage} from '../dist/i18n.js?v=0.9.23';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {StageAudio,audioScene,PLAYLIST,musicSettings} from '../dist/stage-audio.js';
@@ -25,7 +26,7 @@ test('50 percent music matches the old 5 percent gain and migrates saved setting
 });
 test('final verdict is spoken verbatim, ducks music, and respects voice mute',()=>{
  const {audio,utterances,mute}=fixture();audio.unlocked=true;audio.mix();
- audio.verdict('FANTASTIC!');assert.equal(utterances.at(-1).text,'FANTASTIC!');assert.equal(audio.ducked,true);
+ audio.verdict('FANTASTIC!');assert.equal(utterances.at(-1).text,'FANTASTIQUE !');assert.equal(audio.ducked,true);
  utterances.at(-1).onend();assert.equal(audio.ducked,false);
  audio.setLevels({voice:0});audio.verdict('GREAT!');assert.equal(utterances.length,1);mute();
 });
@@ -55,7 +56,7 @@ test('no autoplay, repeated renders keep music position, voice ducks and restore
  audio.unlocked=true;audio.mix();await Promise.resolve();await Promise.resolve();
  const before=audio.tracks.get(audio.scene.key).gain.gain.value;
  for(let n=0;n<10;n++)audio.setScene({key:'backstage.mp3',live:false});assert.equal(media.length,1);assert.equal(media[0].calls,1);
- audio.song(2);assert.equal(utterances.at(-1).text,'Song two!');assert.equal(utterances.at(-1).lang,'en-US');assert.ok(audio.tracks.get(audio.scene.key).gain.gain.value<before);
+ audio.song(2);assert.equal(utterances.at(-1).text,'Chanson deux!');assert.equal(utterances.at(-1).lang,'fr-CA');assert.ok(audio.tracks.get(audio.scene.key).gain.gain.value<before);
  utterances.at(-1).onend();assert.equal(audio.tracks.get(audio.scene.key).gain.gain.value,before);mute();
 });
 test('mute silences every track and clears delayed fades, re-enable uses retained scene',async()=>{
@@ -68,3 +69,5 @@ test('zero voice prevents announcements and unavailable browser audio does not b
  const {audio,utterances,mute}=fixture();audio.setLevels({voice:0,music:0});audio.song(1);audio.announce('Simon');assert.equal(utterances.length,0);mute();
  const unavailable=new StageAudio(()=>true,{});unavailable.unlock();unavailable.song(3);unavailable.setScene({key:'backstage.mp3',live:false});unavailable.suspend();
 });
+
+test('song announcements follow the selected language',()=>{const {audio,utterances,mute}=fixture();try{setLanguage('en');audio.song(2);assert.equal(utterances.at(-1).text,'Song two!');assert.equal(utterances.at(-1).lang,'en-US');}finally{setLanguage('fr');mute();}});

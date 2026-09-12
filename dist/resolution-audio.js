@@ -1,3 +1,4 @@
+import {locale} from './i18n.js?v=0.9.23';
 // Speech gets ordinary word casing; the displayed stage name remains untouched.
 export function spokenStageName(name){
  return String(name??'').normalize('NFC').trim().replace(/\s+/g,' ').replace(/[\p{L}\p{M}]+/gu,word=>word.charAt(0).toLocaleUpperCase('fr-CA')+word.slice(1).toLocaleLowerCase('fr-CA'))||'Sans nom';
@@ -34,7 +35,7 @@ export class ResolutionAudio{
  announce(name,volume=1){
   if(!this.enabled())return;
   this.tone(105,36,.4,.13,'sawtooth');this.tone(52,28,.65,.19);
-  this.speak(spokenStageName(name),{volume,lang:'fr-CA',pitch:.2,rate:1.02,echo:true});
+  this.speak(spokenStageName(name),{volume,lang:locale(),pitch:.2,rate:1.02,echo:true});
  }
  tick(value){this.tone(650+Math.min(value,80)*13,280,.045,.035,'square');}
  hit(index){this.tone(110+index*14,52,.14,.06,'triangle');}

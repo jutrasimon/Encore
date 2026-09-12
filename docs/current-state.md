@@ -1,6 +1,16 @@
-# État courant : preview ENCORE 0.9.22 / principal 0.9.9
+# État courant : preview ENCORE 0.9.23 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Localisation français/anglais et couches Stats 0.9.23
+
+Base `c649b4c`. Les décors de dernière chanson ne sont montés que dans la vue de jeu. Console isolée, panneaux au niveau 1 et actions/navigation au niveau 2, au-dessus du décor : les taches ne passent plus devant Stats.
+
+Réglages accessibles depuis l’accueil ; sélecteur Français / English, français par défaut. Préférence `encore.language` avec le préfixe de sauvegarde existant (`audio-preview.` en preview), indépendante des parties et des autres clients. Changement immédiat, sans commande serveur, sans rechargement, musique continue. Attribut lang du document, titre de page, accessibilité, nombres des graphiques, annonces de chanson/nom/verdict suivent la langue. Les noms saisis par les joueurs sont explicitement exclus de la traduction, y compris un nom identique à une statistique.
+
+Catalogue central `dist/locales/en.tsv` (source française → anglais) compilé par `scripts/build-locales.mjs` pendant `npm run check` vers `dist/locales/en.js`. `dist/i18n.js` traduit uniquement la présentation et conserve les textes d’origine pour le retour au français ; observer limité aux textes et attributs accessibles, sans changement de datasets, valeurs de champs, identifiants ou état de jeu. Les descriptions de tuiles sont traduites avant l’enrichissement typographique pour préserver les phrases complètes. Noms/règles des 18 tuiles, trois salles, états coop, Studio, inventaire/focus, bilans, règles, messages réseau et annonces couverts. Les données moteur et messages serveur sources restent en français ; aucun déploiement serveur requis.
+
+Validation : 123 tests (parcours moteur cinq chansons solo/coop, succès/échec, Studio, sauvegardes ; catalogue complet des tuiles/salles, langue de repli, chiffres/identifiants conservés, annonces vocales bilingues et descriptions sans mutation). Navigateur local : passage anglais depuis l’accueil, persistance au rechargement, reprise en lecture d’une sauvegarde existante, verdict/Studio/Stats/règles traduits, retour français sans rechargement ; aucun décor de chanson dans Stats. Test isolé d’un joueur nommé Qualité : nom inchangé et statistique Quality, puis retour français correct. Réglages à 320 × 700 sans débordement. Aucun choix de Studio ni état de partie modifié pendant ces contrôles ; pas de nouveau parcours complet coop navigateur. Preview : https://jutrasimon.github.io/Encore/audio-test/ ; principal et serveur conservés.
 
 ## Lisibilité et reveal individuel 0.9.22
 
