@@ -16,7 +16,7 @@ Base `3b60ee82e0fe1849bb9c25cb1aacb95c41feb473`, branche `preview/audio-0.9.0`. 
 
 Validation : npm run check et 145 tests réussis. Cinq chansons complètes solo et coop, réussite/Studio/départ des deux joueurs, sauvegarde/reconnexion ; cinq chansons en défaite terminale solo/coop et nouveau départ solo. Navigateur Edge isolé : descriptions Studio et Stats à 320/500 px, Show en lecture seule, trois salles en reveal et verdict, script check-reveal-browser et captures d'introduction/résolution inspectées à 320/500 px ; annonces des deux joueurs vérifiées avec ordre identique sur deux clients. Les compteurs locaux, les masques et les règles de production restent inchangés.
 
-Serveur preview `encore-preview` version 3 publié : protocol 2, rules 7, build 0.10.5 ; les quatre fichiers distants ont été comparés à la copie locale et sont identiques. Authentification existante et tables inchangées. Publication frontend preview en cours de vérification.
+Serveur preview `encore-preview` version 3 publié : protocol 2, rules 7, build 0.10.5 ; les quatre fichiers distants ont été comparés à la copie locale et sont identiques. Authentification existante et tables inchangées. Frontend preview publié au commit `3e258fc2f95c87ec48888bb96420d8769baa3faf` : GitHub Actions [34739112462](https://github.com/jutrasimon/Encore/actions/runs/34739112462) réussi et app.js public vérifié en 0.10.5. Essai coop public dans une nouvelle partie QA isolée : choix des deux classes, reconnexion, confirmation des deux joueurs, ordre identique et annonces centrales des deux joueurs réussis.
 
 ## Couleurs des statistiques et totaux conservés 0.10.4
 
