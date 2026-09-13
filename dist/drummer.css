@@ -19,7 +19,7 @@
 .mult .stat-icon{--stat-size:13px!important;vertical-align:middle}
 
 
-.class-choice .action-button:not(:disabled):is(:hover,:focus-visible){background:#baff42;color:#10190f;border-color:#baff42}
+.class-lobby .action-button:not(:disabled):is(:hover,:focus-visible){background:#baff42;color:#10190f;border-color:#baff42}
 .starter-tile{background:transparent;border:0;color:inherit;padding:3px;border-radius:4px;cursor:help;font:inherit}
 .starter-tile:is(:hover,:focus-visible){background:#ffffff12;outline:2px solid #baff42;outline-offset:0}
 .square-tile.drummer-tile>.sticker{top:15%;left:22%;width:56%;height:33%}

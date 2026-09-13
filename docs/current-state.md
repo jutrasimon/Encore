@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.10.2 / principal 0.9.9
+# État courant : preview ENCORE 0.10.3 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Survol du bouton d'invitation 0.10.3
+
+Base `1a774af`, branche `preview/audio-0.9.0`, test local http://127.0.0.1:8002/ et cible publique https://jutrasimon.github.io/Encore/audio-test/ . Le style lime de survol/focus ne visait que `.class-choice`, excluant le bouton Copier l'invitation. Il vise désormais les boutons actifs de `.class-lobby` ; les boutons désactivés conservent leur état. Modification CSS uniquement, sans changement du reveal, des règles ou de l'action de copie.
+
+Navigateur isolé : survol lime et texte sombre inspectés, focus clavier vérifié, contenu du presse-papiers égal au lien de la room de test, lancement encore désactivé sans second joueur. npm run check et 139 tests réussis. Parcours navigateur de cinq chansons solo et coop : succès, Studio et départ, sauvegarde/reconnexion ; défaites terminales contrôlées et nouveau départ solo également vérifiés. Principal et serveur inchangés.
 
 ## Restauration du reveal 0.10.2
 
