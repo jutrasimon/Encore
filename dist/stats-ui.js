@@ -1,9 +1,9 @@
-import {sticker} from './art.js?v=0.10.5';
-import {locale,getLanguage} from './i18n.js?v=0.10.5';
-import {icon} from './icons.js?v=0.10.5';
-import {classArt} from './show-art.js?v=0.10.5';
-import {TILES,ROLES} from './engine.js?v=0.10.5';
-import {esc} from './tile-ui.js?v=0.10.5';
+import {sticker} from './art.js?v=0.10.6';
+import {locale,getLanguage} from './i18n.js?v=0.10.6';
+import {icon} from './icons.js?v=0.10.6';
+import {classArt} from './show-art.js?v=0.10.6';
+import {TILES,ROLES} from './engine.js?v=0.10.6';
+import {esc} from './tile-ui.js?v=0.10.6';
 export const number=n=>new Intl.NumberFormat(locale(),{maximumFractionDigits:1}).format(n||0);
 const sum=(a,k)=>a.reduce((n,r)=>n+(r[k]||0),0);
 const metric=(n,label,cls='')=>`<div class="stat-sticker ${cls}"><b>${/FANS/.test(label)?icon('choir'):label==='QUALITÉ'?icon('star'):label==='ÉNERGIE'?icon('bolt'):''}${number(n)}</b><span>${label}</span></div>`;

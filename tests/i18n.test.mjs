@@ -1,5 +1,5 @@
 import test from 'node:test';import assert from 'node:assert/strict';
-import {translate,setLanguage,getLanguage,locale,announcement} from '../dist/i18n.js?v=0.10.5';
+import {translate,setLanguage,getLanguage,locale,announcement} from '../dist/i18n.js?v=0.10.6';
 import {TILES,SHOWS} from '../dist/engine.js';
 import english from '../dist/locales/en.js';
 test('French remains the default and unsupported locales fall back safely',()=>{setLanguage('unknown');assert.equal(getLanguage(),'fr');assert.equal(translate('MONTER SUR SCÈNE'),'MONTER SUR SCÈNE');assert.equal(locale(),'fr-CA');});

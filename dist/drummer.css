@@ -21,7 +21,7 @@
 
 .class-lobby .action-button:not(:disabled):is(:hover,:focus-visible){background:#baff42;color:#10190f;border-color:#baff42}
 .starter-tile{background:transparent;border:0;color:inherit;padding:3px;border-radius:4px;cursor:help;font:inherit}
-.starter-tile:is(:hover,:focus-visible){background:#ffffff12;outline:2px solid #baff42;outline-offset:0}
+.starter-tile:is(:hover,:focus-visible){background:#ffffff12;outline:2px solid var(--tile-color);outline-offset:0}
 .square-tile.drummer-tile>.sticker{top:15%;left:22%;width:56%;height:33%}
 .square-tile.drummer-tile .tile-name{top:49%;bottom:auto;height:25%;font-size:clamp(11px,12cqw,18px);line-height:1.03}
 .square-tile.drummer-tile .tile-points{top:76%;bottom:2%;height:22%;min-height:0;font-size:clamp(12px,13cqw,19px);overflow:visible}

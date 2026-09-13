@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.10.5 / principal 0.9.9
+# État courant : preview ENCORE 0.10.6 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Couleurs de survol et sortie du thème final 0.10.6
+
+Base `0ae6a17`, branche preview/audio-0.9.0. Les tuiles de départ utilisent `tileColor` pour leur bordure de survol/focus, comme leurs infobulles. Le thème rose `last-song` est limité à la résolution de la cinquième chanson ; la grille finale consultée via Show reprend sa palette normale et son bouton lime.
+
+Changement visuel uniquement ; moteur coop rules 7 / build 0.10.5 inchangé. npm run check et 145 tests passent. Navigateur isolé sur http://127.0.0.1:8002/ : couleurs des dix tuiles de départ comparées aux infobulles, grille finale sans thème rose à 320/500 px, captures inspectées ; check-reveal-browser réussi. Publication preview en cours de vérification.
 
 ## Studio, scènes, ordre du reveal et focus 0.10.5
 
