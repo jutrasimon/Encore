@@ -59,6 +59,7 @@ function normalizeStudio(g,p){
  p.rewarded=studioComplete(p);
 }
 export const focusCapacity=p=>(p.focusBase??1)+(p.focusTemporary??0);
+function advanceFocus(p,show){const credited=p.focusShow??0;p.focusBase=(p.focusBase??1)+Math.max(0,show-credited);p.focusShow=Math.max(credited,show);}
 export function normalizeGame(input){
  const g=structuredClone(input);g.version=2;g.attempt??=0;
  // Preserve the current show's goal for saves created before the rebalance.
@@ -69,7 +70,7 @@ export function normalizeGame(input){
  if(g.phase==='reward'&&g.retry)g.phase='lost';
  if(g.phase==='lost')g.retry=false;
 
- for(const p of g.players){p.role=Object.hasOwn(ROLES,p.classId||p.role)?(p.classId||p.role):'guitarist-singer';p.classId??=p.classConfirmed===false?null:p.role;p.classConfirmed??=true;p.lobbyReady??=true;p.focusBase??=ROLES[p.role]?.focus??1;p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=ROLES[p.role].pool.slice(0,3);if(g.phase==='reward')normalizeStudio(g,p);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
+ for(const p of g.players){p.role=Object.hasOwn(ROLES,p.classId||p.role)?(p.classId||p.role):'guitarist-singer';p.classId??=p.classConfirmed===false?null:p.role;p.classConfirmed??=true;p.lobbyReady??=true;p.focusBase??=ROLES[p.role]?.focus??1;advanceFocus(p,g.show);p.focusTemporary??=0;p.focusedIds??=[];p.songOffers??=[];p.drafted??=false;if(g.phase==='reward'&&!p.offers?.length)p.offers=ROLES[p.role].pool.slice(0,3);if(g.phase==='reward')normalizeStudio(g,p);pruneFocus(p);if(p.songOffers.length){const pool=ROLES[p.role].pool;p.songOffers=[...new Set([...p.songOffers,...pool])].filter(k=>pool.includes(k)).slice(0,3);}}
  return g;
 }
 function pruneFocus(p){p.focusedIds=p.focusedIds.filter(id=>p.inventory.some(t=>t.id===id&&!t.exhausted)).slice(0,focusCapacity(p));}
@@ -83,7 +84,7 @@ export function adjacent(i){return [i%3?i-1:-1,i%3<2?i+1:-1,i>=3?i-3:-1,i<6?i+3:
 export function tile(kind,id,level=0){return{id,kind,level,charges:0,inactive:false,exhausted:false};}
 export function player(id,name,role='guitarist-singer'){
  const config=ROLES[role];if(!config)throw Error('Rôle inconnu.');
- return{id,name,role,classId:role,classConfirmed:true,lobbyReady:true,inventory:config.starter.slice(0,config.startingCount).map((k,i)=>tile(k,`${id}-${i}`)),fans:0,q:0,e:0,focusBase:config.focus,focusTemporary:0,focusedIds:[],ready:false,board:[],offers:[],rewarded:false,songOffers:[],drafted:false};
+ return{id,name,role,classId:role,classConfirmed:true,lobbyReady:true,inventory:config.starter.slice(0,config.startingCount).map((k,i)=>tile(k,`${id}-${i}`)),fans:0,q:0,e:0,focusBase:config.focus,focusShow:0,focusTemporary:0,focusedIds:[],ready:false,board:[],offers:[],rewarded:false,songOffers:[],drafted:false};
 }
 // New lobbies have no starter until the authoritative start command.
 export function lobbyPlayer(id,name){return {...player(id,name),classId:null,classConfirmed:false,lobbyReady:false,starterPending:true,inventory:[]};}
@@ -182,8 +183,8 @@ export function resolve(inventory,drawn,round=1,rounds=5){
 }
 export function targets(g){const n=g.players.length,s=showInfo(g.show);return g.stageTarget?{...g.stageTarget}:{q:s.q*n,e:s.e*n};}
 function resetShow(g){
- g.round=0;g.q=0;g.e=0;g.retry=false;const stage=showInfo(g.show);g.stageTarget={q:stage.q*g.players.length,e:stage.e*g.players.length};
- for(const p of g.players){p.q=0;p.e=0;p.last=null;p.ready=false;p.board=[];p.rewarded=false;p.studio=null;p.songOffers=[];p.drafted=false;p.focusTemporary=0;pruneFocus(p);for(const t of p.inventory){t.charges=0;t.inactive=false;t.exhausted=false;}}
+ g.revealOrder=[];g.round=0;g.q=0;g.e=0;g.retry=false;const stage=showInfo(g.show);g.stageTarget={q:stage.q*g.players.length,e:stage.e*g.players.length};
+ for(const p of g.players){advanceFocus(p,g.show);p.q=0;p.e=0;p.last=null;p.ready=false;p.board=[];p.rewarded=false;p.studio=null;p.songOffers=[];p.drafted=false;p.focusTemporary=0;pruneFocus(p);for(const t of p.inventory){t.charges=0;t.inactive=false;t.exhausted=false;}}
 }
 function playRound(g,rng){
  g.round++;
@@ -207,6 +208,7 @@ function playRound(g,rng){
  }else{
   g.phase='draft';for(const p of g.players){p.songOffers=songOffers(p,rng);p.drafted=false;}
  }
+ g.revealOrder=shuffle(g.players.map(p=>p.id),rng);song.revealOrder=[...g.revealOrder];
  g.songs??=[];g.songs.push(song);if(g.songs.length>250)g.songs.splice(0,g.songs.length-250);
 }
 // Commands are guarded by both player identity and revision. Invalid commands never mutate state.

@@ -1,6 +1,22 @@
-# État courant : preview ENCORE 0.10.4 / principal 0.9.9
+# État courant : preview ENCORE 0.10.5 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Studio, scènes, ordre du reveal et focus 0.10.5
+
+Base `3b60ee82e0fe1849bb9c25cb1aacb95c41feb473`, branche `preview/audio-0.9.0`. Validation locale sur http://127.0.0.1:8002/ ; cible publique https://jutrasimon.github.io/Encore/audio-test/ . Principal conservé à `dacdaefb168ac3a2b2027d543df8d68afc8505a5` (0.9.9).
+
+- Descriptions Studio directement dans le panneau de catégorie, sans cadre imbriqué. Onglets, confirmations et choix conservés.
+- Chaque chanson enregistre `revealOrder` dans le moteur et son historique. La présentation utilise cet ordre partagé sans réordonner les membres, leurs inventaires ou leurs tirages. La vitesse repart pour chaque joueur.
+- Focus de base +1 par nouveau show, crédité une seule fois avec `focusShow`. Migration des anciennes sauvegardes au niveau courant, nouveau joueur à 1 ; focus temporaire distinct.
+- Pieds ancrés au sol propre à chaque décor (coordonnées source : sous-sol 925, pub 910, toit 860). Taille des personnages cohérente entre reveal et verdict, foule agrandie de 0,72 à 1,12. Les annonces centrales `stage-slam` / `name-rip` restent en place. L'animation générique de changement d'écran est exclue du reveal : son transform créait temporairement un autre repère de positionnement pour le décor au passage au second joueur.
+- Compteur « PROCHAINE CHANSON / NEXT SONG » entre chansons ; numéro courant pendant le reveal, jamais de chanson 6 après la dernière.
+- Classement Stats : illustration native, nom, total dominant et répartition lisible, sans miniature complète de tuile.
+- Le lien « Voir le détail » du verdict est retiré. La navigation Show affiche la dernière grille en lecture seule, avec retour au verdict et ses destinations Studio/Bilan.
+
+Validation : npm run check et 145 tests réussis. Cinq chansons complètes solo et coop, réussite/Studio/départ des deux joueurs, sauvegarde/reconnexion ; cinq chansons en défaite terminale solo/coop et nouveau départ solo. Navigateur Edge isolé : descriptions Studio et Stats à 320/500 px, Show en lecture seule, trois salles en reveal et verdict, script check-reveal-browser et captures d'introduction/résolution inspectées à 320/500 px ; annonces des deux joueurs vérifiées avec ordre identique sur deux clients. Les compteurs locaux, les masques et les règles de production restent inchangés.
+
+Serveur preview `encore-preview` version 3 publié : protocol 2, rules 7, build 0.10.5 ; les quatre fichiers distants ont été comparés à la copie locale et sont identiques. Authentification existante et tables inchangées. Publication frontend preview en cours de vérification.
 
 ## Couleurs des statistiques et totaux conservés 0.10.4
 

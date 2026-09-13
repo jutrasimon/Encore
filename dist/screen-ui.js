@@ -33,7 +33,7 @@ export class ScreenMotion{
   return {board:board?.getBoundingClientRect(),tiles:board?.textContent};
  }
  settle(before){
-  if(!before||!this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(this.root.querySelector('.resolution-mode')||!before||!this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   const animate=(node,frames,duration=240)=>{if(node?.animate)this.animations.push(node.animate(frames,{duration,easing:'cubic-bezier(.2,.75,.25,1)'}));};
   const body=this.root.querySelector('.screen-body');
   const board=this.root.querySelector('.grid-wrap'),r=board?.getBoundingClientRect(),old=before.board;

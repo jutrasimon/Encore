@@ -183,3 +183,9 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .tile-points>.tile-total-value{font:1000 italic clamp(20px,25cqw,36px)/.9 var(--font);letter-spacing:-1px;text-shadow:2px 2px #0a0a09}
 .tile-total-value.total-quality{color:var(--stat-quality-color)}.tile-total-value.total-energy{color:var(--stat-energy-color)}
 .tile-total-value.total-fans{color:#ff89c9}.tile-total-value.total-zero{color:#fff3d3}
+
+/* Selected Studio details belong to the category, without a nested card. */
+.studio-detail .tile-explanation{border:0;border-radius:0;box-shadow:none;padding:4px 0}
+.song-counter .counter-label{font-size:11px;line-height:1.1;max-width:65px;white-space:normal}
+
+.tile-ranking>article{display:grid;grid-template-columns:24px 64px minmax(0,1fr);align-items:center;gap:10px;background:#192615;border:1px solid #65754d;border-radius:5px;padding:12px 10px;color:#fff3d3}.tile-ranking .rank{font-size:26px;color:#baff42}.ranking-art{padding:0;border:0;background:transparent;width:64px;height:80px;cursor:pointer}.ranking-art .sticker{position:static;display:block;width:100%;height:100%;object-fit:contain;transform:none}.ranking-info{min-width:0}.ranking-info h3{font-size:21px;line-height:1.12;margin:0 0 5px}.ranking-info strong{font-size:28px;line-height:1.1}.ranking-values{display:flex;flex-wrap:wrap;gap:4px 12px;margin:7px 0}.ranking-values>span{display:inline-flex;align-items:center;gap:4px;font-size:16px;color:var(--chart)}.ranking-info small{font-size:14px;line-height:1.35;color:#c9ccb3}.ranking-art:focus-visible{outline:2px solid #baff42;outline-offset:3px}@media(max-width:350px){.tile-ranking>article{grid-template-columns:18px 45px minmax(0,1fr);gap:7px;padding:10px 7px}.ranking-art{width:45px;height:65px}.ranking-info h3{font-size:19px}.ranking-info strong{font-size:25px}}

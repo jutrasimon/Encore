@@ -497,5 +497,6 @@ export default {
   "Maillage": "Connections",
   "RANGÉE": "ROW",
   "COLONNE": "COLUMN",
-  "ALIGNÉES": "ALIGNED"
+  "ALIGNÉES": "ALIGNED",
+  "PROCHAINE CHANSON": "NEXT SONG"
 };

@@ -5,8 +5,8 @@ export const BASE_RESOLUTION_SPEED=1.5;
 export const MAX_RESOLUTION_SPEED=2.25;
 // Ease in over 9 seconds of resolution; cap the additional increase at 50%.
 export function resolutionSpeed(elapsed){const t=Math.max(0,Math.min(1,elapsed/9000));return BASE_RESOLUTION_SPEED+(MAX_RESOLUTION_SPEED-BASE_RESOLUTION_SPEED)*t*t;}
-export function resolutionPlan(players,previous,reduced=false){
- const cast=structuredClone(players),events=resolutionEvents(cast),groups=[];
+export function resolutionPlan(players,previous,reduced=false,order=[]){
+ const ids=[...new Set([...order,...players.map(p=>p.id)])],cast=structuredClone(ids.map(id=>players.find(p=>p.id===id)).filter(Boolean)),events=resolutionEvents(cast),groups=[];
  let at=0,score={q:previous.q,e:previous.e};
  for(const [index,p] of cast.entries()){
   const notes=events.filter(e=>e.playerId===p.id),total={q:0,e:0,f:0};

@@ -1,24 +1,24 @@
-import {classChoices} from './class-ui.js?v=0.10.4';
-import {installTileArt} from './art.js?v=0.10.4';
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.4';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.4';
-import {paintDeal} from './deal-ui.js?v=0.10.4';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.4';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.4';
-import {Juice,scoreCallout} from './juice.js?v=0.10.4';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.4';
-import {RewardAdvance} from './autoplay.js?v=0.10.4';
-import {statsMarkup} from './stats-ui.js?v=0.10.4';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.4';
-import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.4';
-import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.4';
-import {inventoryMarkup} from './inventory-ui.js?v=0.10.4';
+import {classChoices} from './class-ui.js?v=0.10.5';
+import {installTileArt} from './art.js?v=0.10.5';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.5';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.5';
+import {paintDeal} from './deal-ui.js?v=0.10.5';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.5';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.5';
+import {Juice,scoreCallout} from './juice.js?v=0.10.5';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.5';
+import {RewardAdvance} from './autoplay.js?v=0.10.5';
+import {statsMarkup} from './stats-ui.js?v=0.10.5';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.5';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.5';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.5';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.5';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.4';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.4';
-import {icon} from './icons.js?v=0.10.4';
-import {SERVER_URL} from './config.js?v=0.10.4';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.4';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.5';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.5';
+import {icon} from './icons.js?v=0.10.5';
+import {SERVER_URL} from './config.js?v=0.10.5';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.5';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -35,7 +35,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.4 · ENCORE ∞';
+const VERSION='0.10.5 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -132,7 +132,7 @@ let statsPlayer='band',statsRange='all',statsMode='production';
 function statsView(){return statsMarkup(game,{playerId:statsPlayer,range:statsRange,chartMode:statsMode,returnLabel:studioReturn&&game?.phase==='reward'?'RETOUR AU STUDIO':'RETOUR SUR SCÈNE'});}
 function profile(id){statsPlayer=id;statsRange='all';view='stats';render();}
 
-function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button>${songCounter(game)}</div>`;}
+function showHeader(){return `<div class="show-top"><button class="show-name" data-action="show-details" aria-label="Détails du show ${esc(showInfo(game.show).name)}"><small>NIVEAU ${game.show+1} · ∞ ${icon('info')}</small><strong>${esc(showInfo(game.show).name)}</strong></button>${songCounter(game,{upcoming:true})}</div>`;}
 function gameView(){if(animating&&cinematic)return resolutionView();if(showingVerdict())return verdictMarkup(game,me());if(game.phase==='lobby')return lobbyView();const p=me();if(!p)return '<p>Connexion…</p>';return `${showHeader()}${meters()}${players()}${grid()}<div class="readout connection-readout" aria-live="polite">${animating?'Pige des tuiles…':mode==='multi'&&!connected?'<strong>RECONNEXION…</strong>':!p.last?'Prêt pour la première chanson':''}</div>`;}
 function playAction(){if(finishedShow(game))return '<div class="action-slot"><button class="action-button primary" data-action="result">RETOUR AU VERDICT</button></div>';return `<div class="action-slot">${animating?'<button class="action-button primary" disabled>CHANSON EN COURS…</button>':game.phase==='show'||game.phase==='draft'?phaseAction():game.phase==='lobby'?'<button class="action-button primary" data-action="show-details">PRÉPARER LE SHOW</button>':game.phase==='reward'?'<button class="action-button primary" data-action="rewards">PASSER AU STUDIO</button>':'<button class="action-button primary" data-action="result">VOIR LE BILAN</button>'}</div>`;}
 function showIntro(){
@@ -278,7 +278,7 @@ function paintCinematic(frame,elapsed){
 }
 function animate(previous){
  stopResolution();
- const reduced=!motion||matchMedia('(prefers-reduced-motion: reduce)').matches,plan=resolutionPlan(game.players,previous,reduced);
+ const reduced=!motion||matchMedia('(prefers-reduced-motion: reduce)').matches,plan=resolutionPlan(game.players,previous,reduced,game.revealOrder);
  if(!plan.groups.length){render();return;}
  animating=true;displayScore={q:previous.q,e:previous.e};view='game';
  cinematic={plan,group:plan.groups[0],mounted:-1,phaseKey:null,eventKey:null,lastValue:0,lastTick:0};
@@ -360,7 +360,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  if(a==='skip-song'){await send('draft',{action:'skip'});}
  if(a==='skip-reward'){await send('reward',{action:'skip',category:rewardAction});}
  if(a==='result-detail'){resultDismissed=true;view='game';render();return;}
- if(a==='nav'){view=b.dataset.view;if(view==='stats')statsPlayer='band';render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
+ if(a==='nav'){view=b.dataset.view;if(view==='game'&&finishedShow(game))resultDismissed=true;if(view==='stats')statsPlayer='band';render();} if(a==='settings'){view='settings';render();} if(a==='motion'){motion=!motion;save('encore.motion',motion);render();} if(a==='show-details')showIntro(); if(a==='result')showResult(); if(a==='dismiss-result')$('#details').close();
  if(a==='rules')rules();if(a==='close')$('#details').close();
  if(a==='solo')solo();if(a==='resume'){intro=false;resultDismissed=false;const s=read('encore.solo');if([1,2].includes(s?.game?.version)){clearNetwork();mode='solo';myId=s.myId;game=normalizeGame(s.game);view='game';render();}else toast('Sauvegarde incompatible. Lance une nouvelle tournée.');}
  if(a==='start'||a==='ready'){if($('#details').open&&!(a==='ready'&&mode==='multi'&&game.round===0))$('#details').close();send(a);}
@@ -390,7 +390,7 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
 render();
 async function checkServer(){
  if(checkingServer)return;checkingServer=true;clearTimeout(healthTimer);networkState='checking';if(!game)render();
- try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===6);}
+ try{const r=await fetch(endpoint+'/health',{signal:AbortSignal.timeout(12000)});const d=await r.json();networkReady=!!(r.ok&&d.ok&&d.protocol===2&&d.rules===7);}
  catch{networkReady=false;}
  finally{checkingServer=false;networkState=networkReady?'online':'offline';if(!game)render();}
  if(!networkReady)healthTimer=setTimeout(checkServer,15000);

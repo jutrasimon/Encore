@@ -53,7 +53,9 @@ Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
 déconnecte conserve sa place; il n'est pas remplacé en cours de tournée.
 Le solo est sauvegardé localement, indépendamment du serveur.
 
-## Boucle de jeu validée (0.9.9)
+## Boucle de jeu validée (preview 0.10.5)
+
+Le focus de base gagne 1 à chaque nouveau show : 1, 2, 3… par joueur. Le gain est enregistré une fois et un nouveau départ revient à 1. L’ordre des joueurs au reveal est tiré à chaque chanson dans le moteur, puis conservé avec la chanson pour tous les clients.
 
 - Chaque show dure cinq chansons. Les quatre premières sont suivies du choix d’une tuile ou de Passer.
 - Après la cinquième chanson, le plateau et le résultat restent visibles.

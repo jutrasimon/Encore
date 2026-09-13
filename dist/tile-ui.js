@@ -1,7 +1,7 @@
-import {getLanguage,translate} from './i18n.js?v=0.10.4';
-import {TILES,upgradeStat} from './engine.js?v=0.10.4';
-import {sticker,FAMILY_ART} from './art.js?v=0.10.4';
-import {icon} from './icons.js?v=0.10.4';
+import {getLanguage,translate} from './i18n.js?v=0.10.5';
+import {TILES,upgradeStat} from './engine.js?v=0.10.5';
+import {sticker,FAMILY_ART} from './art.js?v=0.10.5';
+import {icon} from './icons.js?v=0.10.5';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
