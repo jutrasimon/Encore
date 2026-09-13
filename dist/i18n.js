@@ -1,4 +1,4 @@
-import english from './locales/en.js?v=0.10.1';
+import english from './locales/en.js?v=0.10.4';
 export const LANGUAGES={fr:'Français',en:'English'};
 let language='fr';
 export const getLanguage=()=>language;

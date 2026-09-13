@@ -1,8 +1,8 @@
-import {locale,getLanguage} from './i18n.js?v=0.10.1';
-import {icon} from './icons.js?v=0.10.1';
-import {classArt} from './show-art.js?v=0.10.1';
-import {TILES,ROLES} from './engine.js?v=0.10.1';
-import {esc,tileCard} from './tile-ui.js?v=0.10.1';
+import {locale,getLanguage} from './i18n.js?v=0.10.4';
+import {icon} from './icons.js?v=0.10.4';
+import {classArt} from './show-art.js?v=0.10.4';
+import {TILES,ROLES} from './engine.js?v=0.10.4';
+import {esc,tileCard} from './tile-ui.js?v=0.10.4';
 export const number=n=>new Intl.NumberFormat(locale(),{maximumFractionDigits:1}).format(n||0);
 const sum=(a,k)=>a.reduce((n,r)=>n+(r[k]||0),0);
 const metric=(n,label,cls='')=>`<div class="stat-sticker ${cls}"><b>${/FANS/.test(label)?icon('choir'):label==='QUALITÉ'?icon('star'):label==='ÉNERGIE'?icon('bolt'):''}${number(n)}</b><span>${label}</span></div>`;
@@ -29,7 +29,7 @@ export function statsMarkup(game,{playerId='band',range='all',chartMode='product
  <div class="stats-content content-box" data-scroll="stats" role="region" aria-label="Statistiques détaillées" tabindex="0">
  ${selected?`<div class="profile-hero"><img src="${classArt(selected.role).portrait}" alt="Portrait de classe"><div><span>CLASSE</span><h2>${esc(ROLES[selected.role]?.name||selected.role)}</h2><p>${selected.inventory.length} tuiles · ${selected.focusBase||1} focus de base</p><strong>${icon('choir')}${number(selected.fans)} FANS</strong></div></div>`:''}
  <div class="stats-tabs"><button data-action="stats-range" data-range="all" class="${all?'active':''}">TOUTE LA TOURNÉE</button><button data-action="stats-range" data-range="show" class="${!all?'active':''}">CE SHOW</button></div>
- <div class="stats-headliners">${metric(fans,all?'FANS CUMULÉS':'NOUVEAUX FANS','pink')}${metric(songs,'TOUNES JOUÉES')}${metric(q,'QUALITÉ','cyan')}${metric(e,'ÉNERGIE','orange')}</div>
+ <div class="stats-headliners">${metric(fans,all?'FANS CUMULÉS':'NOUVEAUX FANS','pink')}${metric(songs,'TOUNES JOUÉES')}${metric(q,'QUALITÉ','metric-q')}${metric(e,'ÉNERGIE','metric-e')}</div>
  ${!songs?'<p class="stats-empty">La foule attend. Joue une toune pour faire péter les compteurs !</p>':`<div class="stats-awards"><span>BRISEUR D’AMPLI <b>×${peak}</b><small>Meilleur multiplicateur</small></span><span>MACHINE À BRUIT <b>${number((q+e)/songs)}</b><small>Qualité + énergie / toune</small></span><span>COLLE À BAND <b>${number(total('links'))}</b><small>Liens d’effets activés</small></span></div>
  <h2>LE SISMOGRAPHE</h2><div class="stats-tabs">${[['production','PAR TOUNE'],['cumulative','CUMUL'],['velocity','ACCÉLÉRATION']].map(([k,l])=>`<button data-action="stats-mode" data-mode="${k}" class="${chartMode===k?'active':''}">${l}</button>`).join('')}</div><p class="stats-note">${chartMode==='velocity'?'Écart avec la toune précédente. Au-dessus de zéro : ça accélère !':chartMode==='cumulative'?'Qualité et énergie cumulées sur les tounes affichées. Fans : total réel à chaque toune.':'Production de chaque toune. Les fans de performance sont attribués à la dernière toune du show.'} Chaque courbe a sa propre échelle.</p>
  ${[['q','QUALITÉ'],['e','ÉNERGIE'],['f','FANS']].map(([k,l])=>chart(rows,k,l,chartMode)).join('')}

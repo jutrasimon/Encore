@@ -1,6 +1,6 @@
-import {STUDIO_CATEGORIES,studioChoices,studioComplete,showInfo} from './engine.js?v=0.10.1';
-import {tileCard,tileDetails,esc} from './tile-ui.js?v=0.10.1';
-import {icon} from './icons.js?v=0.10.1';
+import {STUDIO_CATEGORIES,studioChoices,studioComplete,showInfo} from './engine.js?v=0.10.4';
+import {tileCard,tileDetails,esc} from './tile-ui.js?v=0.10.4';
+import {icon} from './icons.js?v=0.10.4';
 const labels={add:'Ajouter',upgrade:'Améliorer',remove:'Retirer'};
 export function studioMarkup(game,p,{category='add',selection=null,locked=false}={}){
  const choices=studioChoices(p,category),adding=category==='add',selected=choices.find(t=>(adding?t.kind:t.id)===selection)||choices[0],done=p.studio?.[category],count=STUDIO_CATEGORIES.filter(k=>p.studio?.[k]).length,next=showInfo(game.show+1),departed=p.studio?.departed;

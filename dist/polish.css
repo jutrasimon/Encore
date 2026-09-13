@@ -163,3 +163,23 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .console{isolation:isolate}.console>.screen-body{position:relative;z-index:1}.console>.action-slot,.console>.navigation{z-index:2}
 
 .language-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:20px;font-weight:800}.language-setting select{font:inherit;color:#fff3d3;background:#1c2915;border:2px solid #718159;border-radius:4px;padding:8px;min-width:140px}.home-settings{align-self:flex-end;font-size:18px;padding:5px 12px}.settings-screen>.language-setting{flex-shrink:0}
+
+/* Shared statistic colors: show meters and sound DNA use the same identity. */
+:root{--stat-quality-color:var(--green);--stat-energy-color:#ffb43e}
+.meter[data-stat="q"]{--meter-color:var(--stat-quality-color)}
+.meter[data-stat="e"]{--meter-color:var(--stat-energy-color)}
+.meter[data-stat]>.stat-icon,.meter[data-stat] .stat-value,.meter[data-stat].overdrive .overdrive-label{color:var(--meter-color)}
+.meter[data-stat] .meter-track i{background:repeating-linear-gradient(90deg,var(--meter-color) 0 8px,color-mix(in srgb,var(--meter-color) 30%,#10190f) 8px 10px)}
+.meter[data-stat].overdrive .stat-value{text-shadow:0 0 12px color-mix(in srgb,var(--meter-color) 65%,transparent)}
+.metric-q{--chart:var(--stat-quality-color)}.metric-e{--chart:var(--stat-energy-color)}
+.stat-sticker.metric-q{background:var(--stat-quality-color)}.stat-sticker.metric-e{background:var(--stat-energy-color)}
+.sound-donut{background:conic-gradient(var(--stat-quality-color) 0 var(--split),var(--stat-energy-color) var(--split) 100%)}
+.tile-result{padding:8px 0;border-block:1px solid #ffffff30;margin:10px 0}
+.tile-result-values{display:flex;gap:12px;flex-wrap:wrap;margin:6px 0}
+.tile-result-values>span{display:inline-flex;align-items:center;gap:4px}
+.tile-result-values .stat-icon-quality{color:var(--stat-quality-color)}.tile-result-values .stat-icon-energy{color:var(--stat-energy-color)}
+
+/* Keep each reveal total on the completed board; the tooltip owns its breakdown. */
+.tile-points>.tile-total-value{font:1000 italic clamp(20px,25cqw,36px)/.9 var(--font);letter-spacing:-1px;text-shadow:2px 2px #0a0a09}
+.tile-total-value.total-quality{color:var(--stat-quality-color)}.tile-total-value.total-energy{color:var(--stat-energy-color)}
+.tile-total-value.total-fans{color:#ff89c9}.tile-total-value.total-zero{color:#fff3d3}

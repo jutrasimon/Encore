@@ -1,6 +1,16 @@
-# État courant : preview ENCORE 0.10.3 / principal 0.9.9
+# État courant : preview ENCORE 0.10.4 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Couleurs des statistiques et totaux conservés 0.10.4
+
+Base `6bd0c9f`, branche `preview/audio-0.9.0`. Qualité lime et énergie orange, avec deux variables CSS partagées par les jauges, leurs valeurs/barres (y compris overdrive), les courbes et compteurs correspondants des Stats et le diagramme ADN sonore. Les couleurs de famille des tuiles ne changent pas.
+
+Sur la grille après une chanson, chaque tuile non vide conserve en grand son total qualité + énergie + fans, rejoués inclus, selon les mêmes valeurs que le reveal. Les tuiles de soutien sans production affichent 0. Les infobulles de ces cartes indiquent la répartition des points de cette chanson, multiplicateurs et rejoués, puis la règle de l'effet. Les propositions non jouées gardent leur résumé. Aucun recalcul ni modification du moteur : les données résolues existantes alimentent cet affichage.
+
+Validation locale http://127.0.0.1:8002/ dans des profils neufs : palette des jauges distincte et égale aux couleurs du donut, contrôle des totaux contre chaque tuile de la sauvegarde après une chanson, support à zéro et détail d'infobulle inspectés. Contrôle navigateur du reveal central/bords réussi à 320 et 500 px ; composition inchangée. Cinq chansons solo/coop, succès/Studio, sauvegarde/reconnexion, départ des deux joueurs et défaites terminales avec nouveau départ solo vérifiés. npm run check et 142 tests réussis, dont tests des supports à zéro, des rejoués et de l'absence de double application des multiplicateurs. Les imports UI sont invalidés ensemble pour éviter le mélange de versions en cache.
+
+Cible publique : https://jutrasimon.github.io/Encore/audio-test/ . Le correctif du bouton Copier l'invitation 0.10.3 est inclus. Principal 0.9.9 et serveur preview rules 6 / build 0.10.0 inchangés.
 
 ## Survol du bouton d'invitation 0.10.3
 

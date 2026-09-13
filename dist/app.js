@@ -1,24 +1,24 @@
-import {classChoices} from './class-ui.js?v=0.10.1';
-import {installTileArt} from './art.js?v=0.10.1';
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.1';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.1';
-import {paintDeal} from './deal-ui.js?v=0.10.1';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.1';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.1';
-import {Juice,scoreCallout} from './juice.js?v=0.10.1';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.1';
-import {RewardAdvance} from './autoplay.js?v=0.10.1';
-import {statsMarkup} from './stats-ui.js?v=0.10.1';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.1';
-import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.1';
-import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.1';
-import {inventoryMarkup} from './inventory-ui.js?v=0.10.1';
+import {classChoices} from './class-ui.js?v=0.10.4';
+import {installTileArt} from './art.js?v=0.10.4';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.4';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.4';
+import {paintDeal} from './deal-ui.js?v=0.10.4';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.4';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.4';
+import {Juice,scoreCallout} from './juice.js?v=0.10.4';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.4';
+import {RewardAdvance} from './autoplay.js?v=0.10.4';
+import {statsMarkup} from './stats-ui.js?v=0.10.4';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.4';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,adjacent,normalizeGame,focusCapacity,ROLES} from './engine.js?v=0.10.4';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.4';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.4';
 import {overdriveLevel} from './presentation.js';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.1';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.1';
-import {icon} from './icons.js?v=0.10.1';
-import {SERVER_URL} from './config.js?v=0.10.1';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.1';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.4';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.4';
+import {icon} from './icons.js?v=0.10.4';
+import {SERVER_URL} from './config.js?v=0.10.4';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.4';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -35,7 +35,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.3 · ENCORE ∞';
+const VERSION='0.10.4 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -114,7 +114,7 @@ function lobbyView(){
 function settingsView(){return `<section class="settings-screen"><h1>Réglages</h1><label class="language-setting">Langue <select id="language" aria-label="Langue"><option value="fr" translate="no" ${getLanguage()==='fr'?'selected':''}>Français</option><option value="en" translate="no" ${getLanguage()==='en'?'selected':''}>English</option></select></label><div class="settings-content content-box" data-scroll="settings" role="region" aria-label="Options du jeu" tabindex="0"><button class="action-button secondary" data-action="sound" aria-pressed="${sound}">${icon('sound')} SON : ${sound?'ACTIVÉ':'COUPÉ'}</button><div class="audio-mix">${[['music','MUSIQUE'],['effects','EFFETS'],['voice','ANNONCES']].map(([key,label])=>`<label>${label}<input type="range" min="0" max="100" value="${Math.round(resolutionAudio.levels[key]*100)}" data-mix="${key}" aria-label="${label}"></label>`).join('')}</div><button class="action-button secondary" data-action="motion" aria-pressed="${motion}">ANIMATIONS : ${motion?'COMPLÈTES':'RÉDUITES'}</button><button class="action-button secondary" data-action="rules">COMMENT JOUER</button>${mode==='multi'?'<button class="action-button secondary" data-action="invite">COPIER L’INVITATION</button>':''}<button class="action-button secondary" data-action="${game?'finish-tour':'back'}">${game?'BILAN AVANT DE QUITTER':'RETOUR'}</button><p class="version">${VERSION}</p><p class="audio-credits">Musique : DJARTMUSIC · Sons : JDSherbert</p></div></section>`;}
 function meters(){const t=targets(game),score=displayScore||game;return `<div class="meters" data-overdrive="${overdriveLevel(score,t)}">${[['q','QUALITÉ','star'],['e','ÉNERGIE','bolt']].map(([key,label,ic])=>`<div class="meter ${score[key]>t[key]?'overdrive':''}" data-stat="${key}">${icon(ic)}<div><div class="meter-label">${label}<b><em class="stat-value">${score[key]}</em><span> / ${t[key]}</span></b></div><div class="meter-track" role="progressbar" aria-label="${label}" aria-valuemin="0" aria-valuemax="${t[key]}" aria-valuenow="${Math.min(score[key],t[key])}"><i style="width:${Math.min(100,score[key]/t[key]*100)}%"></i></div><small class="overdrive-label">${score[key]>=t[key]?'ATTEINT':'OBJECTIF DU SHOW'}</small>${!animating&&me()?.last?`<small class="last-song-stat">Dernière chanson ${icon(ic)} <b>${me().last[key]||0}</b></small>`:''}</div></div>`).join('')}</div><div class="drive-status ${overdriveLevel(score,t)===2?'double-drive':''}" role="status">${overdriveLevel(score,t)===2?'DOUBLE OVERDRIVE':overdriveLevel(score,t)===1?'OVERDRIVE':''}</div>`;}
 function tileButton(t,index,extra=''){
- return tileCard(t,{index,resolved:!!t?.m,focused:(animationPlayer||me())?.focusedIds?.includes(t?.id),classes:`${extra} ${animating?'unscored':''} ${freshDeal?'deal-in':''} ${t?.m>1?'lit':''}`});
+ return tileCard(t,{index,resolved:!!t?.m,settled:!animating&&!!t?.m,focused:(animationPlayer||me())?.focusedIds?.includes(t?.id),classes:`${extra} ${animating?'unscored':''} ${freshDeal?'deal-in':''} ${t?.m>1?'lit':''}`});
 }
 function grid(){
  const p=animationPlayer||me(),b=p?.board.length?p.board:Array(9).fill(null),links=[],seen=new Set();

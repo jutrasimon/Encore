@@ -1,7 +1,7 @@
-import {getLanguage,translate} from './i18n.js?v=0.10.1';
-import {TILES,upgradeStat} from './engine.js?v=0.10.1';
-import {sticker,FAMILY_ART} from './art.js?v=0.10.1';
-import {icon} from './icons.js?v=0.10.1';
+import {getLanguage,translate} from './i18n.js?v=0.10.4';
+import {TILES,upgradeStat} from './engine.js?v=0.10.4';
+import {sticker,FAMILY_ART} from './art.js?v=0.10.4';
+import {icon} from './icons.js?v=0.10.4';
 const shortNames={guitar:'Six-cordes',voice:'Micro cabossé',pick:'Médiator',boot:'Botte de tempo',lighter:'Briquet',duck:'Canard',smoke:'Fumée',cup:'Gobelet',refrain:'Refrain',choir:'Chorale',last:'Une dernière!',solo:'Solo',note:'Note tenue',pedal:'Bouton interdit',encore:'Encore!',kamikaze:'Kamikaze',amp:'Ampli à boutte',feedback:'Larsen'};
 export const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const tileFamily=t=>FAMILY_ART[TILES[t?.kind]?.family||'utility'];
@@ -29,18 +29,24 @@ export function tileSummary(t){
  return ({pick:'GUITARES +1',boot:'+1 / VOISIN',duck:'+1 / SORTE',smoke:'VIDES +2',cup:'CHARGES +2',choir:'+1 / VOIX',pedal:'GUITARES ×2',encore:'REJOUE ×1',feedback:'ESPACES +3'})[t.kind]||'EFFET';
 }
 export const tileMultiplier=t=>t.mq||t.me?[['mq','star'],['me','bolt']].filter(([key])=>t[key]>1).map(([key,stat])=>icon(stat)+'×'+t[key]).join(' '):'×'+t.m;
-export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false}={}){
+export function tileProduction(t,includeZeros=false){
+ return [['q','star'],['e','bolt'],['f','choir']].filter(([k])=>includeZeros||t[k]).map(([k,i])=>`<span>${icon(i)}${(t[k]||0)*(1+(t.repeats||0))}</span>`).join('')||'<span>0</span>';
+}
+export function tileCard(t,{action='tile',index,attributes='',classes='',focused=false,resolved=false,settled=false}={}){
  const empty=!t||t.kind==='empty',d=empty?null:TILES[t.kind],f=empty?null:tileFamily(t);
- const production=resolved&&!empty?[['q','star'],['e','bolt'],['f','choir']].filter(([k])=>t[k]).map(([k,i])=>`<span>${icon(i)}${t[k]*(1+(t.repeats||0))}</span>`).join(''):'';
- return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.kind?.startsWith('perc_')?'drummer-tile':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${empty?'':`data-tile="${esc(JSON.stringify(t))}"`} ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
+ const total=((t?.q||0)+(t?.e||0)+(t?.f||0))*(1+(t?.repeats||0));
+ const dominant=(t?.q||0)>(t?.e||0)?'quality':(t?.f||0)>(t?.e||0)?'fans':'energy';
+ const production=settled&&!empty?`<span class="tile-total-value ${total?'total-'+dominant:'total-zero'}">${total}</span>`:resolved&&!empty?tileProduction(t):'';
+ return `<button class="tile square-tile type-${tileColor(t)} ${empty?'empty':''} ${t?.kind?.startsWith('perc_')?'drummer-tile':''} ${t?.inactive?'inactive':''} ${t?.exhausted?'exhausted':''} ${focused?'focused':''} ${classes}" data-action="${action}" ${resolved?'data-resolved="true"':''} ${empty?'':`data-tile="${esc(JSON.stringify(t))}"`} ${index===undefined?'':`data-index="${index}"`} ${attributes} aria-label="${empty?'Case vide':esc(d.name+' · '+f.label+'. '+d.text)}" ${index===undefined?'':`style="--i:${index}"`}>
  ${empty?'<span class="empty-mark">−</span>':`<span class="tile-family">${f.label}</span>${sticker(t.kind)}<span class="tile-name">${esc(shortNames[t.kind]||d.name)}</span><span class="tile-points">${production||tileSummary(t)}</span>${t.level?`<span class="level">+${t.level}</span>`:''}${t.m>1?`<span class="mult">${tileMultiplier(t)}</span>`:''}${focused?'<span class="focus-badge">'+icon('focus')+'</span>':''}${t.exhausted?'<span class="tile-state">ÉPUISÉE</span>':t.inactive?'<span class="tile-state">INACTIVE</span>':''}`}
  </button>`;
 }
-export function tileDetails(t,{upgrade=false}={}){
+export function tileDetails(t,{upgrade=false,resolved=false}={}){
  const d=TILES[t.kind],f=tileFamily(t),level=t.level||0,stat={q:'qualité',e:'énergie',f:'fan'}[upgradeStat(d)];
  const rule=t.kind==='lighter'?'1 énergie de base. '+d.text:d.text;
  const related=d.family==='guitar'?'voice':d.family==='voice'?'guitar':null;
  return `<section class="tile-explanation type-${tileColor(t)}"><div class="explanation-heading"><strong>${esc(d.name)}</strong><span>${f.label}${level?' · NIVEAU +'+level:''}</span></div>
+ ${resolved?`<div class="tile-result"><strong>CETTE CHANSON</strong><div class="tile-result-values">${tileProduction(t,true)}</div>${t.m>1?`<span>${tileMultiplier(t)}</span>`:''}${t.repeats?`<p>Rejouée ${t.repeats} fois</p>`:''}</div>`:''}
  ${d.family==='voice'?'<p class="family-explainer">Cette tuile est une <strong>VOIX</strong>. Les micros comptent comme des voix.</p>':d.family==='guitar'?'<p class="family-explainer">Cette tuile est une <strong>GUITARE</strong>.</p>':''}
  <p class="tile-rule">${richText(related?rule.replace(', ×2','. ×2').replace(/(?:Voix : )?×2 par (Voix|Guitare) adjacente[.,]?/,'').replace(/,\s*\./g,'.'):rule)}</p>
  ${related?`<p class="tile-rule family-rule">${familyReference(d.family)} <strong>×2</strong> ${getLanguage()==='en'?'per adjacent':'par'} ${familyReference(related)} ${getLanguage()==='en'?'':'<strong>voisine</strong>'}.</p>`:''}
