@@ -140,10 +140,7 @@ dialog[data-kind="show"] .show-entry-note{text-align:center;font-size:13px;line-
 .round.song-counter b{font-size:30px;line-height:1;color:#b8ff41}.round.song-counter>span{font-size:14px;color:#fff3d3}
 @media(max-width:380px){.round.song-counter,.resolution-top>.round.song-counter{height:44px;padding:5px;gap:3px;font-size:11px}.round.song-counter b{font-size:27px}.round.song-counter>span{font-size:12px}}
 
-.resolution-mode[data-resolution="intro"] .resolution-pop{top:var(--deal-name-top,78%);bottom:auto;left:10px;right:10px;padding:3px 8px;border-width:2px;pointer-events:none;animation:none;transform:none;background:#10190fe6}
-.resolution-mode[data-resolution="intro"] .resolution-pop strong{font-size:clamp(22px,5vw,32px);line-height:1.1}
-
-.resolution-mode[data-resolution="intro"] .resolution-pop strong{margin:0}
+/* Player introductions retain the central stage-slam/name-rip rules from 44ee981. */
 
 /* Studio scrolls inside the phone; copy and tiles keep readable sizes. */
 .console.studio-mode{background:#ded7be url('art/studio/decors/fond-creme.png') center/cover}.studio-mode .screen-body{overflow-y:auto;overflow-x:hidden;display:block}.studio-screen{position:relative;isolation:isolate;padding-bottom:8px;color:#192015;min-height:100%}.studio-screen>*:not(.studio-decoration):not(.studio-burst){position:relative;z-index:1}

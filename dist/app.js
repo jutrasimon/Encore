@@ -35,7 +35,7 @@ const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.1 · ENCORE ∞';
+const VERSION='0.10.2 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -164,7 +164,7 @@ function fitBoard(){
  const used=children.reduce((n,el)=>{const c=getComputedStyle(el);return n+el.getBoundingClientRect().height+(parseFloat(c.marginTop)||0)+(parseFloat(c.marginBottom)||0);},0)+children.length*gap;
  const size=Math.max(0,Math.min(body.clientWidth-6,body.clientHeight-used-6));body.style.setProperty('--board-size',size+'px');
  const stage=body.querySelector('.show-visual'),tally=body.querySelector('.resolution-tally');
- if(stage&&tally){const bottom=body.getBoundingClientRect().bottom;stage.style.setProperty('--scene-height',Math.max(0,bottom-tally.getBoundingClientRect().bottom-6)+'px');body.closest('.console').style.setProperty('--deal-name-top',(tally.getBoundingClientRect().bottom-body.closest('.console').getBoundingClientRect().top+6)+'px');}
+ if(stage&&tally){const consoleEl=body.closest('.console'),frame=consoleEl.getBoundingClientRect(),bottom=frame.top+consoleEl.clientTop+consoleEl.clientHeight;stage.style.setProperty('--scene-height',Math.max(0,bottom-tally.getBoundingClientRect().bottom-6)+'px');}
 }
 new ResizeObserver(()=>fitBoard()).observe(app);
 window.addEventListener('resize',fitBoard);

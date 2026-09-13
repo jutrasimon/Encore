@@ -35,3 +35,8 @@
 .console.resolution-mode .screen-body{background:repeating-linear-gradient(0deg,transparent 0 3px,#baff4207 3px 5px)}
 .console.resolution-mode .resolution-caption{min-height:clamp(100px,19dvh,170px)}
 .console.resolution-mode .show-visual{bottom:0}
+
+/* Restore the console as the reveal containing block (before the Stats layering change).
+   The footer reaches the inner phone edge, rather than ending at screen-body padding. */
+.console.resolution-mode>.screen-body{position:static}
+.console.resolution-mode>.case-version{display:none}

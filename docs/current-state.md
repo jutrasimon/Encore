@@ -1,6 +1,16 @@
-# État courant : preview ENCORE 0.10.1 / principal 0.9.9
+# État courant : preview ENCORE 0.10.2 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Restauration du reveal 0.10.2
+
+Base `9ed268e`, branche `preview/audio-0.9.0`. La correction 0.10.1 n'avait pas restauré l'annonce centrale ni le décor jusqu'au bord inférieur. Recherche dans l'historique : `f40bae9` avait ajouté le déplacement `--deal-name-top`, réduit le nom et désactivé son animation ; suppression de ces trois overrides pour retrouver la présentation de `44ee981` (0.9.16.1), avec `stage-slam` et `name-rip` d'origine.
+
+Le positionnement relatif du corps de l'écran, ajouté pour les couches des autres vues, ne s'applique plus au reveal. Le décor est de nouveau positionné par rapport à `.console` ; hauteur calculée jusqu'au bord intérieur inférieur, sans bande vide et avec numéro de version masqué. Pige, sons, tuiles, portraits, effets et règles inchangés. Les corrections de netteté et de chevauchement de 0.10.1 sont conservées.
+
+Contrôle navigateur reproductible : `node scripts/check-reveal-browser.mjs http://127.0.0.1:8002/` (Playwright existant via `PLAYWRIGHT_MODULE`, profils neufs). Vérifie position centrale, animation, grand texte, trois bords du décor au pixel près, navigation et version masquées pendant le reveal, puis neuf cases et retour de navigation. Captures locales inspectées à 500×920 et 320×700. Coop mixte : captures des deux introductions et annonce centrale rejouée au deuxième joueur. Tests moteur et syntaxe : 139 tests et npm run check réussis. Parcours navigateur de cinq chansons solo (53/51) et coop (96/96), sauvegarde/reconnexion, succès vers Studio et départ après les deux joueurs vérifiés. Défaite terminale sur cinq chansons en solo/coop, détail, bilan et nouveau départ solo également vérifiés en navigateur isolé. Aucun état utilisateur ni changement serveur.
+
+Ces invariants visuels et le contrôle navigateur sont désormais inscrits dans AGENTS.md. Cible publique : https://jutrasimon.github.io/Encore/audio-test/ ; principal 0.9.9 et serveur preview rules 6 / build 0.10.0 inchangés.
 
 ## Finition visuelle batteur et reveal 0.10.1
 
