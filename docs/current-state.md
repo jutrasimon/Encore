@@ -6,7 +6,7 @@ Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb
 
 Base `0ae6a17`, branche preview/audio-0.9.0. Les tuiles de départ utilisent `tileColor` pour leur bordure de survol/focus, comme leurs infobulles. Le thème rose `last-song` est limité à la résolution de la cinquième chanson ; la grille finale consultée via Show reprend sa palette normale et son bouton lime.
 
-Changement visuel uniquement ; moteur coop rules 7 / build 0.10.5 inchangé. npm run check et 145 tests passent. Navigateur isolé sur http://127.0.0.1:8002/ : couleurs des dix tuiles de départ comparées aux infobulles, grille finale sans thème rose à 320/500 px, captures inspectées ; check-reveal-browser réussi. Publication preview en cours de vérification.
+Changement visuel uniquement ; moteur coop rules 7 / build 0.10.5 inchangé. npm run check et 145 tests passent. Navigateur isolé sur http://127.0.0.1:8002/ : couleurs des dix tuiles de départ comparées aux infobulles, grille finale sans thème rose à 320/500 px, captures inspectées ; check-reveal-browser réussi. Annonce du deuxième joueur en coop vérifiée. Preview publiée au commit `6438bdba52902855ad1315cfee33ae939cc8efab`, workflow GitHub Actions `34740028574` réussi ; app.js public vérifié en 0.10.6.
 
 ## Studio, scènes, ordre du reveal et focus 0.10.5
 
