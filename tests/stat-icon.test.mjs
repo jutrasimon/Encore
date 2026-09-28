@@ -13,7 +13,7 @@ test('stat masks expose labels, sizes, colors and shared legacy entry points',()
 });
 test('coop entry never auto-readies either player and the second confirmation starts the song',()=>{
  const source=readFileSync(new URL('../dist/app.js',import.meta.url),'utf8');
- const fn=source.slice(source.indexOf('function maybeAutoReady()'),source.indexOf('const type='));
+ const fn=source.slice(source.indexOf('function maybeAutoReady()'),source.indexOf("let healthTimer"));
  let game=newGame();game.players=[player('a','A'),player('b','B')];
  const apply=(id,type)=>{const before=game;game=command(game,id,{type,revision:game.revision,show:game.show,round:game.round},42);return before;};
  const before=apply('a','start');

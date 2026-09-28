@@ -13,6 +13,10 @@ for(const count of [1,2])for(const win of [true,false])test(`verdict uses actual
  assert.match(html,win?/SHOW RÉUSSI !/:/SHOW RATÉ/);assert.match(html,win?/data-action="rewards"/:/data-action="stats"/);
  assert.ok(html.includes(String(g.q)));assert.ok(html.includes(String(g.e)));assert.match(html,win?/✓ ATTEINT/:/IL MANQUAIT/);
  const restored=JSON.parse(before);assert.equal(verdictMarkup(restored,restored.players[0]),html);
+ // A defeat offers the restart itself; the summary stays one tap away.
+ const solo=verdictMarkup(g,g.players[0],{solo:true});
+ if(win)assert.doesNotMatch(solo,/data-action="again"/);
+ else{assert.match(solo,/data-action="again">NOUVELLE TOURNÉE/);assert.match(html,/data-action="again">RETOUR À L’ACCUEIL/);}
 });
 test('compact song counter retains the real number and accessible finale label',()=>{
  const g=newGame();g.round=4;assert.equal(lastSong(g),false);assert.ok(!songCounter(g).includes('DERNIÈRE CHANSON'));g.round=5;assert.equal(lastSong(g),true);assert.match(songCounter(g),/Dernière chanson/);assert.match(songCounter(g),/CHANSON <b>5<\/b><span>\/ 5<\/span>/);g.show=7;g.round=1;assert.equal(lastSong(g),false);

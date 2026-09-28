@@ -46,7 +46,7 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
 clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
-chacun prépare ses trois catégories au Studio. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Au Studio, chaque joueur termine Ajouter, Améliorer et Retirer (ou passe chaque catégorie), puis confirme Partir en show. En coop, les deux départs sont requis, puis chacun confirme Monter sur scène. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
+chacun prépare ses trois catégories au Studio. Après chacune des quatre premières chansons, le choix de trois tuiles s’ouvre directement (la grille jouée reste consultable via Show) : trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Au Studio, chaque joueur termine Ajouter, Améliorer et Retirer (ou passe chaque catégorie), puis confirme Partir en show. En coop, les deux départs sont requis, puis chacun confirme Monter sur scène. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
@@ -98,6 +98,12 @@ Le focus de base gagne 1 à chaque nouveau show : 1, 2, 3… par joueur. Le gain
   propositions, améliorer une tuile (sans plafond) ou retirer définitivement une tuile.
 - Les améliorations de guitare ajoutent de la qualité, le canard des fans,
   les autres de l'énergie. L'amélioration ne change pas la portée des pouvoirs.
+
+## Développement local
+
+- `npm run dev` : sert `dist/` sur http://localhost:8000/ et exécute le vrai serveur multijoueur (`server/http.js`) en mémoire. Aucune donnée Supabase ni sauvegarde réelle. Pour la coop, ouvrir un client sur `localhost` et l’autre sur `127.0.0.1` (identités séparées).
+- `npm run check` : catalogue anglais, playlist, puis syntaxe de tous les modules de `dist/` et `server/`.
+- `npm run set-version -- X.Y.Z` : une seule version pour tous les imports `?v=`, les feuilles de style, l’étiquette du cadre et `package.json`. Un import local sans version peut servir une copie périmée d’un module.
 
 ## Architecture
 

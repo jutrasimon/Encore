@@ -1,4 +1,4 @@
-import {resolutionEvents} from './presentation.js';
+import {resolutionEvents} from './presentation.js?v=0.10.7';
 
 // A shared cast order, frozen boards, and one clock keep each performance separate.
 export const BASE_RESOLUTION_SPEED=1.5;
@@ -16,7 +16,8 @@ export function resolutionPlan(players,previous,reduced=false,order=[]){
   for(const event of notes){const duration=(reduced?140:620)/resolutionSpeed(cursor-at);group.timings.push({start:cursor,duration});cursor+=duration;}
   group.charge=at+intro;group.hold=cursor;
   group.transfer=group.hold+(reduced?160:460)/resolutionSpeed(group.hold-at);group.impact=group.transfer+(reduced?250:850)/resolutionSpeed(group.transfer-at);
-  group.outro=group.impact+(reduced?500:1800);
+  // The shockwave lasts 1600 ms; the fade starts as soon as it ends.
+  group.outro=group.impact+(reduced?500:1600);
   group.end=group.outro+(reduced?100:240);
   for(const event of notes)for(const key of ['q','e','f'])total[key]+=event[key]||0;
   group.total=total;groups.push(group);score={q:score.q+total.q,e:score.e+total.e};at=group.end;

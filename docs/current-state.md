@@ -1,6 +1,22 @@
-# État courant : preview ENCORE 0.10.6 / principal 0.9.9
+# État courant : preview ENCORE 0.10.7 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## Boucle resserrée et nettoyage 0.10.7
+
+Base `43c7b68`, branche preview/audio-0.9.0. Client uniquement : `dist/engine.js` et le serveur ne changent pas (rules 7 / build 0.10.5), aucun déploiement Supabase requis.
+
+- Chansons 1 à 4 : à la fin du reveal (ou s’il est interrompu par un retour sur l’onglet), le choix de tuile s’ouvre directement au lieu de la grille + Continuer. La grille jouée et ses totaux restent consultables via Show, dont le bouton Continuer ramène au choix. Choix toujours obligatoire (tuile ou Passer), coop inchangée.
+- Rythme du reveal : prélude avant le premier joueur 1200 → 800 ms (300 ms en mouvement réduit) ; la sortie démarre à la fin de l’onde de choc (1600 ms, au lieu de 1800). Composition, annonces centrales `stage-slam` / `name-rip`, ordre et accélération inchangés. Chanson type mesurée : 7,5 s → 6,4 s.
+- Défaite : le verdict propose directement NOUVELLE TOURNÉE (solo, retour au choix de classe) ou RETOUR À L’ACCUEIL (coop), plus VOIR LE BILAN. Avant, la relance passait par Bilan → Accueil → Solo.
+- Intro solo sans la ligne « nom : EN ATTENTE » (réservée à la coop). Lobby : navigation réduite à Show / Réglages (plus d’« Inventaire · 0 » ni Stats vides).
+- Code mort retiré de `app.js` : `header()`, `type`, imports inutilisés, branches lobby/reward/lost/won inatteignables de `phaseAction` et `playAction`, actions `result-detail` / `dismiss-result`, restauration d’intro dupliquée. Règles « Comment jouer » mises à jour (deux classes, choix direct), traduites.
+- Cache : tous les imports locaux et feuilles de style portent la même version (`npm run set-version`). Avant, `song-ui.js` importait `engine.js` sans version (seconde instance, copie potentiellement périmée), `resolution.js`/`app.js` `presentation.js`, et trois feuilles de style gardaient 0.9.18–0.9.21.
+- `npm run check` vérifie automatiquement tous les `.js` de `dist/`, `dist/locales/` et `server/` (8 modules n’étaient pas couverts). `npm run dev` : serveur local avec le vrai handler multijoueur en mémoire.
+
+Validation : npm run check (29 fichiers) et 145 tests. Navigateur local : solo défaite en cinq chansons → NOUVELLE TOURNÉE → choix de classe ; solo victoire (sauvegarde renforcée) → Studio trois catégories → départ → chanson 1 du show suivant ; choix direct après chaque chanson et grille via Show. Coop à deux clients (localhost / 127.0.0.1, serveur en mémoire) : lobby, classes, confirmation Monter sur scène sans auto-ready, cinq chansons, choix directs, défaite terminale identique sur les deux clients (54/68, 43/64). check-reveal-browser réussi à 500 et 320 px, captures intro/résolution inspectées ; annonce du deuxième joueur capturée sur les deux clients (centrale, stage-slam, même ordre). Non vérifié dans cette passe : victoire coop jusqu’au Studio en navigateur (couverte par les tests moteur), téléphone physique, publication.
+
+Proposé mais non appliqué (refusé par la revue automatique, décision utilisateur) : sortir de `dist/` les fichiers jamais chargés (~20 Mo : trois intro.png, guitarist-singer.png, microphone.png, maquette-studio.png, stage.png, candy.ogg, backstage.mp3) et convertir les illustrations en WebP (opaques en qualité 85 : ~3,3 Mo → ~0,5 Mo ; détourées en WebP sans perte au pixel près : −30 %), originaux conservés hors déploiement.
 
 ## Couleurs de survol et sortie du thème final 0.10.6
 
@@ -219,7 +235,7 @@ La cinquième chanson mène au Studio uniquement si les deux objectifs sont atte
 
 La version 0.7.0 avait introduit une reprise du même show après défaite. Ce comportement est retiré. Une sauvegarde `lost` reste terminée; une sauvegarde `reward` avec `retry=true` est adaptée en `lost`. Les tentatives déjà commencées restent jouables, sans réécriture de leur historique.
 
-Le plateau reste visible après la résolution. « Passer au Studio » ouvre les trois actions ajouter, améliorer, retirer, plus passer. En coop, chacun doit choisir; ensuite la première chanson du show suivant démarre automatiquement. Le bilan de défaite propose le bilan du band et une nouvelle tournée.
+Après les quatre premières chansons, le choix de tuile s’ouvre directement ; la grille reste consultable via Show. Après la cinquième, le verdict s’affiche. « Passer au Studio » ouvre les trois actions ajouter, améliorer, retirer, plus passer. En coop, chacun doit choisir; ensuite la première chanson du show suivant démarre automatiquement. Le bilan de défaite propose le bilan du band et une nouvelle tournée.
 
 ## Publication et contrôle
 

@@ -36,6 +36,9 @@ try{
   assert.equal(await page.locator('.navigation').isVisible(),false);
   await page.screenshot({path:`test-results/reveal-stage-${width}.png`});
   await page.waitForFunction(()=>!document.querySelector('.resolution-mode'));
+  // Songs 1-4 open the tile choice directly; the played board stays under Show.
+  assert.equal(await page.locator('[data-action=select-song]').count(),3);
+  await page.locator('[data-action=nav][data-view=game]').click();
   assert.equal(await page.locator('.grid .tile').count(),9);
   assert.equal(await page.locator('.navigation').isVisible(),true);
   assert.deepEqual(errors,[]);await context.close();
