@@ -1,6 +1,6 @@
-import {getLanguage,locale,announcement} from './i18n.js?v=0.10.10';
-import {ResolutionAudio} from './resolution-audio.js?v=0.10.10';
-import {PLAYLIST} from './music-playlist.js?v=0.10.10';
+import {getLanguage,locale,announcement} from './i18n.js?v=0.10.11';
+import {ResolutionAudio} from './resolution-audio.js?v=0.10.11';
+import {PLAYLIST} from './music-playlist.js?v=0.10.11';
 export {PLAYLIST};
 
 const MUSIC=PLAYLIST[0];

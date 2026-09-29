@@ -1,4 +1,10 @@
-# État courant : preview ENCORE 0.10.10 / principal 0.10.8
+# État courant : preview ENCORE 0.10.11 / principal 0.10.8
+
+## Copie de l'invitation dans l'iframe itch 0.10.11
+
+Signalé par l'utilisateur sur itch.io : la copie ne fonctionnait pas. L'iframe d'itch n'accorde pas la permission `clipboard-write`, donc `navigator.clipboard` échouait et seul un toast montrait le code. Nouvelle copie commune (Copier l'invitation, clic sur le code) : copie classique via champ caché d'abord, puis API asynchrone, puis fenêtre « CODE DU BAND » dans le cadre du téléphone avec le code déjà sélectionné. Texte traduit.
+
+Validation : 149 tests et npm run check. Harnais local reproduisant itch (jeu servi par le serveur dev dans une iframe d'une autre origine, sans attribut allow) : copie réussie, lien lu dans le presse-papiers ; avec toutes les copies bloquées, fenêtre ouverte, code exact et sélectionné, contenue dans .console. Non vérifié sur la page itch réelle tant que le nouveau zip n'est pas téléversé.
 
 ## Illustrations WebP et préparation itch.io 0.10.9–0.10.10
 

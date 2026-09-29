@@ -333,6 +333,7 @@ export default {
   "Épuisée : sortie du show. Désactivée : encore pigée, sans effet. Ces états et les charges se réinitialisent au prochain show.": "Exhausted: out for this show. Disabled: still drawn, but has no effect. These states and charges reset next show.",
   "Musique : DJARTMUSIC · Sons : JDSherbert": "Music: DJARTMUSIC · Sounds: JDSherbert",
   "Code copié !": "Code copied!",
+  "La copie automatique est bloquée ici. Sélectionne le code, copie-le et envoie-le à ton band.": "Automatic copy is blocked here. Select the code, copy it and send it to your band.",
   "Copie ce code :": "Copy this code:",
   "Code :": "Code:",
   "Colle le lien ou les 12 caractères du code.": "Paste the invite link or the 12-character code.",

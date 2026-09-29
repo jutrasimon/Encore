@@ -1,24 +1,24 @@
-import {classChoices} from './class-ui.js?v=0.10.10';
-import {installTileArt} from './art.js?v=0.10.10';
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.10';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.10';
-import {paintDeal} from './deal-ui.js?v=0.10.10';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.10';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.10';
-import {Juice,scoreCallout} from './juice.js?v=0.10.10';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.10';
-import {RewardAdvance} from './autoplay.js?v=0.10.10';
-import {statsMarkup} from './stats-ui.js?v=0.10.10';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.10';
-import {TILES,showInfo,newGame,lobbyPlayer,command,targets,normalizeGame,ROLES} from './engine.js?v=0.10.10';
-import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.10';
-import {inventoryMarkup} from './inventory-ui.js?v=0.10.10';
-import {overdriveLevel} from './presentation.js?v=0.10.10';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.10';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.10';
-import {icon} from './icons.js?v=0.10.10';
-import {SERVER_URL} from './config.js?v=0.10.10';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.10';
+import {classChoices} from './class-ui.js?v=0.10.11';
+import {installTileArt} from './art.js?v=0.10.11';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.11';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.11';
+import {paintDeal} from './deal-ui.js?v=0.10.11';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.11';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.11';
+import {Juice,scoreCallout} from './juice.js?v=0.10.11';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.11';
+import {RewardAdvance} from './autoplay.js?v=0.10.11';
+import {statsMarkup} from './stats-ui.js?v=0.10.11';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.11';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,normalizeGame,ROLES} from './engine.js?v=0.10.11';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.11';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.11';
+import {overdriveLevel} from './presentation.js?v=0.10.11';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.11';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.11';
+import {icon} from './icons.js?v=0.10.11';
+import {SERVER_URL} from './config.js?v=0.10.11';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.11';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -32,10 +32,19 @@ installTileArt();
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
 const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
+// itch.io runs the game in an iframe without clipboard permission: try the legacy copy first,
+// then the async API, and finally show the text selected so the player can copy it by hand.
+async function copyText(text){
+ try{const area=document.createElement('textarea');area.value=text;area.setAttribute('readonly','');area.style.cssText='position:fixed;top:0;left:0;opacity:0';document.body.append(area);area.select();const ok=document.execCommand('copy');area.remove();if(ok)return true;}catch{}
+ try{await navigator.clipboard.writeText(text);return true;}catch{}
+ return false;
+}
+function showShare(text){const dlg=$('#details');dlg.dataset.kind='share';dlg.className='share-dialog';dlg.innerHTML=`<button class="dialog-close" data-action="close" aria-label="Fermer">${icon('close')}</button><h2>CODE DU BAND</h2><p>La copie automatique est bloquée ici. Sélectionne le code, copie-le et envoie-le à ton band.</p><input class="share-code" readonly value="${esc(text)}" aria-label="CODE DU BAND" translate="no"><button class="action-button secondary" data-action="close">FERMER</button>`;dlg.showModal();const field=dlg.querySelector('.share-code');field.focus();field.select();}
+async function share(text,copied){if(await copyText(text))toast(copied);else showShare(text);}
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.10 · ENCORE ∞';
+const VERSION='0.10.11 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
@@ -382,11 +391,11 @@ app.addEventListener('click',async e=>{const b=e.target.closest('[data-action]')
  }
  if(a==='join'){const code=inviteCode($('#code')?.value||invite);if(!code){toast('Colle le lien ou les 12 caractères du code.');return;}await connect(code);}
  if(a==='check-server')checkServer();
- if(a==='copy-code'){try{await navigator.clipboard.writeText(session.code);toast('Code copié !');}catch{toast('Code : '+session.code);}}
+ if(a==='copy-code')await share(session.code,'Code copié !');
  if(a==='reconnect'&&session)await connect(session.code);
  // On itch.io the game runs in a CDN iframe whose URL is not the game page: share the code instead.
- if(a==='invite'&&/(^|\.)itch\.zone$/.test(location.hostname)){try{await navigator.clipboard.writeText(session.code);toast('Code copié !');}catch{toast('Code : '+session.code);}return;}
- if(a==='invite'){const u=new URL(location.href);u.search='';u.searchParams.set('band',session.code);try{await navigator.clipboard.writeText(u.href);toast('Lien copié. Envoie-le à ton band!');}catch{toast('Copie ce code : '+session.code);}}
+ if(a==='invite'&&/(^|\.)itch\.zone$/.test(location.hostname)){await share(session.code,'Code copié !');return;}
+ if(a==='invite'){const u=new URL(location.href);u.search='';u.searchParams.set('band',session.code);await share(u.href,'Lien copié. Envoie-le à ton band!');}
 });
 render();
 async function checkServer(){
