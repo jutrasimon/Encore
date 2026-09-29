@@ -1,4 +1,4 @@
-import english from './locales/en.js?v=0.10.9';
+import english from './locales/en.js?v=0.10.10';
 export const LANGUAGES={fr:'Français',en:'English'};
 let language='fr';
 export const getLanguage=()=>language;
@@ -10,7 +10,9 @@ const pattern=new RegExp('(?<![\\p{L}\\p{N}])('+[...entries.keys()].sort((a,b)=>
 export function translate(source,lang=language){
  const text=String(source??'');if(lang!=='en')return text;
  return text.replace(pattern,match=>{const value=entries.get(match.toLocaleLowerCase('fr'));return match===match.toLocaleUpperCase('fr')?value.toLocaleUpperCase('en'):match===match.toLocaleLowerCase('fr')?value.toLocaleLowerCase('en'):value;})
- .replace(/Encore (\d+) categor(?:y|ies) to complete\./g,(_,n)=>`${n} categor${n==='1'?'y':'ies'} left to complete.`);
+ .replace(/Encore (\d+) categor(?:y|ies) to complete\./g,(_,n)=>`${n} categor${n==='1'?'y':'ies'} left to complete.`)
+ // French typography spaces before ; : ! ? survive in fragments split around icons and names.
+ .replace(/[   ]+([;:!?])/g,'$1');
 }
 // Presentation-only translation. Original text is retained for instant, lossless switching.
 // Never modifies inputs, tile data, IDs, game state, or saved/player-provided names.

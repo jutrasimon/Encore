@@ -1,4 +1,14 @@
-# État courant : principal et preview ENCORE 0.10.8
+# État courant : preview ENCORE 0.10.10 / principal 0.10.8
+
+## Illustrations WebP et préparation itch.io 0.10.9–0.10.10
+
+Branche preview/audio-0.9.0, client uniquement (moteur et serveurs inchangés : rules 7 / build 0.10.8). Accord utilisateur pour l'optimisation.
+
+- Illustrations en WebP : opaques non détourées (couvertures, fonds `back`, portraits, décors Studio) en qualité 85 ; détourées et alpha en WebP sans perte, pixels vérifiés identiques (clé magenta, masques inchangés). Fichiers jamais chargés retirés de dist (trois intro.png, guitarist-singer, microphone, maquette Studio, stage.png, candy.ogg, backstage.mp3). Originaux conservés hors déploiement dans `art-source/`. dist 142 → 59 Mo ; zip itch 119 → 57,6 Mo. Test `assets.test.mjs` : toute référence art/ du code existe en WebP.
+- Anglais : suppression des espaces typographiques français avant ; : ! ? dans les fragments traduits (« SHOW CLEARED! », « 1 energy; 6 on the last song »). Le français garde sa typographie.
+- Médias itch (non versionnés, `build/itch-media/`) : couverture 630×500 et cinq captures anglaises 880×1560 (choix de classe, reveal, choix de tuile, verdict, Studio).
+
+Validation : npm run check et 149 tests. Navigateur local (serveur dev) : aucun 404 ni erreur JS ; classes, tuiles batteur, reveal (personnages détourés sans liseré), verdict, Studio, icônes de statistiques inspectés ; check-reveal-browser réussi à 500/320 px. Principal non promu (reste 0.10.8) en attendant validation.
 
 ## Mise en production 0.10.8 (29 septembre 2026)
 

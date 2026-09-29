@@ -1,4 +1,4 @@
-import {setLanguage} from '../dist/i18n.js?v=0.10.9';
+import {setLanguage} from '../dist/i18n.js?v=0.10.10';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {StageAudio,audioScene,PLAYLIST,musicSettings} from '../dist/stage-audio.js';
