@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {handler} from '../server/http.js';
+import {handler,allowedOrigin} from '../server/http.js';
 import {hash} from '../server/room.js';
 
 class MemoryStore {
@@ -130,4 +130,11 @@ test('class selection tolerates partner revisions, locks start, restores choices
  const start=action(code,g,'start');r=await a('room',start);assert.equal(r.status,200);assert.equal(r.game.players[1].inventory[0].kind,'perc_kick');const inventory=r.game.players.map(p=>p.inventory);assert.equal(new Set(inventory.flat().map(t=>t.id)).size,10);
  assert.deepEqual((await a('room',start)).game.players.map(p=>p.inventory),inventory);resetRate(store,code);
  assert.equal((await b('room',action(code,r.game,'select-class',{classId:'guitarist-singer'}))).status,400);
+});
+test('GitHub Pages, local tests and itch.io CDN origins are accepted; look-alikes are not',async()=>{
+ for(const origin of ['https://jutrasimon.github.io','http://localhost:8000','https://html.itch.zone','https://html-classic.itch.zone','https://v6.html.itch.zone'])assert.ok(allowedOrigin(origin),origin);
+ for(const origin of ['http://html.itch.zone','https://itch.zone.evil.test','https://evilitch.zone','https://html.itch.zone.evil.test','https://evil.test'])assert.ok(!allowedOrigin(origin),origin);
+ const fetcher=handler({});
+ const ok=await fetcher(new Request('https://example.test/health',{headers:{Origin:'https://html-classic.itch.zone'}}));
+ assert.equal(ok.status,200);assert.equal(ok.headers.get('Access-Control-Allow-Origin'),'https://html-classic.itch.zone');
 });

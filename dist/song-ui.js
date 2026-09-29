@@ -1,6 +1,6 @@
-import {showInfo,targets} from './engine.js?v=0.10.7';
-import {icon} from './icons.js?v=0.10.7';
-import {showVisualMarkup} from './show-art.js?v=0.10.7';
+import {showInfo,targets} from './engine.js?v=0.10.8';
+import {icon} from './icons.js?v=0.10.8';
+import {showVisualMarkup} from './show-art.js?v=0.10.8';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 export const finishedShow=g=>!!g&&['reward','lost','won'].includes(g.phase);
 export const lastSong=g=>!!g&&g.round===showInfo(g.show).rounds;

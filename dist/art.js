@@ -1,5 +1,5 @@
-import {TILES} from './engine.js?v=0.10.7';
-import {stickerMasks} from './art-masks.js?v=0.10.7';
+import {TILES} from './engine.js?v=0.10.8';
+import {stickerMasks} from './art-masks.js?v=0.10.8';
 // Clip atlas pixels explicitly; a wide SVG viewport otherwise reveals adjacent stickers.
 const boxes={
  guitar:[31,10,254,289],voice:[348,15,212,282],pick:[627,55,228,227],
