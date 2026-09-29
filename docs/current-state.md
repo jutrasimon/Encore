@@ -1,4 +1,10 @@
-# État courant : preview ENCORE 0.10.8 / principal 0.9.9
+# État courant : principal et preview ENCORE 0.10.8
+
+## Mise en production 0.10.8 (29 septembre 2026)
+
+Fonction `encore` déployée depuis `ffdd110` : santé protocol 2 / rules 7 / build 0.10.8, CORS vérifié (github.io et itch.zone acceptés, origine inconnue 403), lecture en base OK. PR #1 fusionnée sur main (`cf02e96`), workflow « Verify and deploy Encore » réussi ; https://jutrasimon.github.io/Encore/ et /audio-test/ servent `app.js?v=0.10.8`, config choisissant `encore` sur la racine et `encore-preview` sous /audio-test/. Essai coop réel sur le principal (deux navigateurs isolés, serveur de production) : création, invitation, classes, double Monter sur scène, chanson, annonce centrale du deuxième joueur, choix de tuile, aucune erreur. Keep-alive déclenché manuellement : 404 attendu sur les deux fonctions, run réussi ; planifié tous les 3 jours depuis main.
+
+Retour arrière si nécessaire : redéployer `encore` depuis `dacdaef` (0.9.9, rules 4) et revert de `cf02e96`. Restent hors de cette passe : téléversement réel sur itch.io, conversion WebP des illustrations, téléphone physique.
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
 
@@ -8,7 +14,7 @@ Projet Supabase restauré par l'utilisateur le 28 septembre (il était en pause)
 
 `encore-preview` redéployé : santé protocol 2 / rules 7 / build 0.10.8 ; CORS vérifié (itch.zone et github.io acceptés avec en-tête, origine inconnue 403). Le journal de déploiement liste les quatre fichiers du dépôt ; la comparaison par téléchargement après ce déploiement n'a pas été refaite. Preview client publiée : workflow réussi au commit `7718f93`, page servie en 0.10.8. Essai coop public (deux navigateurs isolés, vrai serveur preview) : création, invitation, classes, double Monter sur scène, chanson, annonce centrale du deuxième joueur, choix de tuile sur les deux clients, aucune erreur. Non testé : un vrai téléversement sur itch.io.
 
-## Promotion vers main (PR #1) : préparée, non exécutée
+## Promotion vers main (PR #1) : exécutée le 29 septembre, voir plus haut
 
 État constaté le 28 septembre 2026 : `imghkkvpotbxqvwnbjxg.supabase.co` ne se résout plus (NXDOMAIN, y compris via 8.8.8.8). Projet Supabase Free très probablement en pause après inactivité : la coop est indisponible sur main comme sur la preview. Le solo n'est pas touché.
 
