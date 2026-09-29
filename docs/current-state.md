@@ -1,6 +1,12 @@
-# État courant : preview ENCORE 0.10.7 / principal 0.9.9
+# État courant : preview ENCORE 0.10.8 / principal 0.9.9
 
 Passe de finition du 11 septembre 2026 sur `preview/audio-0.9.0`, base `dacdaefb168ac3a2b2027d543df8d68afc8505a5`. Le principal reste en 0.9.9 jusqu’à validation utilisateur.
+
+## itch.io et serveur preview 0.10.8
+
+Projet Supabase restauré par l'utilisateur le 28 septembre (il était en pause) ; CLI connecté. `server/http.js` accepte aussi `https://*.itch.zone` (CDN HTML5 d'itch), les imitations restent refusées (tests). Build santé 0.10.8, rules 7 inchangées. Sur itch, « Copier l'invitation » copie le code (l'URL de l'iframe n'est pas la page du jeu). `npm run package-itch` → `build/encore-itch-<version>.zip` (140 fichiers, ~119 Mo, index.html à la racine, pages d'atelier exclues).
+
+`encore-preview` redéployé : santé protocol 2 / rules 7 / build 0.10.8 ; CORS vérifié (itch.zone et github.io acceptés avec en-tête, origine inconnue 403). Le journal de déploiement liste les quatre fichiers du dépôt ; la comparaison par téléchargement après ce déploiement n'a pas été refaite. Preview client publiée : workflow réussi au commit `7718f93`, page servie en 0.10.8. Essai coop public (deux navigateurs isolés, vrai serveur preview) : création, invitation, classes, double Monter sur scène, chanson, annonce centrale du deuxième joueur, choix de tuile sur les deux clients, aucune erreur. Non testé : un vrai téléversement sur itch.io.
 
 ## Promotion vers main (PR #1) : préparée, non exécutée
 
@@ -11,9 +17,9 @@ Préparé sur la branche :
 - `.github/workflows/keep-alive.yml` : tous les 3 jours, lecture d'un band inexistant sur les deux fonctions (404 après requête en base, aucune écriture) pour éviter une nouvelle pause. Les workflows planifiés ne tournent que depuis main, donc actif après fusion.
 
 Étapes, dans l'ordre :
-1. Utilisateur : restaurer le projet dans le tableau de bord Supabase (Restore project). Vérifier ensuite que `…/functions/v1/encore-preview/health` répond protocol 2 / rules 7 / build 0.10.5 et `…/encore/health` rules 4 / build 0.9.9.
-2. Connexion CLI une seule fois : `npx supabase login` (validation dans le navigateur).
-3. Sur confirmation explicite : `npx supabase functions deploy encore --project-ref imghkkvpotbxqvwnbjxg` depuis la branche (entrée `server/index.ts`, table `encore_rooms`, verify_jwt désactivé via `supabase/config.toml`). Vérifier la santé (rules 7) et comparer les fichiers distants au bundle local, moteur compris. Aucune migration requise : `encore_rooms` et `encore_create_room` existent déjà, et `normalizeGame` migre les parties rules 4.
+1. Fait : projet restauré, CLI connecté (`npx.cmd supabase login` sous PowerShell).
+2. Fait : `encore-preview` en rules 7 / build 0.10.8 ; `encore` encore en rules 4 / build 0.9.9.
+3. Sur confirmation explicite : `npx supabase functions deploy encore --project-ref imghkkvpotbxqvwnbjxg --use-api` depuis la branche (entrée `server/index.ts`, table `encore_rooms`, verify_jwt désactivé via `supabase/config.toml`). Vérifier la santé (rules 7) et comparer les fichiers distants au bundle local, moteur compris. Aucune migration requise : `encore_rooms` et `encore_create_room` existent déjà, et `normalizeGame` migre les parties rules 4.
 4. Fusionner la PR #1 aussitôt après : entre les étapes 3 et 4, un client main 0.9.9 attend rules 4 et affiche le multi indisponible. Garder cette fenêtre courte.
 5. Après fusion : workflow « Verify and deploy Encore » réussi ; https://jutrasimon.github.io/Encore/ sert `app.js?v=0.10.7` ; https://jutrasimon.github.io/Encore/audio-test/ reste sur encore-preview ; essai coop réel à deux sur main (création, invitation, Monter sur scène, une chanson, reconnexion).
 
