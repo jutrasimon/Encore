@@ -56,7 +56,12 @@ export class BandConnection {
   // A lost response may follow a successful commit. Reuse the same ID on retry.
   for(let attempt=0;attempt<2;attempt++){
    try{data=await api(this.endpoint,'room',this.session.token,body);break;}
-   catch(e){if(attempt||e.status&&e.status<500)throw e;}
+   catch(e){
+    if(attempt||e.status&&e.status<500&&e.status!==429)throw e;
+    // The next song can follow a committed choice faster than the server's 200ms guard.
+    if(e.status===429)await new Promise(resolve=>setTimeout(resolve,260));
+    if(this.closed)throw e;
+   }
   }
   this.id=data.id;if(data.game&&(!this.game||data.game.revision>=this.game.revision))this.game=data.game;
   this.schedule();return data;

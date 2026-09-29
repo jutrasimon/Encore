@@ -4,3 +4,8 @@ project_id = "encore"
 enabled = true
 verify_jwt = false
 entrypoint = "../server/index.ts"
+
+[functions.encore-preview]
+enabled = true
+verify_jwt = false
+entrypoint = "../server/preview-index.ts"

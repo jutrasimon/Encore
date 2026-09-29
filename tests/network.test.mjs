@@ -58,3 +58,22 @@ test('older sync responses cannot replace a newer action state',async t=>{
  t.mock.method(globalThis,'fetch',async()=>Response.json(snapshot));
  await c.sync();assert.equal(c.game.revision,5);c.close();
 });
+
+test('automatic ready survives the server rate guard with the same action ID',async t=>{
+ const bodies=[],times=[];
+ t.mock.method(globalThis,'fetch',async(_url,options)=>{
+  bodies.push(JSON.parse(options.body));times.push(performance.now());
+  return bodies.length===1?Response.json({error:'Un instant avant la prochaine action.'},{status:429}):Response.json(snapshot);
+ });
+ const c=connection();const result=await c.send({type:'ready',revision:1});
+ assert.equal(result.game.revision,2);assert.equal(bodies.length,2);
+ assert.deepEqual(bodies[0],bodies[1]);assert.ok(times[1]-times[0]>=200);c.close();
+});
+
+test('a persistent refusal is bounded and closing cancels a pending rate retry',async t=>{
+ let calls=0;
+ t.mock.method(globalThis,'fetch',async()=>{calls++;return Response.json({error:'slow down'},{status:429});});
+ const c=connection();await assert.rejects(c.send({type:'ready'}),{status:429});assert.equal(calls,2);c.close();
+ calls=0;const closed=connection(),pending=closed.send({type:'ready'});closed.close();
+ await assert.rejects(pending,{status:429});assert.equal(calls,1);
+});

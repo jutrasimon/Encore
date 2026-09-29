@@ -1,3 +1,4 @@
+import {completeVisit} from './helpers/studio.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RewardAdvance} from '../dist/autoplay.js';
@@ -42,7 +43,7 @@ test('successful studio choice or skip queues first song of the next show',()=>{
  for(const action of ['skip','add','upgrade','remove']){
   let g=setup();g.players[0].inventory.forEach(t=>t.level=30);for(let i=0;i<5;i++){g=act(g,'a','ready');if(g.phase==='draft')g=act(g,'a','draft',{action:'skip'});}
   assert.equal(g.phase,'reward');const advance=new RewardAdvance(),p=g.players[0];
-  const next=act(g,'a','reward',{action,kind:p.offers[0],tileId:p.inventory[0].id});advance.observe(g,next,'a');
+  const next=completeVisit(g,'a',{action,kind:p.offers[0],tileId:p.inventory[0].id});advance.observe(g,next,'a');
   assert.equal(next.round,0);assert.equal(advance.take(next,'a'),true);assert.equal(act(next,'a','ready').round,1);
  }
 });
@@ -50,10 +51,28 @@ test('merely inspecting or opening a reward never starts a song',()=>{
  const advance=new RewardAdvance(),g=setup();advance.observe(g,structuredClone(g),'a');assert.equal(advance.take(g,'a'),false);
  advance.clear();assert.equal(advance.take(g,'a'),false);
 });
+
+test('reconnecting after a committed choice waits for the partner, then auto-readies once',()=>{
+ for(const phase of ['draft','reward']){
+  const flag=phase==='draft'?'drafted':'rewarded',advance=new RewardAdvance();
+  const waiting={phase,show:0,round:phase==='draft'?2:5,players:[{id:'a',[flag]:true},{id:'b',[flag]:false}]};
+  advance.observe(null,waiting,'a');assert.equal(advance.take(waiting,'a'),false);
+  const next={...waiting,phase:'show',show:phase==='reward'?1:0,round:phase==='reward'?0:2,players:waiting.players.map(p=>({...p,[flag]:true}))};
+  advance.observe(waiting,next,'a');assert.equal(advance.take(next,'a'),true);assert.equal(advance.take(next,'a'),false);
+  const unchosen=new RewardAdvance();unchosen.observe(null,waiting,'b');assert.equal(unchosen.pending,null);
+ }
+});
+
+test('reconnecting after the partner completed the choices resumes only an open show',()=>{
+ for(const phase of ['show','draft','reward','lost','lobby']){
+  const advance=new RewardAdvance(),g={phase,show:1,round:0,players:[{id:'a',ready:false}]};
+  advance.observe(null,g,'a');assert.equal(advance.take(g,'a'),phase==='show');assert.equal(advance.take(g,'a'),false);
+ }
+});
 test('resolution accelerates gently from 1.5x to a hard 2.25x ceiling and conserves totals',()=>{
  assert.equal(resolutionSpeed(0),1.5);assert.equal(resolutionSpeed(4500),1.6875);assert.equal(resolutionSpeed(9000),2.25);assert.equal(resolutionSpeed(999999),2.25);
  let g=setup(['a','b']);g=act(act(g,'a','ready'),'b','ready');const p=resolutionPlan(g.players,{q:0,e:0});
- const timings=p.groups.flatMap(g=>g.timings);for(let i=1;i<timings.length;i++)assert.ok(timings[i].duration<=timings[i-1].duration);
+ for(const group of p.groups){const timings=group.timings;for(let i=1;i<timings.length;i++)assert.ok(timings[i].duration<=timings[i-1].duration);}
  for(const g of p.groups)for(const t of g.timings)assert.ok(t.duration<=620/1.5&&t.duration>=620/2.25);
  assert.deepEqual(resolutionFrame(p,p.duration).score,{q:g.q,e:g.e});
 });

@@ -1,0 +1,434 @@
+{
+  "version": 1,
+  "classId": "drummer-percussionist",
+  "className": "Batteur-percussionniste",
+  "portrait": {
+    "path": "assets/character/portrait.png",
+    "size": [
+      1254,
+      1254
+    ],
+    "background": "opaque_olive"
+  },
+  "sheet": {
+    "path": "assets/character/poses-sheet.png",
+    "size": [
+      1536,
+      1024
+    ],
+    "cellSize": [
+      512,
+      512
+    ],
+    "background": "magenta_key",
+    "anchorMode": "per_pose_measured"
+  },
+  "poses": [
+    {
+      "index": 0,
+      "name": "rythme",
+      "rect": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        508
+      ],
+      "contentBounds": [
+        66,
+        25,
+        360,
+        483
+      ]
+    },
+    {
+      "index": 1,
+      "name": "accent",
+      "rect": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        508
+      ],
+      "contentBounds": [
+        56,
+        14,
+        386,
+        494
+      ]
+    },
+    {
+      "index": 2,
+      "name": "fill",
+      "rect": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        508
+      ],
+      "contentBounds": [
+        75,
+        8,
+        389,
+        500
+      ]
+    },
+    {
+      "index": 3,
+      "name": "content",
+      "rect": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        496
+      ],
+      "contentBounds": [
+        86,
+        24,
+        351,
+        472
+      ]
+    },
+    {
+      "index": 4,
+      "name": "neutre",
+      "rect": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        497
+      ],
+      "contentBounds": [
+        99,
+        14,
+        299,
+        483
+      ]
+    },
+    {
+      "index": 5,
+      "name": "triste",
+      "rect": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        498
+      ],
+      "contentBounds": [
+        103,
+        36,
+        279,
+        462
+      ]
+    }
+  ],
+  "tiles": {
+    "perc_kick": {
+      "path": "assets/tiles/kick.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_snare": {
+      "path": "assets/tiles/snare.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_hihat": {
+      "path": "assets/tiles/hihat.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_floor_tom": {
+      "path": "assets/tiles/floor_tom.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_ride": {
+      "path": "assets/tiles/ride.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_crash": {
+      "path": "assets/tiles/crash.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_roll": {
+      "path": "assets/tiles/roll.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_measure": {
+      "path": "assets/tiles/measure.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_metronome": {
+      "path": "assets/tiles/metronome.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_double_pedal": {
+      "path": "assets/tiles/double_pedal.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_rimshot": {
+      "path": "assets/tiles/rimshot.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_fill": {
+      "path": "assets/tiles/fill.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_riff_bridge": {
+      "path": "assets/tiles/riff_bridge.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_voice_bridge": {
+      "path": "assets/tiles/voice_bridge.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_brushes": {
+      "path": "assets/tiles/brushes.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_silence": {
+      "path": "assets/tiles/silence.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    },
+    "perc_patch": {
+      "path": "assets/tiles/patch.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "native_alpha",
+      "displayBoxCssPx": 64
+    },
+    "perc_backstage": {
+      "path": "assets/tiles/backstage.png",
+      "size": [
+        1254,
+        1254
+      ],
+      "background": "magenta_key",
+      "displayBoxCssPx": 64
+    }
+  },
+  "referencePoses": [
+    {
+      "index": 0,
+      "name": "rythme",
+      "rect": [
+        0,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        494
+      ],
+      "contentBounds": [
+        71,
+        17,
+        362,
+        477
+      ]
+    },
+    {
+      "index": 1,
+      "name": "accent",
+      "rect": [
+        512,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        493
+      ],
+      "contentBounds": [
+        40,
+        17,
+        400,
+        476
+      ]
+    },
+    {
+      "index": 2,
+      "name": "fill",
+      "rect": [
+        1024,
+        0,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        494
+      ],
+      "contentBounds": [
+        39,
+        15,
+        417,
+        479
+      ]
+    },
+    {
+      "index": 3,
+      "name": "content",
+      "rect": [
+        0,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        496
+      ],
+      "contentBounds": [
+        94,
+        5,
+        347,
+        491
+      ]
+    },
+    {
+      "index": 4,
+      "name": "neutre",
+      "rect": [
+        512,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        496
+      ],
+      "contentBounds": [
+        107,
+        11,
+        326,
+        485
+      ]
+    },
+    {
+      "index": 5,
+      "name": "triste",
+      "rect": [
+        1024,
+        512,
+        512,
+        512
+      ],
+      "anchor": [
+        256,
+        496
+      ],
+      "contentBounds": [
+        127,
+        33,
+        311,
+        463
+      ]
+    }
+  ]
+}

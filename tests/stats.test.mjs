@@ -1,3 +1,4 @@
+import {completeVisit} from './helpers/studio.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {newGame,player,command,normalizeGame,tile} from '../dist/engine.js';
@@ -10,7 +11,7 @@ test('per-song and career totals reconcile with authoritative production and fan
  assert.equal(g.songs.length,5);const rows=songRows(g);assert.equal(rows.reduce((n,r)=>n+r.q,0),g.q);assert.equal(rows.reduce((n,r)=>n+r.e,0),g.e);
  assert.equal(rows.reduce((n,r)=>n+r.f+r.bonusFans,0),g.players.reduce((n,p)=>n+p.fans,0));
  for(const p of g.players){assert.equal(p.career.songs,5);assert.equal(p.career.q,p.q);assert.equal(p.career.f+p.career.bonusFans,p.fans);assert.equal(Object.values(p.career.byTile).reduce((n,t)=>n+t.q+t.e,0),p.q+p.e);assert.equal(p.career.heat.reduce((a,b)=>a+b,0),p.q+p.e);}
- const c=structuredClone(g.players[0].career);g=act(g,'a','reward',{action:'skip'});g=act(g,'b','reward',{action:'skip'});assert.deepEqual(g.players[0].career,c);assert.equal(songRows(g,'band','show').length,0);
+ const c=structuredClone(g.players[0].career);g=completeVisit(g,'a');g=completeVisit(g,'b');assert.deepEqual(g.players[0].career,c);assert.equal(songRows(g,'band','show').length,0);
 });
 test('readiness and rejected stale requests never double count recorded songs',()=>{
  let g=band();g=act(g,'a','ready');assert.equal(g.songs,undefined);g=act(g,'b','ready');const saved=structuredClone(g);assert.throws(()=>act(g,'b','ready'));assert.deepEqual(g,saved);assert.equal(g.songs.length,1);
@@ -24,4 +25,15 @@ test('chart acceleration uses actual deltas including performance fans; filters 
 });
 test('bounded song history retains lifetime counters and renders escaped names',()=>{
  let g=band();g.songs=Array.from({length:250},()=>({show:0,attempt:0,round:1,players:[]}));g=round(g);assert.equal(g.songs.length,250);assert.equal(g.players[0].career.songs,1);const html=statsMarkup(g,{playerId:'a'});assert(html.includes('&lt;A&gt;'));assert(!html.includes('<A>'));assert(html.includes('250 dernières'));
+});
+
+
+test('sound DNA centers the dominant resource, including ties and silence',()=>{
+ for(const [q,e,value,label] of [[35,65,'65%','ÉNERGIE'],[80,20,'80%','QUALITÉ'],[50,50,'50%','ÉQUILIBRÉ'],[0,0,'—','AUCUN POINT']]){
+  const g=newGame();g.players=[player('a','A')];g.players[0].career={songs:1,q,e};
+  const html=statsMarkup(g);
+  assert.ok(html.includes(`<b>${value}<small>${label}</small></b>`));
+  if(q===35)assert.ok(html.includes('35% qualité · 65% énergie'));
+  if(!q&&!e)assert.ok(html.includes('0% qualité · 0% énergie'));
+ }
 });

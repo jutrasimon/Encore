@@ -1,17 +1,20 @@
 import {GameError, hash, makeRoom, snapshot, transact} from './room.js';
 
 const allowedOrigins=new Set(['https://jutrasimon.github.io','http://localhost:8000','http://127.0.0.1:8000']);
+// itch.io serves HTML5 uploads from its CDN (html.itch.zone, html-classic.itch.zone, …).
+const itchOrigin=/^https:\/\/([a-z0-9-]+\.)*itch\.zone$/;
+export const allowedOrigin=origin=>allowedOrigins.has(origin)||itchOrigin.test(origin||'');
 export function handler(store) {
  return async request=>{
   const origin=request.headers.get('Origin');
   const headers={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin',
     'Access-Control-Allow-Methods':'GET, POST, OPTIONS','Access-Control-Allow-Headers':'Content-Type, Authorization, apikey',
-    'Access-Control-Max-Age':'86400',...(allowedOrigins.has(origin)?{'Access-Control-Allow-Origin':origin}:{})};
+    'Access-Control-Max-Age':'86400',...(allowedOrigin(origin)?{'Access-Control-Allow-Origin':origin}:{})};
   const respond=(value,status=200)=>new Response(JSON.stringify(value),{status,headers});
-  if(origin&&!allowedOrigins.has(origin))return respond({error:'Origine non autorisée.'},403);
+  if(origin&&!allowedOrigin(origin))return respond({error:'Origine non autorisée.'},403);
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers});
   const path=new URL(request.url).pathname.split('/').at(-1);
-  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:4,build:'0.9.9'});
+  if(path==='health'&&request.method==='GET')return respond({ok:true,protocol:2,rules:7,build:'0.10.8'});
   if(request.method!=='POST')return respond({error:'Méthode non autorisée.'},405);
   try {
     const token=request.headers.get('Authorization')?.replace(/^Bearer /,'');
@@ -33,7 +36,7 @@ export function handler(store) {
       return respond({code:inserted.code,...snapshot(inserted,credential)},201);
     }
     if(path!=='room'||!/^[A-F0-9]{12}$/.test(msg.code||''))throw new GameError('Code de band invalide.');
-    if(!['hello','sync','start','ready','reward','draft','focus'].includes(msg.type))throw new GameError('Action inconnue.');
+    if(!['hello','sync','select-class','lobby-ready','start','ready','reward','studio-depart','draft','focus'].includes(msg.type))throw new GameError('Action inconnue.');
     if(!['hello','sync'].includes(msg.type)&&!/^[a-f0-9-]{36}$/.test(msg.requestId||''))throw new GameError('Identifiant d’action invalide.');
     return respond(await transact(store,msg.code,credential,msg));
   }catch(error){

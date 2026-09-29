@@ -36,6 +36,14 @@ test('empty and zero-production boards still get an entrance and a finite finish
  assert.deepEqual(resolutionFrame(p,p.groups[0].hold).local,{q:0,e:0,f:0});assert.equal(resolutionFrame(p,Infinity).done,true);
  assert.deepEqual(resolutionFrame(resolutionPlan([],{q:5,e:6}),0),{done:true,score:{q:5,e:6}});
 });
+
+test('the score lands with the resource packet, after its travel and before the impact',()=>{
+ const plan=resolutionPlan(players,{q:10,e:8}),g=plan.groups[0],duration=g.impact-g.transfer;
+ assert.deepEqual(resolutionFrame(plan,g.transfer+duration*.71).score,g.base);
+ const arriving=resolutionFrame(plan,g.transfer+duration*.9);
+ assert.ok(arriving.score.q>g.base.q);assert.ok(arriving.local.q>0);
+ assert.deepEqual(resolutionFrame(plan,g.impact).score,{q:g.base.q+g.total.q,e:g.base.e+g.total.e});
+});
 test('electric arcs zigzag and reach exact tile centers for adjacent and global synergies',()=>{
  for(const [a,b,end] of [[0,1,'150 50'],[0,8,'250 250'],[8,0,'50 50'],[3,4,'150 150']]){
   const d=electricPath(a,b);assert.ok(d.endsWith('L '+end));assert.ok(d.split(' L ').length>6);assert.ok(!d.includes('NaN'));assert.notEqual(d,electricPath(a,b,1));
@@ -54,3 +62,5 @@ test('stage names are spoken alone as words with French pronunciation, preservin
  const host={speechSynthesis:{speak:u=>calls.push(u),cancel(){},getVoices:()=>[voice]},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}}};
  new ResolutionAudio(()=>true,host).announce(name);assert.equal(name,'SIMON');assert.equal(calls[0].text,'Simon');assert.equal(calls[0].lang,'fr-CA');assert.equal(calls[0].voice,voice);
 });
+
+test('each player restarts the same acceleration independently',()=>{const a=musician('a','Same'),b=musician('b','Same');for(const reduced of [false,true]){const p=resolutionPlan([a,b],{q:0,e:0},reduced);assert.deepEqual(p.groups[0].timings.map(t=>t.duration),p.groups[1].timings.map(t=>t.duration));}});

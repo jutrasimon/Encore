@@ -243,7 +243,7 @@ body.resolving .live-sound{position:relative;z-index:50;background:#172014;borde
 @media(max-width:350px){.bandmate .portrait{width:36px!important;height:36px!important;flex-basis:36px!important}.bandmate{gap:4px;padding:3px}.bandmate .musician-mini strong{font-size:15px}.musician-mini>span{font-size:12px}.band-total{min-width:57px}.band-total>span{font-size:10px}.navigation button span{font-size:14px}.stats-duo .chart-panel{padding:7px}.tile-ranking>div{grid-template-columns:20px 75px 1fr;gap:6px}}
 @media(max-height:600px){.screen-body[data-screen="game"]:has(>.grid-wrap){gap:3px}.screen-body[data-screen="game"] .meter{padding:4px}.screen-body[data-screen="game"] .overdrive-label{display:none}.screen-body[data-screen="game"] .show-top{min-height:30px}.screen-body[data-screen="game"] .show-name strong{font-size:20px}.screen-body[data-screen="game"] .round b{font-size:23px}.screen-body[data-screen="game"] .readout{font-size:12px;min-height:16px}}
 
-.navigation{grid-template-columns:repeat(4,minmax(0,1fr))}
+.navigation{grid-template-columns:repeat(var(--tabs,4),minmax(0,1fr))}
 
 /* Keep the full tile announcement inside the stage, including phone screens. */
 .resolution-mode .resolution-caption{flex-direction:column;gap:3px;min-height:76px;padding:5px 6px;justify-content:center;overflow:visible}

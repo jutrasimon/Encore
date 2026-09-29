@@ -46,27 +46,40 @@ salons enregistrés simultanément pour borner le stockage de ce prototype.
 Entrer un pseudo, créer un band et partager son lien ou son code à 12 caractères.
 Le créateur lance la tournée après l'arrivée du deuxième joueur. Chaque joueur
 clique pour être prêt; la chanson se résout quand tous sont prêts. Entre les shows,
-chacun choisit sa récompense. Après chaque chanson, le plateau reste visible. Continuer ouvre le choix de trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Le même enchaînement s’applique à la sortie du Studio. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
+chacun prépare ses trois catégories au Studio. Après chacune des quatre premières chansons, le choix de trois tuiles s’ouvre directement (la grille jouée reste consultable via Show) : trois tuiles distinctes tirées dans le pool du rôle; posséder déjà une sorte proposée reste permis. Prendre une tuile ou passer lance automatiquement la prochaine chanson. En coop, le lancement attend les deux choix. Au Studio, chaque joueur termine Ajouter, Améliorer et Retirer (ou passe chaque catégorie), puis confirme Partir en show. En coop, les deux départs sont requis, puis chacun confirme Monter sur scène. L'inventaire défile en trois colonnes, avec les copies épuisées à la fin. Elles ne peuvent pas recevoir de focus; un focus se libère dès que sa copie s’épuise.
 
 Une identité aléatoire est conservée dans le navigateur pour reprendre son band.
 Effacer les données du navigateur fait perdre cette identité. Un joueur qui se
 déconnecte conserve sa place; il n'est pas remplacé en cours de tournée.
 Le solo est sauvegardé localement, indépendamment du serveur.
 
-## Boucle de jeu validée (0.9.9)
+## Boucle de jeu validée (preview 0.10.5)
+
+Le focus de base gagne 1 à chaque nouveau show : 1, 2, 3… par joueur. Le gain est enregistré une fois et un nouveau départ revient à 1. L’ordre des joueurs au reveal est tiré à chaque chanson dans le moteur, puis conservé avec la chanson pour tous les clients.
 
 - Chaque show dure cinq chansons. Les quatre premières sont suivies du choix d’une tuile ou de Passer.
 - Après la cinquième chanson, le plateau et le résultat restent visibles.
-- Les deux objectifs atteints : **Passer au Studio**, puis ajouter, améliorer, retirer une tuile ou passer. Le show suivant démarre après le choix de chacun.
+- Les deux objectifs atteints : **Passer au Studio**, puis un choix indépendant dans chacune des catégories Ajouter, Améliorer et Retirer. Chaque catégorie peut être passée et ne peut appliquer qu’une action par visite. À 3/3, chacun confirme Partir en show. Les confirmations et les propositions sont sauvegardées par joueur; Bilan ne les réinitialise pas.
 - Un objectif manqué : **fin de tournée**, bilan consultable et nouvelle tournée avec cinq tuiles de départ. Aucun retry du show avec les gains.
 - La progression reste sans dernier niveau tant que les shows sont réussis.
 - Les anciennes sauvegardes en attente de retry passent en fin de tournée sans effacer leur bilan. Les reprises déjà commencées ne sont pas annulées rétroactivement.
+
+## Batteur V1 — preview 0.10.0
+
+- Choix individuel de classe avant le départ : Guitariste-chanteur ou Batteur-percussionniste. En coop, doublons permis, chacun confirme sa classe puis son état prêt. Le créateur lance ensuite le show ; chacun confirme Monter sur scène.
+- Batteur : 2 Grosses caisses, 2 Caisses claires, 1 Charleston et 1 focus. Les cinq instances sont créées une seule fois au lancement autoritaire.
+- 36 types de tuiles : 18 dans le pack guitariste, 18 dans le pack batteur. Draft et Ajouter au Studio respectent le pack du joueur. `TILE_PACKS.neutral` est préparé mais vide : le futur transfert d'un nombre égal de tuiles des deux packs est différé. Pack et famille de calcul sont deux notions distinctes.
+- Les ponts vers Guitare/Voix restent définis dans le pack batteur ; leur intérêt sera à revoir avec la sélection des tuiles neutres. Aucun transfert d'inventaire entre joueurs.
+- Rangée, colonne et alignement traversent les trous ; espaces = cases vides ou déjà désactivées au début du reveal. Patch donne qualité dans sa rangée, énergie dans sa colonne. Deux rejoués font ×3, sans nouveau gain/dépense de charges. Les améliorations augmentent uniquement la production propre indiquée par `upgradeStat`.
+- Larsen compte désormais aussi les cases vides adjacentes. Botte conserve son comportement réel antérieur. Autres règles et objectifs inchangés.
+- Compatibilité : classe guitariste pour les sauvegardes sans classe, inventaire et charges conservés. Un ancien lobby ayant déjà un inventaire garde sa classe ; lancer une nouvelle tournée permet de choisir.
+- Les chiffres V1 ne sont pas déclarés équilibrés : voir `docs/drummer/balance-v1.json` pour une simulation comparative documentée.
 
 ## Règles du prototype
 
 - Guitariste-chanteur : 5 tuiles (2 guitares, 2 voix, 1 médiator) et 1 focus. Le rôle configure le nombre de départ et son pool.
 - Focus : sélection de copies précises, poids de pige ×2, sans duplication. Modifiable librement entre les chansons avant de se déclarer prêt. Avec 9 tuiles disponibles ou moins, elles sont toutes pigées.
-- Focus temporaire : capacité distincte, expirant dès la fin du show. Le modèle et l’affichage sont prêts; aucune des 18 tuiles actuelles ne donne encore ce bonus.
+- Focus temporaire : capacité distincte, expirant dès la fin du show. Le modèle et l’affichage sont prêts; aucune des 36 tuiles actuelles ne donne encore ce bonus.
 - Grille 3 × 3. Neuf instances pigées sans remise à l'intérieur d'une chanson;
   toutes les tuiles admissibles redeviennent disponibles à la chanson suivante.
 - Inventaire insuffisant : cases vides ajoutées puis mélangées avec les tuiles.
@@ -85,6 +98,12 @@ Le solo est sauvegardé localement, indépendamment du serveur.
   propositions, améliorer une tuile (sans plafond) ou retirer définitivement une tuile.
 - Les améliorations de guitare ajoutent de la qualité, le canard des fans,
   les autres de l'énergie. L'amélioration ne change pas la portée des pouvoirs.
+
+## Développement local
+
+- `npm run dev` : sert `dist/` sur http://localhost:8000/ et exécute le vrai serveur multijoueur (`server/http.js`) en mémoire. Aucune donnée Supabase ni sauvegarde réelle. Pour la coop, ouvrir un client sur `localhost` et l’autre sur `127.0.0.1` (identités séparées).
+- `npm run check` : catalogue anglais, playlist, puis syntaxe de tous les modules de `dist/` et `server/`.
+- `npm run set-version -- X.Y.Z` : une seule version pour tous les imports `?v=`, les feuilles de style, l’étiquette du cadre et `package.json`. Un import local sans version peut servir une copie périmée d’un module.
 
 ## Architecture
 
@@ -171,3 +190,7 @@ simultanés maximum, pause quand l’onglet est masqué.
 Crédits et provenance : [dist/vfx/CREDITS.md](dist/vfx/CREDITS.md).
 Licence musique : [Abstraction-LICENSE.txt](dist/audio/Abstraction-LICENSE.txt).
 Sons : JDSherbert, [licence fournie](dist/audio/JDSherbert-LICENSE.pdf).
+
+### Langue du jeu
+
+Dans Réglages (également accessible depuis l’accueil), choisir Français ou English. La langue est conservée localement et chaque joueur coop peut avoir sa propre langue. Les noms de scène ne sont jamais traduits. Les traductions de présentation sont dans `dist/locales/en.tsv` ; lancer `npm run check` pour reconstruire le catalogue. Les règles et sauvegardes restent indépendantes de la langue.

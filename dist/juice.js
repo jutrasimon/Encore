@@ -1,3 +1,4 @@
+import {announcement} from './i18n.js?v=0.10.8';
 // Effects stay outside the game state. One bounded canvas, paused when idle/hidden.
 export function scoreCallout(event){
  const total=(event?.q||0)+(event?.e||0)+(event?.f||0);
@@ -8,6 +9,8 @@ export function scoreCallout(event){
  return null;
 }
 const SPRITES=['hit-spark','critical-star','big-boom','shockwave','overload'];
+// Intensité des boutons : 0 = aucune distorsion, 0.5 = douce, 1 = forte.
+const BUTTON_WARP_INTENSITY = 0.5;
 export class Juice{
  constructor(root,enabled=()=>true){
   this.root=root;this.enabled=enabled;this.particles=[];this.bursts=[];this.assets=new Map();this.raf=0;this.last=0;this.pointer=null;this.hovered=null;this.warp=0;
@@ -19,18 +22,21 @@ export class Juice{
   this.resize=()=>{this.dpr=Math.min(devicePixelRatio||1,1.5);this.w=innerWidth;this.h=innerHeight;this.canvas.width=this.w*this.dpr;this.canvas.height=this.h*this.dpr;};
   this.resize();window.addEventListener('resize',this.resize);
   root.addEventListener('pointermove',e=>this.move(e));root.addEventListener('pointerleave',()=>this.release());
-  root.addEventListener('pointerdown',e=>{if(e.target.closest('button')&&!e.target.closest('button:disabled'))this.burst('hit-spark',e.clientX,e.clientY,65,'#baff42',260);});
+  root.addEventListener('pointerdown',e=>{if(e.target.closest('button')&&!e.target.closest('button:disabled,[data-action=starter-tooltip]'))this.burst('hit-spark',e.clientX,e.clientY,65,'#baff42',260);});
   document.addEventListener('visibilitychange',()=>{if(document.hidden)this.clear();});
  }
  reduced(){return !this.enabled()||matchMedia('(prefers-reduced-motion: reduce)').matches;}
  move(e){
-  if(this.reduced()||e.pointerType==='touch')return;
-  const el=e.target.closest('.tile,.home h1,.primary');
+  if(this.reduced()||e.pointerType==='touch'||this.root.querySelector('.resolution-mode'))return;
+  const target=e.target.closest('.tile,.action-button');
+  const el=target&&!target.matches(':disabled')&&!target.closest('[inert]')?target:null;
   if(this.hovered!==el){this.release();this.hovered=el;}
   if(!el)return;
   const r=el.getBoundingClientRect(),speed=this.pointer?Math.min(24,Math.hypot(e.clientX-this.pointer.x,e.clientY-this.pointer.y)):3;
-  el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*9+'deg');el.classList.add('pointer-warp');
-  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min(19,this.warp+speed*.6);
+  el.style.setProperty('--lean',((e.clientX-r.x)/r.width-.5)*5+'deg');el.classList.add('pointer-warp');
+  const action=el.classList.contains('action-button');
+  const intensity=action?BUTTON_WARP_INTENSITY:1;
+  this.pointer={x:e.clientX,y:e.clientY};this.warp=Math.min((action?19:9)*intensity,this.warp+speed*(action?0.65:0.3)*intensity);
   if(speed>3)this.particles.push({x:e.clientX,y:e.clientY,vx:(Math.random()-.5)*100,vy:(Math.random()-.5)*100,life:0,ttl:250,size:2+Math.random()*3,color:Math.random()>.5?'#ff5aae':'#baff42'});
   this.particles=this.particles.slice(-80);this.wake();
  }
@@ -47,7 +53,10 @@ export class Juice{
  }
  float(text,color='#baff42',rank=1){
   const board=this.root.querySelector('.grid-wrap');if(!board||document.hidden)return;
-  const r=board.getBoundingClientRect(),el=document.createElement('strong');el.className=`hype-callout rank-${rank}`;el.textContent=text;
+  const now=performance.now();
+  if(rank!==5&&this.lastPraise&&now-this.lastPraise.time<650&&rank<=this.lastPraise.rank)return;
+  this.lastPraise={time:now,rank};
+  const r=board.getBoundingClientRect(),el=document.createElement('strong');el.className=`hype-callout rank-${rank}`;el.textContent=announcement(text);
   el.style.cssText=`left:${r.x+r.width/2}px;top:${Math.max(95,r.y+r.height*.32)}px;--hype:${color}`;
   // At most one praise and one overdrive message; bursts can overlap without text piling up.
   this.layer.querySelectorAll(rank===5?'.rank-5':'.hype-callout:not(.rank-5)').forEach(n=>n.remove());
@@ -55,9 +64,17 @@ export class Juice{
   else if(this.layer.querySelector('.rank-5'))return;
   this.layer.append(el);setTimeout(()=>el.remove(),this.reduced()?1100:1000);
  }
+ clearTileScores(){this.layer.querySelectorAll('.tile-score-total').forEach(el=>el.remove());}
+ tileTotal(event,remaining){
+  const tile=this.root.querySelectorAll('.grid .tile')[event.index];if(!tile)return;
+  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height*.43,total=(event.q||0)+(event.e||0)+(event.f||0),color=event.q>event.e?'#baff42':event.f>event.e?'#ff89c9':'#ffb441';
+  const el=document.createElement('strong');el.className='tile-score-total';el.textContent=String(total);el.setAttribute('aria-hidden','true');el.style.cssText=`left:${x}px;top:${y}px;--score-size:${Math.min(64,r.width*.5)}px;color:${color}`;this.layer.append(el);
+  this.spray(x,y,color,18);this.burst('hit-spark',x,y,r.width,color,250);
+  if(!this.reduced())el.animate([{transform:'translate(-50%,-50%) scale(1.35)'},{transform:'translate(-50%,-50%) scale(1)',offset:Math.min(.12,160/Math.max(200,remaining))},{transform:'translate(-50%,-50%) scale(.45)'}],{duration:Math.max(200,remaining),fill:'forwards',easing:'linear'});
+ }
  hit(event,beat=400){
   const tile=this.root.querySelectorAll('.grid .tile')[event.index];if(!tile)return;
-  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,call=scoreCallout(event),color=event.q>event.e?'#baff42':event.f>event.e?'#ffbb42':'#ff5aae';
+  const r=tile.getBoundingClientRect(),x=r.x+r.width/2,y=r.y+r.height/2,call=scoreCallout(event),color=event.q>event.e?'#baff42':event.f>event.e?'#ff89c9':'#ffb441';
   tile.style.setProperty('--hit-time',Math.max(150,beat)+'ms');
   this.burst(call?'critical-star':'hit-spark',x,y,r.width*(call?2:1.3),color,Math.min(460,beat+100));
   this.spray(x,y,color,call?18:7);
@@ -82,9 +99,9 @@ export class Juice{
   this.raf=0;const dt=Math.min(50,now-this.last);this.last=now;const c=this.ctx;
   c.setTransform(this.dpr,0,0,this.dpr,0,0);c.clearRect(0,0,this.w,this.h);c.imageSmoothingEnabled=false;
   if(this.reduced()||document.hidden){this.clear();return;}
-  // Clip every canvas effect, including its glow, inside the visible game frame.
+  // Resolution impacts stay on the board; pointer trails can reach the action buttons.
   c.save();
-  const frame=this.root.querySelector('.grid-wrap')||this.root.querySelector('.console');
+  const frame=this.root.querySelector('.resolution-mode .grid-wrap')||this.root.querySelector('.console');
   if(frame){
    const r=frame.getBoundingClientRect(),inset=Math.max(frame.clientLeft,frame.clientTop),radius=Math.max(0,(parseFloat(getComputedStyle(frame).borderRadius)||0)-inset);
    c.beginPath();c.roundRect(r.x+inset,r.y+inset,Math.max(0,r.width-inset*2),Math.max(0,r.height-inset*2),radius);c.clip();
@@ -99,5 +116,5 @@ export class Juice{
   for(const p of this.particles){p.x+=p.vx*dt/1000;p.y+=p.vy*dt/1000;p.vy+=dt*.22;c.globalAlpha=1-p.life/p.ttl;c.fillStyle=p.color;c.fillRect(p.x,p.y,p.size,p.size);}
   c.restore();c.globalAlpha=1;if(this.bursts.length||this.particles.length||this.lines||this.warp)this.raf=requestAnimationFrame(t=>this.draw(t));
  }
- clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
+ clear(){cancelAnimationFrame(this.raf);this.raf=0;this.bursts=[];this.particles=[];this.lines=null;this.lastPraise=null;this.warp=0;this.release();document.getElementById('cursor-displacement')?.setAttribute('scale','0');this.layer.querySelectorAll('.hype-callout').forEach(n=>n.remove());this.clearTileScores();this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);}
 }

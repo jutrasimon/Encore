@@ -1,5 +1,6 @@
-import {ResolutionAudio} from './resolution-audio.js?v=0.9.7';
-import {PLAYLIST} from './music-playlist.js?v=0.9.7';
+import {getLanguage,locale,announcement} from './i18n.js?v=0.10.8';
+import {ResolutionAudio} from './resolution-audio.js?v=0.10.8';
+import {PLAYLIST} from './music-playlist.js?v=0.10.8';
 export {PLAYLIST};
 
 const MUSIC=PLAYLIST[0];
@@ -83,23 +84,24 @@ export class StageAudio extends ResolutionAudio{
    ['tile','inspect-inventory','inspect-offer','show-details','rules','profile'].includes(action)?'open':'cursor';
   this.sample(name,.38);
  }
- song(number){
+ song(number,last=false){
   if(!this.enabled())return;
   this.tone(65,32,.45,.15);this.sample('select',.35);
   if(!this.levels.voice)return;
-  const words=['','one','two','three','four','five'];this.duck(1700);
-  this.speak('Song '+(words[number]||number)+'!',{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:1.12});
+  const en=getLanguage()==='en',words=en?['','one','two','three','four','five']:['','un','deux','trois','quatre','cinq'];this.duck(1700);
+  this.speak(last?(en?'Last song!':'Dernière chanson !'):(en?'Song ':'Chanson ')+(words[number]||number)+'!',{volume:this.levels.voice,lang:locale(),pitch:.5,rate:1.12});
  }
  announce(name){
   if(!this.enabled())return;
   if(!this.levels.voice){this.tone(105,36,.4,.13,'sawtooth');return;}
   this.duck(2800);super.announce(name,this.levels.voice);
  }
+ deal(){if(this.enabled())this.tone(240,95,.045,.035,'triangle');}
  hit(index){super.hit(index);this.sample('score-hit',.34,1+index*.025);}
  critical(rank){this.sample('critical',.38+rank*.035,1+rank*.04);}
  verdict(text){
   if(!this.enabled()||!this.levels.voice||!text)return;
-  this.duck(2000);this.speak(text,{volume:this.levels.voice,lang:'en-US',pitch:.5,rate:.95});
+  this.duck(2000);this.speak(announcement(text),{volume:this.levels.voice,lang:locale(),pitch:.5,rate:.95});
  }
 
  transfer(){super.transfer();this.sample('whoosh',.44);}

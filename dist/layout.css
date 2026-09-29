@@ -44,3 +44,7 @@ html,body{overflow:hidden;overscroll-behavior:none}
  .stats-screen>h1{font-size:25px}
  .home>h1{font-size:43px;margin:2px 0 5px}
 }
+
+/* Bound the phone proportions even in tall windows or when zoomed out. */
+body{display:grid;place-items:center}
+#app{width:100%;height:min(100dvh,1040px,200vw);margin:0 auto}
