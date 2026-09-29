@@ -6,12 +6,12 @@ import {tileCard,tileDetails,familyReference,tileProduction} from '../dist/tile-
 
 test('every tile has one registered atlas asset and the same square renderer for all screens',()=>{
  for(const [kind,d] of Object.entries(TILES)){
-  assert(hasTileArt(kind),kind);const html=tileCard({kind,level:0});assert(html.includes('square-tile'));assert(html.includes(kind.startsWith('perc_')?'data-art-kind':'punk-stickers-v1.png'));assert(html.includes(d.name));assert(html.includes(d.family==='voice'?'VOIX':d.family==='guitar'?'GUITARE':d.family==='percussion'?'PERCUSSION':'EFFET'));
+  assert(hasTileArt(kind),kind);const html=tileCard({kind,level:0});assert(html.includes('square-tile'));assert(html.includes(kind.startsWith('perc_')?'data-art-kind':'punk-stickers-v1.webp'));assert(html.includes(d.name));assert(html.includes(d.family==='voice'?'VOIX':d.family==='guitar'?'GUITARE':d.family==='percussion'?'PERCUSSION':'EFFET'));
   const details=tileDetails({kind,level:2});assert(details.includes('tile-rule'));assert(details.includes('avant les multiplicateurs'));assert(!details.includes('undefined'));
  }
 });
 test('family references use the actual guitar and microphone artwork and explicit words',()=>{
- for(const family of ['guitar','voice']){const html=familyReference(family);assert(html.includes('punk-stickers-v1.png'));assert(html.includes(family==='voice'?'VOIX':'GUITARE'));}
+ for(const family of ['guitar','voice']){const html=familyReference(family);assert(html.includes('punk-stickers-v1.webp'));assert(html.includes(family==='voice'?'VOIX':'GUITARE'));}
  assert(tileDetails({kind:'voice'}).includes('Les micros comptent comme des voix'));
  const a=tileCard({kind:'voice'}),b=tileCard({kind:'voice'});assert.notEqual(a.match(/id="(sticker-crop-\d+)"/)[1],b.match(/id="(sticker-crop-\d+)"/)[1]);
 });

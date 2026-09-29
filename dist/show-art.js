@@ -1,9 +1,9 @@
-import {keyDrummerPixels} from './art.js?v=0.10.8';
+import {keyDrummerPixels} from './art.js?v=0.10.9';
 // Presentation assets keyed by the engine's role ID; no game rules live here.
 const ROOT='./art/stage/';
 export const CLASS_ART={
- 'drummer-percussionist':{portrait:'./art/drummer/character/portrait.png',poses:'./art/drummer/character/poses-sheet.png'},
- 'guitarist-singer':{portrait:ROOT+'characters/guitariste-chanteur/portrait.png',poses:ROOT+'characters/guitariste-chanteur/poses-sheet.png'}
+ 'drummer-percussionist':{portrait:'./art/drummer/character/portrait.webp',poses:'./art/drummer/character/poses-sheet.webp'},
+ 'guitarist-singer':{portrait:ROOT+'characters/guitariste-chanteur/portrait.webp',poses:ROOT+'characters/guitariste-chanteur/poses-sheet.webp'}
 };
 export const classArt=role=>CLASS_ART[role]||CLASS_ART['guitarist-singer'];
 export const SHOW_ART=[
@@ -12,7 +12,7 @@ export const SHOW_ART=[
  {directory:'03-toit-pirate',feet:860,crowd:[[0,80,1536,257],[0,425,1536,236],[0,750,1536,238]]}
 ];
 export const showArt=index=>SHOW_ART[Math.max(0,Math.floor(index||0))%SHOW_ART.length];
-export const showAsset=(index,file)=>ROOT+'shows/'+showArt(index).directory+'/'+file+'.png';
+export const showAsset=(index,file)=>ROOT+'shows/'+showArt(index).directory+'/'+file+'.webp';
 const coverCache=new Map();
 export function preloadShowCover(index){
  const path=showAsset(index,'cover');if(coverCache.has(path))return;
@@ -65,7 +65,7 @@ export class ShowVisual{
   if(key!==this.key){
    this.key=key;this.assets=null;this.lastFrame='';this.lastBurst=-Infinity;this.burstUntil=0;
    const generation=++this.generation;
-   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),Promise.all(cast.map(p=>texture(classArt(p.role).poses).then(async sheet=>{if(sheet)return sheet;const portrait=await texture(classArt(p.role).portrait,false);if(!portrait)return null;const fallback=document.createElement('canvas');fallback.width=1536;fallback.height=1024;const ctx=fallback.getContext('2d');for(let i=0;i<6;i++)ctx.drawImage(portrait,i%3*512,Math.floor(i/3)*512,512,512);return fallback;}))),texture(ROOT+'shared/crowd-expression-sheet.png')]).then(assets=>{
+   Promise.all([texture(showAsset(state.show,'back'),false),...['background','foreground','crowd-sheet'].map(n=>texture(showAsset(state.show,n))),Promise.all(cast.map(p=>texture(classArt(p.role).poses).then(async sheet=>{if(sheet)return sheet;const portrait=await texture(classArt(p.role).portrait,false);if(!portrait)return null;const fallback=document.createElement('canvas');fallback.width=1536;fallback.height=1024;const ctx=fallback.getContext('2d');for(let i=0;i<6;i++)ctx.drawImage(portrait,i%3*512,Math.floor(i/3)*512,512,512);return fallback;}))),texture(ROOT+'shared/crowd-expression-sheet.webp')]).then(assets=>{
     if(generation!==this.generation)return;
     this.assets=assets;this.draw(performance.now(),true);
    });

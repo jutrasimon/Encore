@@ -1,5 +1,5 @@
-import {TILES} from './engine.js?v=0.10.8';
-import {stickerMasks} from './art-masks.js?v=0.10.8';
+import {TILES} from './engine.js?v=0.10.9';
+import {stickerMasks} from './art-masks.js?v=0.10.9';
 // Clip atlas pixels explicitly; a wide SVG viewport otherwise reveals adjacent stickers.
 const boxes={
  guitar:[31,10,254,289],voice:[348,15,212,282],pick:[627,55,228,227],
@@ -14,7 +14,7 @@ export function sticker(kind){
  if(kind.startsWith('perc_')&&TILES[kind])return `<img class="sticker percussion-art" data-art-kind="${kind}" alt="" aria-hidden="true">`;
  const box=boxes[kind];if(!box)return '';
  const id=`sticker-crop-${++stickerId}`;
- return `<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><defs><clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${stickerMasks[kind]}"/></clipPath></defs><g clip-path="url(#${id})"><image href="./art/punk-stickers-v1.png" width="887" height="1774"/></g></svg>`;
+ return `<svg class="sticker" viewBox="${box.join(' ')}" aria-hidden="true" focusable="false"><defs><clipPath id="${id}" clipPathUnits="userSpaceOnUse"><path d="${stickerMasks[kind]}"/></clipPath></defs><g clip-path="url(#${id})"><image href="./art/punk-stickers-v1.webp" width="887" height="1774"/></g></svg>`;
 }
 
 // One atlas and one family mapping, shared by cards, rules and effect references.
@@ -35,7 +35,7 @@ export function loadTileTexture(kind){
    for(let y=0;y<source.height;y++)for(let x=0;x<source.width;x++)if(rgba[(y*source.width+x)*4+3]>16){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
    const cropped=document.createElement('canvas');cropped.width=right-left+1;cropped.height=bottom-top+1;
    cropped.getContext('2d').drawImage(source,left,top,cropped.width,cropped.height,0,0,cropped.width,cropped.height);resolve(cropped);
-  }catch{resolve(null);}};image.onerror=()=>resolve(null);image.src=new URL('./art/drummer/tiles/'+TILES[kind].icon+'.png',import.meta.url).href;
+  }catch{resolve(null);}};image.onerror=()=>resolve(null);image.src=new URL('./art/drummer/tiles/'+TILES[kind].icon+'.webp',import.meta.url).href;
  }));return tileTextures.get(kind);
 }
 export function installTileArt(root=document.body){
