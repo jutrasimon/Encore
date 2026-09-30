@@ -1,4 +1,4 @@
-import {resolutionEvents} from './presentation.js?v=0.10.11';
+import {resolutionEvents} from './presentation.js?v=0.10.12';
 
 // A shared cast order, frozen boards, and one clock keep each performance separate.
 export const BASE_RESOLUTION_SPEED=1.5;

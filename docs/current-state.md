@@ -1,4 +1,12 @@
-# État courant : preview ENCORE 0.10.11 / principal 0.10.8
+# État courant : preview ENCORE 0.10.12 / principal 0.10.8 / itch.io https://lm-vg.itch.io/encore
+
+## itch.io en ligne et tuiles batteur pré-détourées 0.10.12
+
+Page publique https://lm-vg.itch.io/encore (projet 19479252, servi par html-classic.itch.zone). Contrôle réel : v0.10.11 servie en anglais, « MULTIPLAYER ONLINE » (serveur de production encore via CORS itch.zone) ; coop à deux navigateurs isolés sur la page itch : Copy invite → « Code copied! » et presse-papiers égal au code, second joueur rejoint avec ce code, classes, double Monter sur scène, première chanson, même score sur les deux clients (12/9), aucune erreur.
+
+Constaté pendant cet essai : tuiles batteur vides quelques secondes. Chaque illustration (1254 px, ~1,3 Mo) était détourée pixel par pixel en JavaScript puis réencodée en PNG dans le navigateur. `scripts/build-drummer-tiles.py` fait maintenant ce travail une fois (même clé que keyDrummerPixels, Patch en alpha natif, marges transparentes rognées, 512 px max, WebP sans perte) depuis `art-source/`. Le jeu affiche l'image directement ; `installTileArt` et le traitement canvas sont retirés, keyDrummerPixels reste pour les poses de scène. Tuiles 20 → 3,9 Mo.
+
+Validation : 149 tests, check-reveal-browser à 500/320 px, Studio batteur et choix de classe inspectés (détourage et netteté identiques), aucune erreur ni ressource manquante. À faire par l'utilisateur : téléverser `build/encore-itch-0.10.12.zip` sur itch.
 
 ## Copie de l'invitation dans l'iframe itch 0.10.11
 

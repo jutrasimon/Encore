@@ -1,4 +1,4 @@
-import {keyDrummerPixels} from './art.js?v=0.10.11';
+import {keyDrummerPixels} from './art.js?v=0.10.12';
 // Presentation assets keyed by the engine's role ID; no game rules live here.
 const ROOT='./art/stage/';
 export const CLASS_ART={

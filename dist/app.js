@@ -1,24 +1,23 @@
-import {classChoices} from './class-ui.js?v=0.10.11';
-import {installTileArt} from './art.js?v=0.10.11';
-import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.11';
-import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.11';
-import {paintDeal} from './deal-ui.js?v=0.10.11';
-import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.11';
-import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.11';
-import {Juice,scoreCallout} from './juice.js?v=0.10.11';
-import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.11';
-import {RewardAdvance} from './autoplay.js?v=0.10.11';
-import {statsMarkup} from './stats-ui.js?v=0.10.11';
-import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.11';
-import {TILES,showInfo,newGame,lobbyPlayer,command,targets,normalizeGame,ROLES} from './engine.js?v=0.10.11';
-import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.11';
-import {inventoryMarkup} from './inventory-ui.js?v=0.10.11';
-import {overdriveLevel} from './presentation.js?v=0.10.11';
-import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.11';
-import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.11';
-import {icon} from './icons.js?v=0.10.11';
-import {SERVER_URL} from './config.js?v=0.10.11';
-import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.11';
+import {classChoices} from './class-ui.js?v=0.10.12';
+import {getLanguage,setLanguage,installLocalization,translate} from './i18n.js?v=0.10.12';
+import {studioMarkup,studioConfirmation} from './studio-ui.js?v=0.10.12';
+import {paintDeal} from './deal-ui.js?v=0.10.12';
+import {finishedShow,lastSong,songCounter,songDecor,verdictMarkup,SongEffects} from './song-ui.js?v=0.10.12';
+import {ShowVisual,showVisualMarkup,showAsset,classArt,preloadShowCover} from './show-art.js?v=0.10.12';
+import {Juice,scoreCallout} from './juice.js?v=0.10.12';
+import {mountScreen,ScreenMotion} from './screen-ui.js?v=0.10.12';
+import {RewardAdvance} from './autoplay.js?v=0.10.12';
+import {statsMarkup} from './stats-ui.js?v=0.10.12';
+import {installTooltips,hideTooltip} from './tooltips.js?v=0.10.12';
+import {TILES,showInfo,newGame,lobbyPlayer,command,targets,normalizeGame,ROLES} from './engine.js?v=0.10.12';
+import {tileCard,tileDetails,tileMultiplier} from './tile-ui.js?v=0.10.12';
+import {inventoryMarkup} from './inventory-ui.js?v=0.10.12';
+import {overdriveLevel} from './presentation.js?v=0.10.12';
+import {resolutionPlan,resolutionFrame,electricPath} from './resolution.js?v=0.10.12';
+import {StageAudio,audioScene,musicSettings} from './stage-audio.js?v=0.10.12';
+import {icon} from './icons.js?v=0.10.12';
+import {SERVER_URL} from './config.js?v=0.10.12';
+import {api, BandConnection, credential, inviteCode} from './network.js?v=0.10.12';
 const $=s=>document.querySelector(s),app=$('#app');
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const STORAGE_PREFIX=location.pathname.split('/').includes('audio-test')?'audio-preview.':'';
@@ -28,7 +27,6 @@ let game=null,myId=null,mode=null,view='game',selected=null,rewardAction='add',c
 let name=read('encore.name',''),sound=read('encore.sound',true),session=read('encore.session');
 setLanguage(read('encore.language','en'));
 const localization=installLocalization();
-installTileArt();
 let invite=new URL(location.href).searchParams.get('band')?.toUpperCase()||'';
 const endpoint=(SERVER_URL||location.origin).replace(/\/$/,'');
 const rnd=()=>crypto.getRandomValues(new Uint32Array(1))[0];
@@ -44,7 +42,7 @@ async function share(text,copied){if(await copyText(text))toast(copied);else sho
 function toast(s){$('#toast').textContent=s;$('#toast').classList.add('visible');setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 function beep(i=0){resolutionAudio.tone([196,247,294,392,494,587,784,988,1175][i%9],160,.13,.022,'square');}
 function me(){return game?.players.find(p=>p.id===myId);}
-const VERSION='0.10.11 · ENCORE ∞';
+const VERSION='0.10.12 · ENCORE ∞';
 let intro=true,resultDismissed=false,step=-1,displayScore=null,resolvingName='';
 let lastActivity=null;
 let rewardSelection=null,draftSelection=null;
